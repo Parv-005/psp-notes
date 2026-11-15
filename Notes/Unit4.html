@@ -1,0 +1,1858 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSP Unit 4 — Random Processes</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="assets/plot.js"></script>
+<script defer src="assets/unit4-figs.js"></script>
+<script defer src="assets/common.js"></script>
+</head>
+<body>
+<button id="tocbtn" class="tool">☰ Contents</button>
+<nav id="toc">
+  <div class="toc-title">PSP · Unit 4</div>
+  <div class="toc-sub">Random processes: description, SSS &amp; WSS, autocorrelation &amp; covariance and their properties, Gaussian processes, ergodicity, power spectral density, discrete-time processes (Bernoulli, binomial counting, random walk), Poisson and Wiener processes</div>
+  <div class="toc-tools"></div>
+  <ol></ol>
+</nav>
+
+<main>
+<header class="unit-head">
+  <div class="kicker">Probability &amp; Stochastic Processes · Unit 4 · full treatment</div>
+  <h1>Random Processes</h1>
+  <p>Definition &amp; classification · sample functions and the ensemble · $n$th-order PDFs · mean, autocorrelation, autocovariance, cross-correlation · independent, uncorrelated &amp; orthogonal processes · strict-sense and wide-sense stationarity · properties of the autocorrelation and cross-correlation functions · Gaussian random processes · ergodicity in the mean and in the autocorrelation · power spectral density (spectral representation) · Bernoulli process · sum processes, independent &amp; stationary increments · binomial counting process · random walk · Poisson process · Wiener process</p>
+</header>
+
+<div class="box tip">
+  <span class="bt">How to use this unit</span>
+  <p>So far a random experiment produced a <b>number</b> (Unit 2) or a few numbers (Unit 3). In this unit the experiment produces a whole <b>function of time</b>: a noise waveform, a stream of bits, the count of phone calls arriving at an exchange, the position of a pollen grain jiggling in water. Such a random function is called a <b>random process</b>. You will see that it is nothing new: it is just "lots of random variables, one for every instant of time", and every tool from Unit 3 (joint PDFs, correlation, covariance, jointly Gaussian RVs) carries straight over.</p>
+  <p>You said you are starting from zero, so this unit is written slowly. Every derivation is shown <b>one step per line</b>, with the reason in <span style="color:#8a8f99">grey</span>. After each result there is a paragraph saying what it <em>means</em>. In this unit the exam questions are very repetitive (find the mean and autocorrelation, decide if the process is WSS; list the properties of the ACF; a Poisson numerical; a Gaussian-process numerical), so the solved past papers in §17 are the most valuable part. Read §1–§5 carefully first, though: everything later rests on them.</p>
+  <p>Colour code:
+  <span class="box def" style="display:inline-block;margin:0;padding:0 8px">Definition</span>
+  <span class="box thm" style="display:inline-block;margin:0;padding:0 8px">Theorem / proof</span>
+  <span class="box key" style="display:inline-block;margin:0;padding:0 8px">Key formula / recipe</span>
+  <span class="box warn" style="display:inline-block;margin:0;padding:0 8px">Common mistake</span>
+  <span class="ex" style="display:inline-block;margin:0;padding:0 8px">Example</span>,
+  levels <span class="tag-lvl lvl-e">Easy</span><span class="tag-lvl lvl-m">Medium</span><span class="tag-lvl lvl-h">Exam</span>, <span class="tag-beyond">Beyond class notes</span> for syllabus material the handwritten notes skip (ergodicity, power spectral density, ACF properties), and <span class="tag-pyq">PYQ</span> for past-paper questions.</p>
+  <p class="small muted">Solutions are folded. Try each one first, even for two minutes, then open it.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="map"><span class="num">0</span>Unit map, notation &amp; maths warm-up</h2>
+<p>The unit has four blocks.</p>
+<ol>
+  <li><b>What a random process is and how to describe it</b> (§1–§3). Two descriptions: the <em>exact</em> one (joint PDFs of the values at any set of times) and the <em>average</em> one (mean function and autocorrelation function). Exams almost always use the average one.</li>
+  <li><b>Stationarity and its consequences</b> (§4–§8). A process is stationary if its statistics don't change with time. Strict-sense (SSS) and wide-sense (WSS) stationarity; the properties of the autocorrelation function; Gaussian processes, where WSS and SSS coincide; ergodicity, which lets one long recording stand in for the whole ensemble; and the power spectral density, which is the autocorrelation seen in the frequency domain.</li>
+  <li><b>Discrete-time processes built from coin tosses</b> (§9–§11). Bernoulli process → binomial counting process → random walk. These introduce two key ideas: <em>independent increments</em> and <em>stationary increments</em>.</li>
+  <li><b>Their continuous-time limits</b> (§12–§13). Poisson process (counting random arrivals) and Wiener process (Brownian motion).</li>
+</ol>
+<figure class="diagram map-wrap"><div id="fig-map4"></div><figcaption>How the ideas in Unit 4 depend on each other</figcaption></figure>
+
+<h3 id="notation">Notation</h3>
+<table>
+  <tr><th>Symbol</th><th>Meaning</th></tr>
+  <tr><td>$X(t,\xi)$, or just $X(t)$</td><td>a random process: for each outcome ξ of the experiment, a function of time $t$</td></tr>
+  <tr><td>$x(t,\xi_i)$</td><td>one <b>sample function</b> (one realisation, one waveform you could record)</td></tr>
+  <tr><td>$X(t_0)$, $X_{t_0}$</td><td>the random variable obtained by looking at the process at the fixed time $t_0$</td></tr>
+  <tr><td>$X[n]$, $X_n$</td><td>a discrete-time process (a random sequence), $n\in\mathbb Z$</td></tr>
+  <tr><td>$f_X(\alpha;t)$, lecturer: $f_{X_t}(\alpha,t)$</td><td>first-order PDF: the PDF of the RV $X(t)$. It may depend on $t$.</td></tr>
+  <tr><td>$f_X(\alpha_1,\alpha_2;t_1,t_2)$</td><td>second-order PDF: the joint PDF of $X(t_1)$ and $X(t_2)$</td></tr>
+  <tr><td>$m_X(t)=E[X(t)]$</td><td>mean function</td></tr>
+  <tr><td>$R_{XX}(t_1,t_2)=E[X(t_1)X(t_2)]$</td><td>autocorrelation function (ACF). Also written $R_X$.</td></tr>
+  <tr><td>$K_{XX}(t_1,t_2)$, $C_X(t_1,t_2)$</td><td>autocovariance function, $\Cov[X(t_1),X(t_2)]$. The lecturer writes $K$; some papers write $C$.</td></tr>
+  <tr><td>$\sigma_X^2(t)$</td><td>variance function, $K_{XX}(t,t)$</td></tr>
+  <tr><td>$R_{XY}(t_1,t_2)$, $K_{XY}(t_1,t_2)$</td><td>cross-correlation, cross-covariance of two processes</td></tr>
+  <tr><td>$\tau=t_1-t_2$ (or $t_2-t_1$)</td><td>time lag, the separation between the two instants. For a WSS process $R_X(\tau)$ depends only on this.</td></tr>
+  <tr><td>$S_X(\omega)$</td><td>power spectral density, the Fourier transform of $R_X(\tau)$</td></tr>
+  <tr><td>$\langle x(t)\rangle$, $\overline{x}$</td><td>time average of one sample function, $\lim_{T\to\infty}\frac1{2T}\int_{-T}^{T}x(t)\,dt$</td></tr>
+  <tr><td>$N(t)$, $\lambda$</td><td>Poisson counting process, rate (arrivals per unit time)</td></tr>
+  <tr><td>$W(t)$, $\alpha$ (or $\sigma^2$)</td><td>Wiener process; $\Var[W(t)]=\alpha t$</td></tr>
+</table>
+<p class="small muted">As in Units 2–3, the lecturer uses α, β for the dummy values of random variables (so $f_X(\alpha;t)$ rather than $f_X(x;t)$). Past papers use $x$. They mean the same thing.</p>
+
+<h3 id="warmup">Maths warm-up</h3>
+<p>Almost every Unit 4 calculation uses the five tools below. Make sure each one is comfortable before going on.</p>
+
+<div class="box key"><span class="bt">W1. Trig product-to-sum identities</span>
+<p>You'll multiply two cosines in nearly every autocorrelation calculation:</p>
+$$\begin{aligned}
+\cos A\cos B&=\tfrac12\big[\cos(A-B)+\cos(A+B)\big]\\
+\sin A\sin B&=\tfrac12\big[\cos(A-B)-\cos(A+B)\big]\\
+\sin A\cos B&=\tfrac12\big[\sin(A+B)+\sin(A-B)\big]\\
+\cos A\cos B-\sin A\sin B&=\cos(A+B)\\
+\sin A\cos B-\cos A\sin B&=\sin(A-B)
+\end{aligned}$$
+<p><b>Why it matters:</b> with $A=\omega_0t_1+\Theta$ and $B=\omega_0t_2+\Theta$, the difference $A-B=\omega_0(t_1-t_2)$ has no Θ in it, while the sum $A+B=\omega_0(t_1+t_2)+2\Theta$ still contains Θ. Averaging over Θ kills the sum term, and only the difference term survives. That is exactly how a "random phase" makes a process stationary.</p></div>
+
+<div class="box key"><span class="bt">W2. Averaging a sinusoid over a uniform phase</span>
+<p>If $\Theta\sim U[0,2\pi]$ (or $U[-\pi,\pi]$, any interval of length 2π) and $c$ is any constant, then</p>
+$$\begin{aligned}
+E[\cos(c+\Theta)]&=\frac1{2\pi}\int_0^{2\pi}\cos(c+\theta)\,d\theta\\
+&=\frac1{2\pi}\Big[\sin(c+\theta)\Big]_0^{2\pi}\\
+&=\frac1{2\pi}\big[\sin(c+2\pi)-\sin c\big]\\
+&=0 .
+\end{aligned}$$
+<p>Same for $\sin(c+\Theta)$, and for $\cos(c+2\Theta)$ (two full periods). <b>In words:</b> a sinusoid averaged over one full period is zero. But be careful: if Θ is uniform over a <em>shorter</em> interval, such as $[0,\pi/2]$, the average is <em>not</em> zero (Example 4.5).</p></div>
+
+<div class="box key"><span class="bt">W3. Expectation of a function of RVs, and independence</span>
+<p>Unit 2–3 facts used constantly here:</p>
+$$\begin{aligned}
+E[g(A)]&=\int g(a)\,f_A(a)\,da\\
+E[g(A)h(B)]&=E[g(A)]\,E[h(B)] &&\why{if $A,B$ independent}\\
+E[A^2]&=\Var A+(E[A])^2\\
+A\sim U[a,b]:\quad E[A]&=\tfrac{a+b}{2},\quad \Var A=\tfrac{(b-a)^2}{12}
+\end{aligned}$$
+<p>For example $A\sim U[-1,1]$ has $E[A]=0$ and $E[A^2]=\frac{4}{12}=\frac13$. And for $A\sim U[0,1]$, $E[e^{-As}]=\int_0^1e^{-as}da=\frac{1-e^{-s}}{s}$.</p></div>
+
+<div class="box key"><span class="bt">W4. Double sums and the min trick</span>
+<p>For counting processes we need $E\big[\sum_{i=1}^{n}\sum_{j=1}^{k}U_iU_j\big]$ where the $U_i$ are independent with mean 0 and variance σ². Every cross term ($i\ne j$) has $E[U_iU_j]=E[U_i]E[U_j]=0$. Only the terms with $i=j$ survive, and $i=j$ is possible only for $i$ up to the smaller of $n$ and $k$:</p>
+$$\begin{aligned}
+E\Big[\sum_{i=1}^{n}\sum_{j=1}^{k}U_iU_j\Big]&=\sum_{i=1}^{n}\sum_{j=1}^{k}E[U_iU_j]\\
+&=\sum_{i=1}^{\min(n,k)}E[U_i^2]\\
+&=\min(n,k)\,\sigma^2 .
+\end{aligned}$$
+<p>That is where the "$\min(t_1,t_2)$" in the binomial, random-walk, Poisson and Wiener autocovariances comes from: two sums share exactly their common part.</p></div>
+
+<div class="box key"><span class="bt">W5. Fourier transform (for §8)</span>
+<p>We use the convention with ω in rad/s:</p>
+$$\begin{aligned}
+G(\omega)&=\int_{-\infty}^{\infty}g(\tau)\,e^{-j\omega\tau}\,d\tau,\\
+g(\tau)&=\frac1{2\pi}\int_{-\infty}^{\infty}G(\omega)\,e^{j\omega\tau}\,d\omega .
+\end{aligned}$$
+<p>The pairs you need: $e^{-a|\tau|}\leftrightarrow\frac{2a}{a^2+\omega^2}$; $\ \delta(\tau)\leftrightarrow1$; $\ 1\leftrightarrow2\pi\delta(\omega)$; $\ \cos\omega_0\tau\leftrightarrow\pi[\delta(\omega-\omega_0)+\delta(\omega+\omega_0)]$; triangle $\big(1-\frac{|\tau|}{T}\big)$ for $|\tau|\le T$ $\leftrightarrow T\,\frac{\sin^2(\omega T/2)}{(\omega T/2)^2}$. If $g$ is even, $G(\omega)=2\int_0^\infty g(\tau)\cos\omega\tau\,d\tau$ is real and even.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="rp"><span class="num">1</span>What is a random process?</h2>
+
+<div class="box why"><span class="bt">Why we need this</span>
+<p>Switch on a radio between stations: you hear hiss. Record the voltage for one second and you get a wiggly waveform. Record again and you get a <em>different</em> wiggly waveform. Neither recording is "the" noise: the noise is the whole random mechanism that produces such waveforms. We want to answer questions like: what is the average power of the hiss? How strongly is the voltage now related to the voltage 1 ms later? How much of its power is at high frequencies? Will averaging one long recording tell me the true mean? These are questions about a <b>random process</b>.</p></div>
+
+<h3 id="dice">The lecturer's opening example: a die chooses a waveform</h3>
+<p>Roll a fair die. The outcome is $\xi_k$ for $k=1,\dots,6$. Instead of attaching a <em>number</em> to each outcome (that would be a random variable), attach a whole <em>function of time</em>:</p>
+$$\begin{aligned}
+X(t,\xi_k)&=\sin(2\pi k f_0t) &&\why{the die chooses the frequency}\\
+Y(t,\xi_k)&=k\sin(2\pi f_0t) &&\why{the die chooses the amplitude}
+\end{aligned}$$
+<div class="plots-row"><div data-plot="diceX"></div><div data-plot="diceY"></div></div>
+<p>Each process has exactly six possible waveforms, each with probability 1/6. Now freeze time at some instant $t_0$ and look at $Y(t_0)$. It is a single number that depends on the die: it equals $k\sin(2\pi f_0t_0)$ with probability 1/6 for each $k$. So <b>$Y(t_0)$ is a random variable</b> (a discrete one here), with the staircase CDF below. Move to another instant $t_1$ and you get a different random variable $Y(t_1)$ (with values $k\sin(2\pi f_0t_1)$).</p>
+<div data-plot="diceCdf"></div>
+<p>That is the whole idea: a random process is a <b>collection of random variables, one for each time instant</b>, all defined on the same experiment.</p>
+
+<h3 id="def-rp">Definitions</h3>
+<div class="box def"><span class="bt">Random process (two equivalent definitions, lecturer)</span>
+<p><b>Definition 1 (mapping view).</b> Let $(\Omega,\mathcal F,P)$ be a probability space. A <b>random (stochastic) process</b> $X$ is a mapping that assigns to each outcome $\xi\in\Omega$ a function of time $x(t,\xi)$, called a <b>sample function</b>, such that for every fixed time $t$ the mapping $\xi\mapsto X(t,\xi)$ is a random variable.</p>
+<p><b>Definition 2 (indexed-family view).</b> A random process is an indexed set of random variables $\{X(t),\ t\in T\}$. If the index set is $T=\mathbb R$ (all real times) it is a <b>continuous-time random process (CTRP)</b>; if $T=\mathbb Z$ (integer times) it is a <b>discrete-time random process (DTRP)</b>, also called a random sequence.</p>
+<p>The set of all sample functions is called the <b>ensemble</b>.</p></div>
+
+<p><b>The two views of $X(t,\xi)$.</b> It is a function of two variables, and you can fix either one:</p>
+<table>
+  <tr><th>Fix</th><th>Vary</th><th>What you get</th></tr>
+  <tr><td>ξ (one outcome)</td><td>$t$</td><td>a <b>sample function</b> $x(t,\xi)$: an ordinary deterministic waveform, one "recording"</td></tr>
+  <tr><td>$t$ (one instant)</td><td>ξ</td><td>a <b>random variable</b> $X(t)$: the possible values at that instant, across the ensemble</td></tr>
+  <tr><td>both</td><td>nothing</td><td>a plain number $x(t_0,\xi_0)$</td></tr>
+  <tr><td>neither</td><td>both</td><td>the random process itself</td></tr>
+</table>
+<figure class="diagram"><div id="fig-views"></div><figcaption>Rows are sample functions (fix ξ). The vertical dashed slice is a random variable (fix t).</figcaption></figure>
+
+<h3 id="classes">Classification: time × value</h3>
+<p>Two independent questions: is time continuous or discrete? Is the value $X(t_0)$ a continuous RV or a discrete RV? That gives four kinds (the lecturer's table):</p>
+<table>
+  <tr><th></th><th>$X(t_0)$ is a continuous RV</th><th>$X(t_0)$ is a discrete RV</th></tr>
+  <tr><th>$t\in\mathbb R$ (CT)</th><td>CT, continuous-valued: thermal noise, Gaussian process, Wiener process, line process</td><td>CT, discrete-valued: Poisson counting process, random telegraph signal</td></tr>
+  <tr><th>$t\in\mathbb Z$ (DT)</th><td>DT, continuous-valued: sampled noise, inter-arrival times $\tau[n]$</td><td>DT, discrete-valued: Bernoulli process, binomial counting, random walk</td></tr>
+</table>
+<div class="plots-row"><div data-plot="clsCtcv"></div><div data-plot="clsCtdv"></div></div>
+<div class="plots-row"><div data-plot="clsDtcv"></div><div data-plot="clsDtdv"></div></div>
+<p class="small">"Discrete-time" refers to the index; "discrete-valued" refers to what values $X$ takes. A random walk is discrete in both; a Poisson process has continuous time but integer values.</p>
+
+<!-- ============================================================ -->
+<h2 id="describe"><span class="num">2</span>Describing a random process: exact and average descriptions</h2>
+
+<div class="box why"><span class="bt">The problem</span>
+<p>A single RV is described by one PDF. A pair of RVs by a joint PDF (Unit 3). A random process has infinitely many RVs (one per instant), so a complete description must tell us the joint behaviour of <em>any</em> collection of them. That is a lot of information, so in practice we use a few summary functions instead, just as in Unit 3 we used means and covariances instead of full joint PDFs.</p></div>
+
+<h3 id="exact">Exact (complete) description: nth-order PDFs</h3>
+<div class="box def"><span class="bt">nth-order distribution (lecturer)</span>
+<p>Pick any $N$ time instants $t_1,\dots,t_N$ and form the random vector $\mathbf X_t=[X(t_1),\dots,X(t_N)]^T$. Its joint PDF</p>
+$$f_{X}(\alpha_1,\dots,\alpha_N;\ t_1,\dots,t_N)$$
+<p>is the <b>Nth-order PDF</b> of the process. The process is <b>completely (statistically) characterised</b> if this is known for <em>every</em> $N$ and every choice of $t_1,\dots,t_N$.</p>
+<ul>
+<li><b>First order</b> ($N=1$): $f_X(\alpha;t)$, the PDF of the single RV $X(t)$. It tells you what values occur at time $t$, but nothing about how different times relate.</li>
+<li><b>Second order</b> ($N=2$): $f_X(\alpha_1,\alpha_2;t_1,t_2)$, the joint PDF of $X(t_1)$ and $X(t_2)$. This tells you how values at two instants are related, and is enough to compute the mean and the autocorrelation.</li>
+</ul>
+<p>For discrete-valued processes, replace PDFs by PMFs: $P[X(t_1)=\alpha_1,\dots,X(t_N)=\alpha_N]$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 2.1: the line process (lecturer)</span>
+<p>$X(t)=At$ for $0\le t\le T$, where $A\sim U[0,1]$. Sketch the sample functions and find the first-order PDF of $X(t_0)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>Sample functions.</b> Once the experiment picks $A=a$, the waveform is $x(t)=at$: a straight line through the origin with slope $a\in[0,1]$. The steepest possible line is $x=t$ (when $a=1$).</p>
+<div class="plots-row"><div data-plot="lineProc"></div><div data-plot="linePdf"></div></div>
+<p><b>First-order PDF.</b> At a fixed time $t_0\gt0$, $X(t_0)=t_0A$ is a linear function of the RV $A$. From Unit 3, if $Y=aX+b$ then $f_Y(\beta)=\frac1{|a|}f_X\big(\frac{\beta-b}{a}\big)$. Here the "$a$" is $t_0$ and $b=0$:</p>
+$$\begin{aligned}
+f_X(\alpha;t_0)&=\frac{1}{|t_0|}\,f_A\Big(\frac{\alpha}{t_0}\Big)\\
+&=\begin{cases}\dfrac1{t_0}, & 0\le\dfrac{\alpha}{t_0}\le1\ \text{ i.e. } 0\le\alpha\le t_0\\[6pt] 0,&\text{otherwise.}\end{cases}
+\end{aligned}$$
+<p><b>Meaning.</b> $X(t_0)$ is uniform on $[0,t_0]$. The PDF <em>changes with time</em>: early on, all lines are bunched near 0 (narrow, tall PDF); later they fan out (wide, flat PDF). A process whose first-order PDF depends on $t$ cannot be stationary (§4).</p></details></div>
+
+<h3 id="averages">Average (partial) description: the moment functions</h3>
+<p>Instead of all the PDFs, we usually keep just the first and second moments, as functions of time. These can be computed from the first- and second-order PDFs.</p>
+<div class="box def"><span class="bt">Mean, variance, autocorrelation, autocovariance (lecturer's list)</span>
+$$\begin{aligned}
+\text{1. Mean function:}\quad m_X(t)&=E[X(t)]=\int_{-\infty}^{\infty}\alpha\,f_X(\alpha;t)\,d\alpha\\[4pt]
+\text{2. Variance function:}\quad \sigma_X^2(t)&=E\big[(X(t)-m_X(t))^2\big]\\[4pt]
+\text{3. Autocovariance:}\quad K_{XX}(t_1,t_2)&=E\big[(X(t_1)-m_X(t_1))(X(t_2)-m_X(t_2))\big]\\
+&=\Cov[X(t_1),X(t_2)]\\[4pt]
+\text{4. Autocorrelation (ACF):}\quad R_{XX}(t_1,t_2)&=E[X(t_1)X(t_2)]\\
+&=\iint\alpha_1\alpha_2\,f_X(\alpha_1,\alpha_2;t_1,t_2)\,d\alpha_1d\alpha_2
+\end{aligned}$$
+<p>For two processes $X(t)$ and $Y(t)$ on the same experiment:</p>
+$$\begin{aligned}
+\text{Cross-correlation:}\quad R_{XY}(t_1,t_2)&=E[X(t_1)Y(t_2)]\\
+\text{Cross-covariance:}\quad K_{XY}(t_1,t_2)&=\Cov[X(t_1),Y(t_2)]
+\end{aligned}$$</div>
+
+<p><b>How they are connected.</b> Expanding the covariance exactly as in Unit 3 ($\Cov[U,V]=E[UV]-E[U]E[V]$):</p>
+$$\begin{aligned}
+K_{XX}(t_1,t_2)&=E[X(t_1)X(t_2)]-m_X(t_1)\,m_X(t_2)\\
+&=R_{XX}(t_1,t_2)-m_X(t_1)\,m_X(t_2),\\[4pt]
+\sigma_X^2(t)&=K_{XX}(t,t)\\
+&=R_{XX}(t,t)-m_X^2(t),\\[4pt]
+E[X^2(t)]&=R_{XX}(t,t),\\[4pt]
+K_{XY}(t_1,t_2)&=R_{XY}(t_1,t_2)-m_X(t_1)\,m_Y(t_2).
+\end{aligned}$$
+<p>So if you know $m_X(t)$ and $R_{XX}(t_1,t_2)$ you know everything in the average description. For a zero-mean process, $K=R$.</p>
+
+<p><b>What the ACF means.</b> $R_{XX}(t_1,t_2)$ measures how much the values at two instants "move together". If the process changes slowly, $X(t_1)$ and $X(t_1+\tau)$ are similar for small τ, and $R$ stays large over a range of τ. If it changes very fast (like white noise), values even slightly apart are unrelated and $R$ drops to (almost) zero immediately. The normalised version is the correlation coefficient between the two instants, $\rho(t_1,t_2)=\frac{K_{XX}(t_1,t_2)}{\sigma_X(t_1)\sigma_X(t_2)}$, exactly as in Unit 3.</p>
+
+<div class="box tip"><span class="bt">Exact vs average: the lecturer's summary</span>
+<p>$X(t)$ → <b>exact/complete</b>: $f_X(\alpha_1,\dots,\alpha_N;t_1,\dots,t_N)$ for all $N$.<br>
+$X(t)$ → <b>average</b>: $m_X(t)$ and $K_{XX}(t_1,t_2)$ (equivalently $R_{XX}$).<br>
+The exact description gives the average one, but not the other way round, except for <b>Gaussian processes</b> (§6), where mean and covariance determine every PDF.</p></div>
+
+<div class="box recipe"><span class="bt">Recipe: mean and ACF of a process of the form $X(t)=g(t;\text{RVs})$</span>
+<ol>
+<li>Identify which quantities are random (A, Θ, Ω, …) and their distributions. Note independence.</li>
+<li><b>Mean:</b> $m_X(t)=E[g(t;\dots)]$. Treat $t$ as a constant and take the expectation over the RVs. Split products of independent RVs.</li>
+<li><b>ACF:</b> write $X(t_1)X(t_2)$, multiply out, use the trig identities (W1) to separate "difference" and "sum" terms, and take expectations term by term.</li>
+<li><b>Interpret:</b> does $m_X$ depend on $t$? Does $R$ depend on $t_1,t_2$ only through $t_1-t_2$? (That is the WSS test, §4.)</li>
+</ol></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 2.2: line process with symmetric slope (lecturer)</span>
+<p>$X(t)=At$ with $A\sim U[-a,a]$. Find the first-order PDF, the mean, the ACF and the variance.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>PDF:</b> as before, $f_X(\alpha;t)=\frac1{|t|}f_A\big(\frac{\alpha}{t}\big)$, which is uniform on $[-a|t|,\,a|t|]$ with height $\frac{1}{2a|t|}$.</p>
+<p><b>Mean.</b> $t$ is a constant inside the expectation:</p>
+$$\begin{aligned}
+m_X(t)&=E[At]\\
+&=t\,E[A] &&\why{pull the constant out}\\
+&=t\cdot0=0 .
+\end{aligned}$$
+<p><b>ACF.</b></p>
+$$\begin{aligned}
+R_{XX}(t_1,t_2)&=E[At_1\cdot At_2]\\
+&=t_1t_2\,E[A^2]\\
+&=t_1t_2\cdot\frac{(2a)^2}{12} &&\why{$E[A^2]=\Var A$ since mean 0}\\
+&=\frac{a^2}{3}\,t_1t_2 .
+\end{aligned}$$
+<p><b>Variance:</b> $\sigma_X^2(t)=R_{XX}(t,t)-0=\frac{a^2t^2}{3}$, which grows with time. The mean is constant, but the ACF depends on the product $t_1t_2$, not on the difference, so (as we'll see in §4) the process is not stationary.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 2.3: random amplitude vs random phase</span>
+<p>(a) $X(t)=A\cos\omega_0t$ with $E[A]=0$, $E[A^2]=\sigma^2$. (b) $Y(t)=\cos(\omega_0t+\Theta)$ with $\Theta\sim U[0,2\pi]$. Find the mean and ACF of each.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>(a)</b> The only random thing is $A$:</p>
+$$\begin{aligned}
+m_X(t)&=E[A]\cos\omega_0t=0,\\[4pt]
+R_{XX}(t_1,t_2)&=E[A^2]\cos\omega_0t_1\cos\omega_0t_2\\
+&=\sigma^2\cos\omega_0t_1\cos\omega_0t_2\\
+&=\frac{\sigma^2}{2}\big[\cos\omega_0(t_1-t_2)+\cos\omega_0(t_1+t_2)\big] &&\why{W1}
+\end{aligned}$$
+<p>The $\cos\omega_0(t_1+t_2)$ term depends on where you are in time, not just on the gap. Physically: every sample function passes through 0 at the same instants ($\omega_0t=\pi/2+k\pi$), so at those instants $X$ is exactly 0 with certainty; at $t=0$ it has its full variance $\sigma^2$. The statistics depend on $t$.</p>
+<p><b>(b)</b> The only random thing is Θ:</p>
+$$\begin{aligned}
+m_Y(t)&=E[\cos(\omega_0t+\Theta)]=0 &&\why{W2}\\[4pt]
+R_{YY}(t_1,t_2)&=E[\cos(\omega_0t_1+\Theta)\cos(\omega_0t_2+\Theta)]\\
+&=\tfrac12E\big[\cos\omega_0(t_1-t_2)\big]+\tfrac12E\big[\cos(\omega_0(t_1+t_2)+2\Theta)\big] &&\why{W1}\\
+&=\tfrac12\cos\omega_0(t_1-t_2)+0 &&\why{first term not random; second averages to 0}\\
+&=\tfrac12\cos\omega_0(t_1-t_2).
+\end{aligned}$$
+<p>Now only the gap $t_1-t_2$ matters. The random phase "smears" the sinusoid uniformly over all positions, so no instant is special.</p>
+<div class="plots-row"><div data-plot="phaseEns"></div><div data-plot="phaseAcf"></div></div></details></div>
+
+<!-- ============================================================ -->
+<h2 id="types"><span class="num">3</span>Independent, uncorrelated and orthogonal processes</h2>
+<p>These carry the Unit 3 ideas (independent, uncorrelated, orthogonal RVs) over to processes. They describe how the values at <em>different</em> times relate.</p>
+
+<div class="box def"><span class="bt">Definitions (lecturer)</span>
+<p><b>Independent process.</b> For every $N$ and all distinct times, the RVs $X(t_1),\dots,X(t_N)$ are independent:</p>
+$$f_X(\alpha_1,\dots,\alpha_N;t_1,\dots,t_N)=\prod_{i=1}^Nf_X(\alpha_i;t_i).$$
+<p>So the <b>first-order PDF alone describes the whole process</b>. (This is an "exact" property.)</p>
+<p><b>Uncorrelated process.</b> Values at distinct times are uncorrelated:</p>
+$$K_{XX}(t_i,t_j)=\begin{cases}\sigma_X^2(t_i),&t_i=t_j\\0,&t_i\ne t_j.\end{cases}$$
+<p>The lecturer writes this compactly as $K_{XX}(t_i,t_j)=\sigma^2_{X}(t_i)\,\delta(t_i-t_j)$, meaning "zero unless the times coincide". (An "average" property.)</p>
+<p><b>Orthogonal process.</b> $R_{XX}(t_i,t_j)=0$ for $t_i\ne t_j$. Since $R=K+m\,m$, at equal times $R_{XX}(t_i,t_i)=\sigma_X^2(t_i)+m_X^2(t_i)$; the lecturer writes $R_{XX}(t_i,t_j)=\{\sigma^2_X(t_i)+m_X^2(t_i)\}\,\delta(t_i-t_j)$.</p></div>
+<p><b>Relations.</b> Independent ⇒ uncorrelated (Unit 3: independence makes $E[XY]=E[X]E[Y]$). Uncorrelated ⇏ independent in general, but for a Gaussian process they are the same (§6). Uncorrelated and orthogonal coincide when the mean is zero.</p>
+<p><b>For two processes</b> $X(t)$, $Y(t)$: they are <em>independent</em> if any set of $X$-values is independent of any set of $Y$-values; <em>uncorrelated</em> if $K_{XY}(t_1,t_2)=0$ for all $t_1,t_2$; <em>orthogonal</em> if $R_{XY}(t_1,t_2)=0$ for all $t_1,t_2$.</p>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 3.1 (lecturer): an uncorrelated process</span>
+<p>Let $X(t)$ be an uncorrelated process with zero mean and unit variance. Compute $P[X^2(t)+X^2(u)\le a^2]$ for $t\ne u$.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>What we know.</b> $m_X(t)=0$, $\sigma_X^2(t)=K_{XX}(t,t)=1$, and $K_{XX}(t,u)=0$ for $t\ne u$. So $X_t=X(t)$ and $X_u=X(u)$ are two zero-mean, unit-variance, uncorrelated RVs. The probability is the integral of their joint PDF over the disc $C_a=\{\alpha_1^2+\alpha_2^2\le a^2\}$:</p>
+$$P[X_t^2+X_u^2\le a^2]=\iint_{C_a}f_X(\alpha_1,\alpha_2;t,u)\,d\alpha_1\,d\alpha_2 .$$
+<p><b>The catch.</b> "Uncorrelated" gives only second moments, not the joint PDF, so the integral cannot be finished without more information. (That is the lecturer's point: the average description doesn't answer every probability question.) If we add the assumption that the process is <b>Gaussian</b>, then uncorrelated ⇒ independent, so $X_t,X_u$ are iid $N(0,1)$, and Unit 3 (Rayleigh) gives:</p>
+$$\begin{aligned}
+P[X_t^2+X_u^2\le a^2]&=\int_0^{2\pi}\!\!\int_0^a\frac{1}{2\pi}e^{-r^2/2}\,r\,dr\,d\theta &&\why{polar coordinates}\\
+&=\int_0^ae^{-r^2/2}\,r\,dr\\
+&=1-e^{-a^2/2}.
+\end{aligned}$$</details></div>
+
+<!-- ============================================================ -->
+<h2 id="stationary"><span class="num">4</span>Stationarity: strict-sense (SSS) and wide-sense (WSS)</h2>
+
+<div class="box why"><span class="bt">The idea in plain words</span>
+<p>Imagine recording noise from an amplifier that has been running for an hour. Whether you start the recording at 3:00 pm or 3:07 pm shouldn't matter: the noise "looks the same" statistically at all times. Its average level, its power and how fast it fluctuates do not drift. Such a process is called <b>stationary</b>. The line process $X(t)=At$, by contrast, spreads out as time passes, so it is not stationary.</p>
+<p>The lecturer's picture: draw several sample functions, pick a set of instants $t_0,t_1,\dots$, and then shift <em>all</em> of them by the same amount $T$. For a stationary process the statistics of the values at the shifted instants are identical to those at the original instants. Only the <em>gaps</em> between instants matter, not their absolute position.</p></div>
+
+<h3 id="sss">Strict-sense stationary (SSS)</h3>
+<div class="box def"><span class="bt">SSS (lecturer)</span>
+<p>$X(t)$ is <b>strict-sense stationary</b> if all its finite-order PDFs are unchanged by a shift of the time origin:</p>
+$$f_X(\alpha_1,\dots,\alpha_N;\ t_1,\dots,t_N)=f_X(\alpha_1,\dots,\alpha_N;\ t_1+T,\dots,t_N+T)\qquad\forall\,N,\ t_i,\ T .$$
+<p>This is an <b>exact</b> property (it is about PDFs). If it holds only for $N\le k$, the process is called <b>stationary of order $k$</b>.</p></div>
+
+<p><b>What SSS implies (lecturer's two cases).</b></p>
+<p><b>Case N = 1.</b> $f_X(\alpha;t)=f_X(\alpha;t+T)$ for all $t,T$. Choose $T=-t$:</p>
+$$\begin{aligned}
+f_X(\alpha;t)&=f_X(\alpha;0) &&\why{the first-order PDF does not depend on $t$}\\[4pt]
+m_X(t)&=\int\alpha\,f_X(\alpha;t)\,d\alpha\\
+&=\int\alpha\,f_X(\alpha;0)\,d\alpha\\
+&=m_X\quad(\text{a constant}).
+\end{aligned}$$
+<p>Likewise the variance is constant.</p>
+<p><b>Case N = 2.</b> $f_X(\alpha_1,\alpha_2;t_1,t_2)=f_X(\alpha_1,\alpha_2;t_1+T,t_2+T)$. Choose $T=-t_2$:</p>
+$$\begin{aligned}
+f_X(\alpha_1,\alpha_2;t_1,t_2)&=f_X(\alpha_1,\alpha_2;\ t_1-t_2,\ 0) &&\why{depends only on the gap}\\[4pt]
+K_{XX}(t_1,t_2)&=\iint(\alpha_1-m_X)(\alpha_2-m_X)\,f_X(\alpha_1,\alpha_2;t_1,t_2)\,d\alpha_1d\alpha_2\\
+&=\iint(\alpha_1-m_X)(\alpha_2-m_X)\,f_X(\alpha_1,\alpha_2;t_1-t_2,0)\,d\alpha_1d\alpha_2\\
+&=K_{XX}(t_1-t_2)=K_{XX}(\tau).
+\end{aligned}$$
+<p>And so $R_{XX}(t_1,t_2)=K_{XX}(\tau)+m_X^2=R_{XX}(\tau)$ as well.</p>
+
+<h3 id="wss">Wide-sense stationary (WSS)</h3>
+<div class="box def"><span class="bt">WSS (lecturer)</span>
+<p>$X(t)$ is <b>wide-sense stationary</b> (weakly stationary) if</p>
+<ol>
+<li>its mean is constant: $m_X(t)=m_X$ for all $t$, and</li>
+<li>its ACF depends only on the time separation: $R_{XX}(t_1,t_2)=R_{XX}(t_1-t_2)=R_{XX}(\tau)$.</li>
+</ol>
+<p>(Many books add "3. $E[X^2(t)]\lt\infty$", which is automatic once $R_X(0)$ is finite.) This is an <b>average</b> property. For a WSS process we write $R_X(\tau)=E[X(t+\tau)X(t)]$, the same for every $t$.</p></div>
+<p>Equivalently: constant mean and $K_{XX}(t_1,t_2)=K_{XX}(\tau)$, because $K=R-m^2$ and $m$ is constant.</p>
+
+<div class="box thm"><span class="bt">SSS ⇒ WSS, but WSS ⇏ SSS</span>
+<p><b>SSS ⇒ WSS.</b> Proved just above: SSS makes the mean constant (case N = 1) and the ACF a function of τ only (case N = 2). Those are exactly the two WSS conditions. (We need $E[X^2]\lt\infty$ so that the moments exist.)</p>
+<p><b>WSS does not imply SSS.</b> WSS fixes only the first two moments. The PDFs themselves can still change with time. <em>Counter-example:</em> let $X(t)$ be independent at different times, with $X(t)\sim N(0,1)$ for integer $t$ and $X(t)\sim U[-\sqrt3,\sqrt3]$ otherwise. Both distributions have mean 0 and variance 1, so $m_X=0$ and $R_X(t_1,t_2)=\delta$-like (1 if $t_1=t_2$, else 0), which depends only on $t_1-t_2$: WSS. But the first-order PDF changes shape with $t$: not SSS.</p>
+<p><b>Exception:</b> for a <b>Gaussian</b> process, WSS ⇒ SSS (§6).</p></div>
+
+<table>
+  <tr><th></th><th>SSS</th><th>WSS</th></tr>
+  <tr><td>Condition on</td><td>all PDFs (every order N)</td><td>mean and ACF only</td></tr>
+  <tr><td>Type</td><td>exact</td><td>average</td></tr>
+  <tr><td>Requires</td><td>$f(\cdot;t_1..t_N)=f(\cdot;t_1+T..t_N+T)$</td><td>$m_X$ constant, $R_X(t_1,t_2)=R_X(t_1-t_2)$</td></tr>
+  <tr><td>Implies the other?</td><td>yes, SSS ⇒ WSS (if 2nd moments finite)</td><td>no (only for Gaussian processes)</td></tr>
+  <tr><td>How to check</td><td>hard: need all PDFs</td><td>easy: compute two functions</td></tr>
+  <tr><td>Also called</td><td>strictly / strongly stationary</td><td>weakly / covariance stationary, stationary to order 2 in moments</td></tr>
+</table>
+
+<div class="box recipe"><span class="bt">Recipe: "Is X(t) WSS?"</span>
+<ol>
+<li>Compute $m_X(t)$. If it depends on $t$ → <b>not WSS</b>; stop.</li>
+<li>Compute $R_{XX}(t_1,t_2)$ (or $R_{XX}(t,t+\tau)$). Simplify fully.</li>
+<li>If the answer can be written using only $t_1-t_2$ → <b>WSS</b>. If it contains $t_1+t_2$, $t_1t_2$, or $t_1$ alone → <b>not WSS</b>.</li>
+<li>Quick disproof trick (lecturer): find two pairs with the same gap but different $R$. E.g. compare $R(0,5)$ with $R(1,6)$. Also: if $E[X^2(t)]=R(t,t)$ depends on $t$, the process is not WSS.</li>
+<li>To show "not SSS" it is enough to show the first-order PDF depends on $t$, or that the process is not WSS.</li>
+</ol></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.1 (lecturer): $X(t)=At+b$</span>
+<p>$A$ is a zero-mean RV with PDF $f_A$; $b$ is a constant. Is $X(t)$ SSS? WSS?</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>First-order PDF.</b> $X(t)$ is a linear function of $A$, so</p>
+$$f_X(\alpha;t)=\frac{1}{|t|}\,f_A\Big(\frac{\alpha-b}{t}\Big).$$
+<p>This depends on $t$ (its width scales with $|t|$), so the process is <b>not SSS</b>.</p>
+<p><b>Mean:</b> $m_X(t)=tE[A]+b=b$, constant. So we must check the ACF.</p>
+$$\begin{aligned}
+R_{XX}(t,u)&=E\big[(At+b)(Au+b)\big]\\
+&=E\big[A^2tu+Abt+Abu+b^2\big]\\
+&=tu\,E[A^2]+b(t+u)E[A]+b^2\\
+&=(\sigma_A^2+m_A^2)\,tu+b^2 &&\why{$E[A^2]=\sigma_A^2+m_A^2$; $E[A]=0$}
+\end{aligned}$$
+<p><b>Test with equal gaps.</b> Both pairs below have gap 5:</p>
+$$\begin{aligned}
+R_{XX}(0,5)&=b^2,\\
+R_{XX}(1,6)&=6(\sigma_A^2+m_A^2)+b^2 .
+\end{aligned}$$
+<p>They differ, so $R$ is not a function of the gap alone: <b>not WSS</b>.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.2 (lecturer): random-phase cosine</span>
+<p>$X(t)=\cos(\omega_0t+\phi)$, $\phi\sim U[0,2\pi]$. Is it WSS?</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+m_X(t)&=\frac1{2\pi}\int_0^{2\pi}\cos(\omega_0t+\phi)\,d\phi\\
+&=\frac1{2\pi}\Big[\sin(\omega_0t+\phi)\Big]_0^{2\pi}=0 .\\[6pt]
+R_{XX}(t,u)&=E\big[\cos(\omega_0t+\phi)\cos(\omega_0u+\phi)\big]\\
+&=E\Big\{\tfrac12\big[\cos(\omega_0(t+u)+2\phi)+\cos\omega_0(t-u)\big]\Big\}\\
+&=0+\tfrac12\cos\omega_0(t-u).
+\end{aligned}$$
+<p>Constant mean, ACF a function of $t-u$ only ⇒ <b>WSS</b>. In fact this process is also SSS (shifting time by $T$ just changes the phase to $\phi+\omega_0T$, which is still uniform mod 2π), but proving SSS needs that extra argument.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 4.3: $X(t)=A\cos\omega_0t+B\sin\omega_0t$</span>
+<p>$A,B$ are uncorrelated, zero-mean, each with variance σ². Show $X(t)$ is WSS. (This process appears in ES 2021 Q4a.)</p>
+<details class="sol"><summary>Solution</summary>
+<p>Mean: $E[A]\cos\omega_0t+E[B]\sin\omega_0t=0$. For the ACF, multiply out and use $E[A^2]=E[B^2]=\sigma^2$, $E[AB]=E[A]E[B]=0$:</p>
+$$\begin{aligned}
+R_X(t_1,t_2)&=E\big[(A\cos\omega_0t_1+B\sin\omega_0t_1)(A\cos\omega_0t_2+B\sin\omega_0t_2)\big]\\
+&=E[A^2]\cos\omega_0t_1\cos\omega_0t_2+E[B^2]\sin\omega_0t_1\sin\omega_0t_2\\
+&\quad+E[AB]\big(\cos\omega_0t_1\sin\omega_0t_2+\sin\omega_0t_1\cos\omega_0t_2\big)\\
+&=\sigma^2\big(\cos\omega_0t_1\cos\omega_0t_2+\sin\omega_0t_1\sin\omega_0t_2\big)+0\\
+&=\sigma^2\cos\omega_0(t_1-t_2) &&\why{$\cos(A-B)$ identity}
+\end{aligned}$$
+<p><b>WSS.</b> Note what made it work: <em>equal</em> variances and <em>zero</em> correlation of $A,B$. If $E[A^2]\ne E[B^2]$, a $\cos\omega_0(t_1+t_2)$ term would remain.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 4.4: random amplitude and phase</span>
+<p>$X(t)=A\cos(\omega_0t+\Theta)$, where $A$ is a RV with $E[A^2]=2$, $\Theta\sim U[0,2\pi]$, independent. Find $m_X$, $R_X$, average power.</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+m_X(t)&=E[A]\,E[\cos(\omega_0t+\Theta)]=E[A]\cdot0=0,\\[4pt]
+R_X(t+\tau,t)&=E[A^2]\,E[\cos(\omega_0(t+\tau)+\Theta)\cos(\omega_0t+\Theta)] &&\why{independence}\\
+&=2\cdot\tfrac12\cos\omega_0\tau\\
+&=\cos\omega_0\tau .
+\end{aligned}$$
+<p>WSS, with average power $E[X^2(t)]=R_X(0)=1$. (General rule: $R_X(\tau)=\frac{E[A^2]}{2}\cos\omega_0\tau$.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 4.5: phase over too small an interval</span>
+<p>$X(t)=\cos(t+\Theta)$ with $\Theta\sim U[0,\pi/2]$. Is it WSS?</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+m_X(t)&=\frac{2}{\pi}\int_0^{\pi/2}\cos(t+\theta)\,d\theta\\
+&=\frac2\pi\big[\sin(t+\tfrac\pi2)-\sin t\big]\\
+&=\frac2\pi(\cos t-\sin t).
+\end{aligned}$$
+<p>The mean depends on $t$ ⇒ <b>not WSS</b>. The phase must be spread over a whole period for the averaging trick (W2) to work.</p></details></div>
+
+<h3 id="jwss">Jointly WSS processes</h3>
+<div class="box def"><span class="bt">Joint wide-sense stationarity</span>
+<p>$X(t)$ and $Y(t)$ are <b>jointly WSS</b> if each is WSS and their cross-correlation depends only on the gap: $R_{XY}(t,t+\tau)=E[X(t)Y(t+\tau)]=R_{XY}(\tau)$.</p></div>
+<p class="small">Convention warning: books differ on whether $R_{XY}(\tau)$ means $E[X(t)Y(t+\tau)]$ (Schaum, past papers) or $E[X(t+\tau)Y(t)]$. The two differ by $\tau\to-\tau$. Always state which you use; we use $R_{XY}(\tau)=E[X(t)Y(t+\tau)]$ and $R_X(\tau)=E[X(t)X(t+\tau)]$ (for the ACF it doesn't matter, since $R_X$ is even).</p>
+
+<!-- ============================================================ -->
+<h2 id="acfprops"><span class="num">5</span>Properties of the autocorrelation &amp; cross-correlation functions <span class="tag-beyond">Beyond class notes</span></h2>
+<p>These are asked as theory questions (ES July 2024 Q5c, ES June 2026 Q4c) and also used to check numerical answers. Throughout, $X(t)$ is WSS with $R_X(\tau)=E[X(t)X(t+\tau)]$.</p>
+
+<div class="box thm"><span class="bt">Property 1: $R_X(0)=E[X^2(t)]\ge0$ (average power)</span>
+<p>Put τ = 0 in the definition: $R_X(0)=E[X(t)X(t)]=E[X^2(t)]$, which is the mean of a non-negative quantity, so ≥ 0. If $X(t)$ is a voltage across a 1 Ω resistor, $X^2(t)$ is the instantaneous power, so $R_X(0)$ is the <b>average power</b>. Also $\sigma_X^2=R_X(0)-m_X^2$.</p></div>
+
+<div class="box thm"><span class="bt">Property 2: $R_X(-\tau)=R_X(\tau)$ (even function) — ES 2026 Q4c</span>
+$$\begin{aligned}
+R_X(-\tau)&=E[X(t)\,X(t-\tau)] &&\why{definition with $-\tau$}\\
+&=E[X(s+\tau)\,X(s)] &&\why{put $s=t-\tau$, so $t=s+\tau$}\\
+&=E[X(s)\,X(s+\tau)] &&\why{multiplication is commutative}\\
+&=R_X(\tau) &&\why{WSS: same for every $s$}
+\end{aligned}$$
+<p>The key step is WSS: the value doesn't depend on which starting instant ($t$ or $s$) we use. <b>Meaning:</b> the correlation between "now" and "τ later" equals that between "now" and "τ earlier". The ACF graph is always symmetric about τ = 0.</p></div>
+
+<div class="box thm"><span class="bt">Property 3: $|R_X(\tau)|\le R_X(0)$ (maximum at the origin)</span>
+<p><b>Proof.</b> A square is never negative, so its expectation isn't either:</p>
+$$\begin{aligned}
+0&\le E\big[(X(t+\tau)\pm X(t))^2\big]\\
+&=E[X^2(t+\tau)]\pm2E[X(t+\tau)X(t)]+E[X^2(t)]\\
+&=R_X(0)\pm2R_X(\tau)+R_X(0) &&\why{WSS: $E[X^2]=R_X(0)$ at every time}\\
+&=2R_X(0)\pm2R_X(\tau).
+\end{aligned}$$
+<p>With the "+" sign: $R_X(\tau)\ge-R_X(0)$. With the "−" sign: $R_X(\tau)\le R_X(0)$. Together, $|R_X(\tau)|\le R_X(0)$. ∎ (It is also the Cauchy–Schwarz inequality $|E[UV]|\le\sqrt{E[U^2]E[V^2]}$.)</p>
+<p><b>Meaning:</b> nothing is more correlated with $X(t)$ than $X(t)$ itself.</p></div>
+
+<div class="box thm"><span class="bt">Property 4: periodic component ⇒ periodic ACF</span>
+<p>If $R_X(T_0)=R_X(0)$ for some $T_0\ne0$, then $R_X$ is periodic with period $T_0$ and $X(t+T_0)=X(t)$ with probability 1. Conversely, a periodic component in $X$ (like $A\cos(\omega_0t+\Theta)$) gives a periodic component in $R_X$ (like $\frac{E[A^2]}2\cos\omega_0\tau$) with the same frequency.</p>
+<p class="small">Sketch: $E[(X(t+T_0)-X(t))^2]=2R_X(0)-2R_X(T_0)=0$, so $X(t+T_0)=X(t)$ in mean square.</p></div>
+
+<div class="box thm"><span class="bt">Property 5: $R_X(\tau)\to m_X^2$ as $|\tau|\to\infty$ (if no periodic component)</span>
+<p>For most physical processes, values far apart in time become unrelated: $K_X(\tau)\to0$. Since $R_X(\tau)=K_X(\tau)+m_X^2$:</p>
+$$\lim_{|\tau|\to\infty}R_X(\tau)=m_X^2 .$$
+<p><b>Use:</b> this gives the mean from the ACF (up to sign): $|m_X|=\sqrt{R_X(\infty)}$, and then $\sigma_X^2=R_X(0)-R_X(\infty)$. (ES July 2024 Q4a.)</p>
+<div data-plot="acfMean"></div></div>
+
+<div class="box thm"><span class="bt">Property 6: $R_X$ is positive semidefinite; its Fourier transform is ≥ 0</span>
+<p>For any times $t_1,\dots,t_n$ and real numbers $a_1,\dots,a_n$:</p>
+$$\begin{aligned}
+0&\le E\Big[\Big(\sum_{i=1}^na_iX(t_i)\Big)^2\Big]\\
+&=\sum_{i=1}^n\sum_{j=1}^na_ia_j\,E[X(t_i)X(t_j)]\\
+&=\sum_{i=1}^n\sum_{j=1}^na_ia_j\,R_X(t_i-t_j).
+\end{aligned}$$
+<p>Equivalently (§8), the power spectral density $S_X(\omega)=\mathcal F\{R_X(\tau)\}$ is never negative. This is the real test for whether a given function can be an ACF.</p></div>
+
+<div class="box key"><span class="bt">Same properties for the autocovariance</span>
+<p>$K_X(\tau)=R_X(\tau)-m_X^2$ is also even, $K_X(0)=\sigma_X^2$, $|K_X(\tau)|\le K_X(0)$, and usually $K_X(\tau)\to0$ as $|\tau|\to\infty$. The <b>normalised</b> autocovariance $\rho_X(\tau)=K_X(\tau)/K_X(0)$ lies in [−1, 1].</p></div>
+
+<div class="plots-row"><div data-plot="acfExp"></div><div data-plot="acfTri"></div><div data-plot="acfCos"></div></div>
+
+<div class="box thm"><span class="bt">Properties of the cross-correlation $R_{XY}(\tau)=E[X(t)Y(t+\tau)]$ (jointly WSS)</span>
+<ol>
+<li><b>Symmetry (not evenness):</b> $R_{XY}(-\tau)=R_{YX}(\tau)$.
+$$\begin{aligned}
+R_{XY}(-\tau)&=E[X(t)Y(t-\tau)]\\
+&=E[X(s+\tau)Y(s)] &&\why{$s=t-\tau$}\\
+&=E[Y(s)X(s+\tau)]=R_{YX}(\tau).
+\end{aligned}$$
+$R_{XY}$ itself need not be even, and its maximum need not be at τ = 0.</li>
+<li><b>Bound:</b> $|R_{XY}(\tau)|\le\sqrt{R_X(0)R_Y(0)}$ (Cauchy–Schwarz).</li>
+<li><b>Arithmetic-mean bound:</b> $|R_{XY}(\tau)|\le\frac12\big[R_X(0)+R_Y(0)\big]$, from $E[(X(t)\pm Y(t+\tau))^2]\ge0$ and the fact that the geometric mean ≤ the arithmetic mean.</li>
+<li><b>Orthogonal:</b> $R_{XY}(\tau)=0$ for all τ. <b>Uncorrelated:</b> $K_{XY}(\tau)=R_{XY}(\tau)-m_Xm_Y=0$, i.e. $R_{XY}(\tau)=m_Xm_Y$. <b>Independent</b> ⇒ uncorrelated.</li>
+<li><b>Sum of processes:</b> if $Z=X+Y$, then $R_Z(\tau)=R_X(\tau)+R_Y(\tau)+R_{XY}(\tau)+R_{YX}(\tau)$; if $X,Y$ are orthogonal, $R_Z=R_X+R_Y$ (powers add).</li>
+</ol></div>
+
+<div class="box warn"><span class="bt">Is this function a valid ACF? Quick checks</span>
+<p>A function $g(\tau)$ can be the ACF of a WSS process only if: (i) $g(0)\ge0$; (ii) $g(-\tau)=g(\tau)$; (iii) $|g(\tau)|\le g(0)$; and (iv) its Fourier transform is ≥ 0 for every ω. Checks (i)–(iii) are quick necessary tests; (iv) is the decisive one.</p>
+<ul>
+<li>$e^{-\tau}$ (one-sided) ✗ not even. $\ \tau^2e^{-|\tau|}$ ✗ $g(0)=0\lt g(1)$.</li>
+<li>$e^{-a|\tau|}$ ✓, $\ \cos\omega_0\tau$ ✓, $\ \frac{1}{1+\tau^2}$ ✓ (FT $=\pi e^{-|\omega|}\ge0$), triangle ✓ (FT sinc² ≥ 0).</li>
+<li>Rectangle $g=1$ for $|\tau|\le1$ ✗: passes (i)–(iii) but its FT $\frac{2\sin\omega}{\omega}$ goes negative.</li>
+</ul>
+<div data-plot="acfBad"></div></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 5.1: mean, power and variance from an ACF</span>
+<p>A WSS process has $R_X(\tau)=36+\dfrac{16}{1+4\tau^2}$. Find $|m_X|$, $E[X^2]$ and $\sigma_X^2$.</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+m_X^2&=\lim_{|\tau|\to\infty}R_X(\tau)=36+0=36 &&\why{Property 5}\\
+|m_X|&=6\\[4pt]
+E[X^2]&=R_X(0)=36+16=52 &&\why{Property 1}\\[4pt]
+\sigma_X^2&=E[X^2]-m_X^2=52-36=16 .
+\end{aligned}$$
+<p>The ACF can't tell you the <em>sign</em> of the mean: $X$ and $-X$ have the same ACF.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 5.2: the difference process</span>
+<p>$X(t)$ is WSS. Let $Y(t)=X(t)-X(t-T)$ for a fixed $T$. Find $R_Y(\tau)$ and $E[Y^2]$.</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+R_Y(\tau)&=E\big[(X(t)-X(t-T))(X(t+\tau)-X(t+\tau-T))\big]\\
+&=E[X(t)X(t+\tau)]-E[X(t)X(t+\tau-T)]\\
+&\quad-E[X(t-T)X(t+\tau)]+E[X(t-T)X(t+\tau-T)]\\
+&=R_X(\tau)-R_X(\tau-T)-R_X(\tau+T)+R_X(\tau)\\
+&=2R_X(\tau)-R_X(\tau+T)-R_X(\tau-T).
+\end{aligned}$$
+<p>For each term, find the gap between the two time arguments: e.g. $(t+\tau)-(t-T)=\tau+T$. At τ = 0, using evenness: $E[Y^2]=2R_X(0)-2R_X(T)$. (Compare the lecturer's Gaussian example in §6, $E[(X(t+1)-X(t-1))^2]=2R(0)-2R(2)$.)</p></details></div>
+
+<div class="box key"><span class="bt">Mean square of a sum of samples</span>
+<p>Repeatedly useful (ES 2025 Q4b): for any times,</p>
+$$E\Big[\Big(\sum_iX(t_i)\Big)^2\Big]=\sum_i\sum_jR_X(t_i-t_j),\qquad \Var\Big[\sum_iX(t_i)\Big]=\sum_i\sum_jK_X(t_i-t_j).$$</div>
+
+<!-- ============================================================ -->
+<h2 id="gaussian"><span class="num">6</span>Gaussian random processes</h2>
+
+<div class="box why"><span class="bt">Why Gaussian processes matter</span>
+<p>Thermal noise is the sum of tiny contributions from huge numbers of electrons, so by the central limit theorem (Unit 3) its value at any instant is Gaussian, and the values at several instants are jointly Gaussian. Gaussian processes are the standard model for noise. They are also the easiest processes to work with: the mean function and covariance function alone determine <em>everything</em>.</p></div>
+
+<div class="box def"><span class="bt">Gaussian random process (lecturer)</span>
+<p>$X(t)$ is a <b>Gaussian random process</b> if, for every $N$ and every choice of instants $t_1,\dots,t_N$, the random variables $X(t_1),\dots,X(t_N)$ are <b>jointly Gaussian</b>, i.e. the $N$th-order PDF is the multidimensional Gaussian</p>
+$$f_X(\boldsymbol\alpha;\mathbf t)=\frac{1}{(2\pi)^{N/2}\,|\mathbf K|^{1/2}}\exp\Big\{-\tfrac12(\boldsymbol\alpha-\boldsymbol\mu)^T\mathbf K^{-1}(\boldsymbol\alpha-\boldsymbol\mu)\Big\},$$
+<p>with mean vector $\mu_i=m_X(t_i)$ and covariance matrix $K_{ij}=K_{XX}(t_i,t_j)$.</p>
+<p><b>Alternative definition (lecturer).</b> $X(t)$ is Gaussian if every linear functional $Y=\int_0^Tg(t)X(t)\,dt$ is a Gaussian RV, for every weighting function $g(t)$ for which $E[Y^2]$ is finite.</p></div>
+
+<div class="box thm"><span class="bt">Properties of Gaussian processes (lecturer's list + one)</span>
+<ol>
+<li><b>Determined by mean and covariance.</b> The samples $X(t_i)$ are jointly Gaussian, and their joint PDF is completely determined by $m_X(t_i)$ and $K_{XX}(t_i,t_j)$. So for a Gaussian process the average description <em>is</em> the exact description.</li>
+<li><b>Linear filtering preserves Gaussianity.</b> If a Gaussian process is the input to a linear (time-invariant, stable) system, the output $Y(t)=\int h(s)X(t-s)\,ds$ is also a Gaussian process. (Each output value is a limit of linear combinations of jointly Gaussian RVs.) The same holds for derivatives and integrals of $X(t)$.</li>
+<li><b>WSS ⇒ SSS.</b> A WSS Gaussian process is strictly stationary (proof below).</li>
+<li><b>Uncorrelated ⇒ independent.</b> If $K_{XX}(t_i,t_j)=0$ for $t_i\ne t_j$, the covariance matrix is diagonal, the joint Gaussian PDF factors into a product, and the samples are independent (Unit 3, jointly Gaussian RVs).</li>
+<li><b>Every sample is Gaussian:</b> $X(t)\sim N\big(m_X(t),\,K_{XX}(t,t)\big)$, and any linear combination $\sum a_iX(t_i)$ is Gaussian with mean $\sum a_im_X(t_i)$ and variance $\sum_i\sum_ja_ia_jK_{XX}(t_i,t_j)$.</li>
+</ol></div>
+
+<div class="box thm"><span class="bt">Proof: a WSS Gaussian process is SSS (lecturer; ES 2022 Q4b)</span>
+<p>Let $X(t)$ be Gaussian and WSS. Fix any $N$, instants $t_1,\dots,t_N$ and shift $T$.</p>
+<p><b>Step 1: the mean vector doesn't change under the shift.</b> WSS ⇒ the mean is a constant $\mu_X$:</p>
+$$m_X(t_i)=\mu_X=m_X(t_i+T)\quad\text{for every }i .$$
+<p><b>Step 2: the covariance matrix doesn't change under the shift.</b> WSS ⇒ the covariance depends only on the gap:</p>
+$$\begin{aligned}
+K_{XX}(t_i+T,\,t_j+T)&=K_{XX}\big((t_i+T)-(t_j+T)\big)\\
+&=K_{XX}(t_i-t_j)\\
+&=K_{XX}(t_i,t_j)\quad\text{for every }i,j .
+\end{aligned}$$
+<p><b>Step 3: compare the two PDFs.</b> The vector $[X(t_1),\dots,X(t_N)]$ and the shifted vector $[X(t_1+T),\dots,X(t_N+T)]$ are both jointly Gaussian (the process is Gaussian). By Steps 1–2 they have the <em>same</em> mean vector and the <em>same</em> covariance matrix. A jointly Gaussian PDF is completely determined by these two (Property 1). Hence</p>
+$$f_X(\boldsymbol\alpha;\ t_1,\dots,t_N)=f_X(\boldsymbol\alpha;\ t_1+T,\dots,t_N+T)=N(\boldsymbol\mu_X,\mathbf K_X).$$
+<p><b>Step 4.</b> This holds for every $N$, every set of instants and every $T$: that is the definition of SSS. ∎</p>
+<p><b>Why it doesn't work for other processes:</b> for a general process, equal means and covariances don't force equal PDFs, because higher moments can differ.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 6.1 (lecturer): Gaussian process with $R(\tau)=4e^{-2|\tau|}$</span>
+<p>$X(t)$ is a zero-mean, WSS Gaussian process with $R_{XX}(\tau)=4e^{-2|\tau|}$. Compute (a) $P[X(t)\le3]$; (b) $E\big[\{X(t+1)-X(t-1)\}^2\big]$; (c) the joint PDF of $X(3)$ and $X(5)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>First, the distribution of one sample.</b> Mean 0. Variance:</p>
+$$\begin{aligned}
+\sigma_X^2&=E[X^2(t)]-0^2\\
+&=R_{XX}(t,t)=R_{XX}(0)\\
+&=4e^{0}=4 .
+\end{aligned}$$
+<p>So $X(t)\sim N(0,4)$ for every $t$, σ = 2.</p>
+<div data-plot="gaussPaths"></div>
+<p><b>(a)</b> Standardise: $Z=X/2\sim N(0,1)$.</p>
+$$\begin{aligned}
+P[X(t)\le3]&=\int_{-\infty}^{3}\frac{1}{\sqrt{2\pi\cdot4}}e^{-\alpha^2/8}\,d\alpha\\
+&=\int_{-\infty}^{3/2}\frac1{\sqrt{2\pi}}e^{-p^2/2}\,dp &&\why{substitute $p=\alpha/2$}\\
+&=1-Q(1.5)\\
+&=1-0.0668=\mathbf{0.9332}.
+\end{aligned}$$
+<p><b>(b)</b> Expand the square and use linearity of expectation. The gap between $t+1$ and $t-1$ is 2:</p>
+$$\begin{aligned}
+E\big[\{X(t+1)-X(t-1)\}^2\big]&=E[X^2(t+1)]+E[X^2(t-1)]-2E[X(t+1)X(t-1)]\\
+&=R(0)+R(0)-2R(2)\\
+&=4+4-2\cdot4e^{-4}\\
+&=8(1-e^{-4})\approx\mathbf{7.85}.
+\end{aligned}$$
+<p><b>Meaning:</b> samples 2 s apart are almost uncorrelated ($e^{-4}\approx0.018$), so the difference has nearly twice the variance of one sample.</p>
+<p><b>(c)</b> $X(3)$ and $X(5)$ are jointly Gaussian (Gaussian process), each $N(0,4)$. Their covariance is $K(5-3)=R(2)=4e^{-4}$, so the correlation coefficient is</p>
+$$\rho=\frac{4e^{-4}}{\sqrt{4}\sqrt4}=e^{-4}.$$
+<p>So $(X(3),X(5))\sim N(0,0,4,4,e^{-4})$, and with the bivariate Gaussian formula from Unit 3 ($\sigma_1=\sigma_2=2$):</p>
+$$f(\alpha_1,\alpha_2)=\frac{1}{2\pi\cdot4\sqrt{1-e^{-8}}}\exp\Big\{-\frac{1}{2(1-e^{-8})}\Big[\Big(\frac{\alpha_1}{2}\Big)^2-2e^{-4}\Big(\frac{\alpha_1}{2}\Big)\Big(\frac{\alpha_2}{2}\Big)+\Big(\frac{\alpha_2}{2}\Big)^2\Big]\Big\}.$$</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 6.2: a non-stationary Gaussian process</span>
+<p>$X(t)=A+Bt$ where $A,B$ are iid $N(0,1)$. Show $X(t)$ is a Gaussian process, find its mean and covariance, and $P[X(2)\gt X(1)]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Any collection $X(t_1),\dots,X(t_N)$ is a linear transformation of the jointly Gaussian pair $(A,B)$, so it is jointly Gaussian (Unit 3): Gaussian process. Mean: $E[A]+tE[B]=0$. Covariance:</p>
+$$\begin{aligned}
+K(t_1,t_2)&=E[(A+Bt_1)(A+Bt_2)]\\
+&=E[A^2]+(t_1+t_2)E[AB]+t_1t_2E[B^2]\\
+&=1+t_1t_2 .
+\end{aligned}$$
+<p>Not WSS (it depends on the product $t_1t_2$). Now $X(2)-X(1)=B$, so $P[X(2)\gt X(1)]=P[B\gt0]=\frac12$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="ergodic"><span class="num">7</span>Ergodicity <span class="tag-beyond">Beyond class notes</span></h2>
+
+<div class="box why"><span class="bt">The practical problem ergodicity solves</span>
+<p>All the averages so far ($m_X$, $R_X$) are <b>ensemble averages</b>: averages across many sample functions at a fixed time. In a lab you usually have <b>one</b> long recording, not a thousand copies of the experiment. The natural thing to compute from it is a <b>time average</b>. The question is: does averaging one sample function over a long time give the same answer as averaging across the ensemble? If yes, the process is called <b>ergodic</b>. Ergodicity is what justifies measuring the mean and the ACF of noise from a single recording.</p></div>
+
+<div class="box def"><span class="bt">Time averages</span>
+<p>For one sample function $x(t)=x(t,\xi)$:</p>
+$$\begin{aligned}
+\text{time mean:}\quad\langle x\rangle&=\lim_{T\to\infty}\frac1{2T}\int_{-T}^{T}x(t)\,dt,\\[4pt]
+\text{time ACF:}\quad\mathcal R_x(\tau)&=\lim_{T\to\infty}\frac1{2T}\int_{-T}^{T}x(t)\,x(t+\tau)\,dt .
+\end{aligned}$$
+<p>(For a discrete-time process: $\langle x\rangle=\lim_{N\to\infty}\frac1{2N+1}\sum_{n=-N}^{N}x[n]$.) Notice these depend on ξ in general: each sample function could give a different answer, so a time average is itself a <b>random variable</b>.</p></div>
+
+<div class="box def"><span class="bt">Ergodic processes</span>
+<p>A stationary process is <b>ergodic</b> if its time averages equal the corresponding ensemble averages, with probability 1 (for almost every sample function).</p>
+<ul>
+<li><b>Ergodic in the mean:</b> $\langle x\rangle=E[X(t)]=m_X$.</li>
+<li><b>Ergodic in the autocorrelation:</b> $\mathcal R_x(\tau)=R_X(\tau)$ for every τ.</li>
+<li><b>(Fully) ergodic:</b> every time average of every function equals the ensemble average; equivalently, all statistics can be read off one sample function.</li>
+</ul>
+<p>Ergodicity needs stationarity (a time average can't equal $m_X(t)$ if $m_X(t)$ keeps changing), so ergodic ⊂ stationary. Ergodic in the mean and ergodic in the ACF are what the syllabus asks for; one needs the process to be WSS for these.</p></div>
+
+<div class="box thm"><span class="bt">When is a WSS process ergodic in the mean?</span>
+<p>The time average over $[-T,T]$, $\ \overline X_T=\frac1{2T}\int_{-T}^TX(t)\,dt$, is a RV with</p>
+$$E[\overline X_T]=\frac1{2T}\int_{-T}^{T}E[X(t)]\,dt=m_X ,$$
+<p>so it is always "centred correctly". It converges to $m_X$ if and only if its variance goes to zero:</p>
+$$\Var[\overline X_T]=\frac1{2T}\int_{-2T}^{2T}\Big(1-\frac{|\tau|}{2T}\Big)K_X(\tau)\,d\tau\ \xrightarrow{\ T\to\infty\ }\ 0 .$$
+<p><b>Simple sufficient conditions:</b> $\int_{-\infty}^{\infty}|K_X(\tau)|\,d\tau\lt\infty$, or just $K_X(\tau)\to0$ as $|\tau|\to\infty$ (Slutsky's theorem). <b>In words:</b> if the process "forgets" its past (values far apart become uncorrelated), then a long time average contains many effectively independent pieces, and by the law of large numbers (Unit 3) it settles to the mean. The variance formula is the continuous-time version of $\Var[M_n]=\sigma^2/n$.</p>
+<p>Ergodicity in the ACF is the same statement applied to the process $Y_\tau(t)=X(t)X(t+\tau)$; its condition involves fourth moments, which for Gaussian processes reduces to $\int|K_X(\tau)|\,d\tau\lt\infty$ (or $K_X\to0$).</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 7.1: a stationary process that is NOT ergodic</span>
+<p>$X(t)=A$ for all $t$, where $A$ is a RV with mean 0 and variance 1 (each sample function is a flat line at a random height).</p>
+<details class="sol"><summary>Solution</summary>
+<p>Ensemble averages: $m_X=E[A]=0$, $R_X(\tau)=E[A^2]=1$ for all τ. Constant mean, ACF depends on τ trivially ⇒ WSS (in fact SSS).</p>
+<p>Time average of the sample function $x(t)=a$: $\langle x\rangle=\frac1{2T}\int_{-T}^Ta\,dt=a$. That equals the ensemble mean 0 only if $a=0$, which happens with probability 0 (for a continuous $A$). So the process is <b>not ergodic in the mean</b>. The condition above fails because $K_X(\tau)=1$ never decays: a value now tells you the value forever.</p>
+<div class="plots-row"><div data-plot="ergConst"></div><div data-plot="ergRun"></div></div></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 7.2: random-phase sinusoid is ergodic in mean and ACF</span>
+<p>$X(t)=A\cos(\omega_0t+\Theta)$, $A,\omega_0$ constants, $\Theta\sim U[0,2\pi]$. (This exact question is ES July 2024 Q4c; the full exam answer is in §17C.)</p>
+<details class="sol"><summary>Solution</summary>
+<p>Ensemble: $m_X=0$, $R_X(\tau)=\frac{A^2}{2}\cos\omega_0\tau$ (Example 4.2 scaled by $A^2$). Time averages of a sample function with phase θ:</p>
+$$\begin{aligned}
+\langle x\rangle&=\lim_{T\to\infty}\frac1{2T}\int_{-T}^{T}A\cos(\omega_0t+\theta)\,dt\\
+&=\lim_{T\to\infty}\frac{A}{2T\omega_0}\big[\sin(\omega_0T+\theta)-\sin(-\omega_0T+\theta)\big]\\
+&=0 &&\why{bounded numerator ÷ $T\to\infty$}\\[6pt]
+\mathcal R_x(\tau)&=\lim_{T\to\infty}\frac1{2T}\int_{-T}^{T}A^2\cos(\omega_0t+\theta)\cos(\omega_0t+\omega_0\tau+\theta)\,dt\\
+&=\lim_{T\to\infty}\frac{A^2}{4T}\int_{-T}^{T}\big[\cos\omega_0\tau+\cos(2\omega_0t+\omega_0\tau+2\theta)\big]dt\\
+&=\frac{A^2}{2}\cos\omega_0\tau+0 .
+\end{aligned}$$
+<p>Both match the ensemble values for every θ ⇒ ergodic in the mean and in the ACF.</p></details></div>
+
+<div class="box tip"><span class="bt">Hierarchy to remember</span>
+<p>All processes ⊃ WSS ⊃ SSS ⊃ ergodic (roughly: ergodic processes must be stationary; not all stationary processes are ergodic). For Gaussian processes WSS = SSS. In engineering practice, stationary noise is usually <em>assumed</em> ergodic so that one recording can be used to measure it.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="psd"><span class="num">8</span>Spectral representation: power spectral density <span class="tag-beyond">Beyond class notes</span></h2>
+
+<div class="box why"><span class="bt">Why a spectrum?</span>
+<p>For a deterministic signal, the Fourier transform tells you which frequencies it contains. A random process has no single waveform to transform, and its sample functions usually have infinite energy. What we <em>can</em> ask is: on average, how is the <b>power</b> of the process spread over frequency? Is noise mostly low-frequency rumble or high-frequency hiss? The answer is the <b>power spectral density</b> (PSD), and the beautiful fact is that it is simply the Fourier transform of the ACF. The syllabus calls this "spectral representation".</p></div>
+
+<div class="box def"><span class="bt">Power spectral density &amp; the Wiener–Khinchin theorem</span>
+<p>For a WSS process with ACF $R_X(\tau)$:</p>
+$$\begin{aligned}
+S_X(\omega)&=\int_{-\infty}^{\infty}R_X(\tau)\,e^{-j\omega\tau}\,d\tau,\\[4pt]
+R_X(\tau)&=\frac1{2\pi}\int_{-\infty}^{\infty}S_X(\omega)\,e^{j\omega\tau}\,d\omega .
+\end{aligned}$$
+<p>These two equations are the <b>Wiener–Khinchin relations</b>. $S_X(\omega)\,\frac{d\omega}{2\pi}$ is the average power in the frequency band $[\omega,\omega+d\omega]$.</p>
+<p><b>Discrete-time:</b> $S_X(\Omega)=\sum_{k=-\infty}^{\infty}R_X[k]\,e^{-j\Omega k}$, periodic with period 2π, and $R_X[k]=\frac1{2\pi}\int_{-\pi}^{\pi}S_X(\Omega)e^{j\Omega k}d\Omega$.</p></div>
+
+<div class="box thm"><span class="bt">Properties of the PSD</span>
+<ol>
+<li><b>Real:</b> $S_X(\omega)$ is real, because $R_X$ is even: $S_X(\omega)=2\int_0^\infty R_X(\tau)\cos\omega\tau\,d\tau$.</li>
+<li><b>Even:</b> $S_X(-\omega)=S_X(\omega)$.</li>
+<li><b>Non-negative:</b> $S_X(\omega)\ge0$ for all ω (power can't be negative; this is Property 6 of the ACF).</li>
+<li><b>Total power:</b> put τ = 0 in the inverse transform:
+$$E[X^2(t)]=R_X(0)=\frac1{2\pi}\int_{-\infty}^{\infty}S_X(\omega)\,d\omega .$$</li>
+<li><b>DC component:</b> a non-zero mean $m_X$ puts $m_X^2$ into $R_X$, which shows up as an impulse $2\pi m_X^2\delta(\omega)$ in $S_X$.</li>
+</ol></div>
+
+<h3 id="psdpairs">Standard pairs</h3>
+<div class="plots-row"><div data-plot="psdExpR"></div><div data-plot="psdExpS"></div></div>
+<div class="plots-row"><div data-plot="psdTriR"></div><div data-plot="psdTriS"></div></div>
+<div class="plots-row"><div data-plot="psdCosR"></div><div data-plot="psdCosS"></div></div>
+<div class="plots-row"><div data-plot="psdWhiteR"></div><div data-plot="psdWhiteS"></div></div>
+<p><b>The pattern:</b> a narrow ACF (fast-changing process, short memory) ↔ a wide PSD (lots of high frequencies). A wide ACF (slow process) ↔ a narrow PSD. The extreme case is <b>white noise</b>: $R(\tau)=\frac{N_0}{2}\delta(\tau)$ (uncorrelated at any two distinct instants) and a flat PSD containing all frequencies equally, like white light. It is an idealisation (its total power is infinite) but it models wideband noise well.</p>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 8.1: PSD of $R(\tau)=e^{-a|\tau|}$</span>
+<details class="sol"><summary>Solution</summary>
+<p>Split the integral at 0 because of $|\tau|$:</p>
+$$\begin{aligned}
+S_X(\omega)&=\int_{-\infty}^{0}e^{a\tau}e^{-j\omega\tau}d\tau+\int_0^{\infty}e^{-a\tau}e^{-j\omega\tau}d\tau\\
+&=\int_{-\infty}^{0}e^{(a-j\omega)\tau}d\tau+\int_0^{\infty}e^{-(a+j\omega)\tau}d\tau\\
+&=\frac{1}{a-j\omega}+\frac{1}{a+j\omega}\\
+&=\frac{(a+j\omega)+(a-j\omega)}{a^2+\omega^2}\\
+&=\frac{2a}{a^2+\omega^2}.
+\end{aligned}$$
+<p>Check the power: $\frac1{2\pi}\int\frac{2a}{a^2+\omega^2}d\omega=\frac{2a}{2\pi}\cdot\frac{\pi}{a}=1=R(0)$ ✓. For the lecturer's Gaussian example $R=4e^{-2|\tau|}$: $S(\omega)=4\cdot\frac{4}{4+\omega^2}=\frac{16}{4+\omega^2}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 8.2: PSD of the random-phase sinusoid</span>
+<p>$R_X(\tau)=\frac{A^2}{2}\cos\omega_0\tau$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Write $\cos\omega_0\tau=\frac12(e^{j\omega_0\tau}+e^{-j\omega_0\tau})$ and use $e^{j\omega_0\tau}\leftrightarrow2\pi\delta(\omega-\omega_0)$:</p>
+$$\begin{aligned}
+S_X(\omega)&=\frac{A^2}{2}\cdot\frac12\big[2\pi\delta(\omega-\omega_0)+2\pi\delta(\omega+\omega_0)\big]\\
+&=\frac{\pi A^2}{2}\big[\delta(\omega-\omega_0)+\delta(\omega+\omega_0)\big].
+\end{aligned}$$
+<p>All the power sits at $\pm\omega_0$, as it should for a pure tone. Total power: $\frac1{2\pi}\cdot\frac{\pi A^2}{2}\cdot2=\frac{A^2}{2}=R(0)$ ✓.</p></details></div>
+
+<div class="box key"><span class="bt">WSS process through an LTI system</span>
+<p>If a WSS process $X(t)$ is the input to a stable LTI system with impulse response $h(t)$ and frequency response $H(\omega)$, the output $Y(t)=\int h(s)X(t-s)\,ds$ is WSS with</p>
+$$\begin{aligned}
+m_Y&=m_X\,H(0)=m_X\int h(t)\,dt,\\
+R_Y(\tau)&=h(\tau)*h(-\tau)*R_X(\tau),\\
+S_Y(\omega)&=|H(\omega)|^2\,S_X(\omega).
+\end{aligned}$$
+<p>The last line is the one to remember: a filter reshapes the power spectrum by $|H|^2$. White noise through a filter $H$ has PSD $\frac{N_0}{2}|H(\omega)|^2$, which is how "coloured" noise is modelled. Cross-PSD: $S_{XY}(\omega)=\mathcal F\{R_{XY}(\tau)\}$, complex in general, with $S_{XY}(\omega)=S_{YX}^*(\omega)$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 8.3: discrete-time moving average</span>
+<p>$X[n]$ is iid (white) with mean 0 and variance σ². Let $Y[n]=X[n]+X[n-1]$. Find $R_Y[k]$ and $S_Y(\Omega)$.</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+R_Y[k]&=E\big[(X[n]+X[n-1])(X[n+k]+X[n+k-1])\big]\\
+&=R_X[k]+R_X[k-1]+R_X[k+1]+R_X[k],
+\end{aligned}$$
+<p>where $R_X[k]=\sigma^2$ for $k=0$ and 0 otherwise. So $R_Y[0]=2\sigma^2$, $R_Y[\pm1]=\sigma^2$, and $R_Y[k]=0$ for $|k|\ge2$. Then</p>
+$$\begin{aligned}
+S_Y(\Omega)&=\sigma^2e^{j\Omega}+2\sigma^2+\sigma^2e^{-j\Omega}\\
+&=2\sigma^2(1+\cos\Omega)\ \ge0 .
+\end{aligned}$$
+<p>Averaging neighbours removes high frequencies: the PSD is largest at Ω = 0 and zero at Ω = π (a low-pass effect).</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="bernoulli"><span class="num">9</span>Discrete-time processes I: the Bernoulli process and its relatives</h2>
+
+<div class="box why"><span class="bt">Why start with coin tosses?</span>
+<p>The next three sections build processes out of the simplest randomness there is: a sequence of independent coin tosses. From it we get a counter (binomial counting process), a random walk, and, by taking limits, the Poisson and Wiener processes. Along the way we meet the ideas of <em>independent increments</em>, <em>stationary increments</em> and the <em>Markov property</em>, which are the doorway to Unit 5.</p></div>
+
+<div class="box def"><span class="bt">Bernoulli random process (lecturer)</span>
+<p>$X[n]$, $n=1,2,\dots$, is an <b>iid Bernoulli process</b> if the $X[n]$ are independent, each Bernoulli$(p)$, i.e. $B(1,p)$:</p>
+$$P(X[n]=1)=p,\qquad P(X[n]=0)=1-p=q .$$
+<p>It is a discrete-time, discrete-valued process (each $X[n]$ is a DRV). Think: bit stream, or success/failure at each trial.</p></div>
+<div data-plot="bernPath"></div>
+
+<p><b>Exact description.</b> The first-order PMF is $P(X[n]=1)=p$, $P(X[n]=0)=q$ for every $n$. Because the values are independent, any higher-order PMF is a product. Second order, for $n\ne k$:</p>
+$$P(X[n]=\alpha,\,X[k]=\beta)=P(X[n]=\alpha)\,P(X[k]=\beta)=\begin{cases}p^2,&\alpha=1,\beta=1\\pq,&\alpha=0,\beta=1\ \text{or}\ \alpha=1,\beta=0\\q^2,&\alpha=0,\beta=0.\end{cases}$$
+<p><b>Average description.</b></p>
+$$\begin{aligned}
+m_X[n]&=E[X[n]]=0\cdot q+1\cdot p=p,\\[4pt]
+R_X[n,k]&=E[X[n]X[k]]=\begin{cases}E[X^2[n]]=p,&n=k\\E[X[n]]\,E[X[k]]=p^2,&n\ne k,\end{cases}\\[4pt]
+\sigma_X^2[n]&=p-p^2=p(1-p),\qquad K_X[n,k]=p(1-p)\,\delta[n-k].
+\end{aligned}$$
+<p class="small">(The lecturer's notes write $R_{XX}[n,k]=p^2$, which is the $n\ne k$ case; at $n=k$ it is $E[X^2]=p$ since $X^2=X$ for a 0/1 variable.)</p>
+<p><b>Conclusions (lecturer):</b> the Bernoulli process is (1) <b>SSS</b> (the joint PMF of any set of samples is a product of identical factors, unchanged by shifting $n$), hence (2) <b>WSS</b>, (3) <b>iid</b>, (4) a DT discrete-valued process.</p>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 9.1 (lecturer; also ES 2021 Q4c): the ±1 process $Y[n]=2X[n]-1$</span>
+<p>This maps bit 1 → +1 and bit 0 → −1, e.g. the input to an up–down counter. Find its PMFs, mean, variance and ACF.</p>
+<details class="sol"><summary>Solution</summary>
+<div data-plot="updownPath"></div>
+<p><b>First-order PMF:</b> $P(Y[n]=1)=P(X[n]=1)=p$ and $P(Y[n]=-1)=P(X[n]=0)=1-p$.</p>
+<p><b>Second-order PMF</b> ($n\ne k$, independent): $P(1,1)=p^2$, $P(1,-1)=P(-1,1)=p(1-p)$, $P(-1,-1)=(1-p)^2$. These do not depend on $n,k$ ⇒ SSS.</p>
+<p><b>Mean</b> (either directly or by linearity):</p>
+$$\begin{aligned}
+m_Y&=(+1)p+(-1)(1-p)=2p-1\\
+&=2E[X]-1 .
+\end{aligned}$$
+<p><b>Variance.</b> $Y^2=1$ always, so $E[Y^2]=1$:</p>
+$$\begin{aligned}
+\sigma_Y^2&=E[Y^2]-m_Y^2=1-(2p-1)^2\\
+&=1-(4p^2-4p+1)\\
+&=4p-4p^2=4p(1-p).
+\end{aligned}$$
+<p>(Check: $\Var(2X-1)=4\Var X=4p(1-p)$ ✓.)</p>
+<p><b>ACF</b> for $n\ne k$:</p>
+$$\begin{aligned}
+R_Y[n,k]&=E\{[2X[n]-1][2X[k]-1]\}\\
+&=4E[X[n]X[k]]-2E[X[k]]-2E[X[n]]+1\\
+&=4p^2-4p+1=(2p-1)^2,
+\end{aligned}$$
+<p>and $R_Y[n,n]=1$. Constant mean, ACF depends only on whether $n=k$ ⇒ <b>WSS</b> (indeed SSS). For a fair coin ($p=\frac12$): mean 0, variance 1.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 9.2 (lecturer): $Z[n]=aX[n]+bX[n-1]$</span>
+<p>$X[n]$ is iid Bernoulli($p$), $a,b$ distinct non-zero constants with $a+b$ different from both. Describe $Z[n]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>1. Sample space:</b> $Z[n]\in\{0,\ a,\ b,\ a+b\}$ according to $(X[n],X[n-1])=(0,0),(1,0),(0,1),(1,1)$.</p>
+<p><b>2. First-order PMF:</b></p>
+$$\begin{aligned}
+P(Z[n]=0)&=P(X[n]=0,X[n-1]=0)=(1-p)^2\\
+P(Z[n]=a)&=P(X[n]=1,X[n-1]=0)=p(1-p)\\
+P(Z[n]=b)&=P(X[n]=0,X[n-1]=1)=p(1-p)\\
+P(Z[n]=a+b)&=P(X[n]=1,X[n-1]=1)=p^2
+\end{aligned}$$
+<p><b>3. Second-order PMF.</b> There are $4\times4=16$ combinations of $(Z[n],Z[k])$. The new feature: <em>neighbouring</em> samples share an $X$. For $|k-n|\ge2$ they use disjoint $X$'s and are independent, e.g.</p>
+$$P(Z[n]=a,\,Z[k]=b)=P(X[n]=1,X[n-1]=0)\,P(X[k]=0,X[k-1]=1)=p^2(1-p)^2 .$$
+<p>But for $k=n+1$, the same pair of events needs $X[n]=1$ (from $Z[n]=a$) and also $X[n]=1$ (from $Z[n+1]=b$, which requires $X[n+1]=0$, $X[n]=1$):</p>
+$$P(Z[n]=a,\,Z[n+1]=b)=P(X[n-1]=0,\,X[n]=1,\,X[n+1]=0)=p(1-p)^2 .$$
+<p><b>4. Mean and ACF:</b></p>
+$$\begin{aligned}
+m_Z&=aE[X[n]]+bE[X[n-1]]=(a+b)p,\\[4pt]
+R_Z[n,n]&=a^2E[X^2]+2abE[X[n]]E[X[n-1]]+b^2E[X^2]\\
+&=(a^2+b^2)p+2abp^2,\\[4pt]
+R_Z[n,n+1]&=E[(aX[n]+bX[n-1])(aX[n+1]+bX[n])]\\
+&=a^2p^2+ab\,E[X^2[n]]+ab\,p^2+b^2p^2\\
+&=(a+b)^2p^2+ab\,p(1-p),\\[4pt]
+R_Z[n,k]&=(a+b)^2p^2\quad(|k-n|\ge2).
+\end{aligned}$$
+<p>Everything depends only on $|k-n|$ ⇒ <b>WSS</b> (in fact SSS). Subtracting $m_Z^2$: $K_Z[0]=(a^2+b^2)p(1-p)$, $K_Z[\pm1]=ab\,p(1-p)$, $K_Z[k]=0$ otherwise. Samples one step apart are correlated (they share an $X$); farther apart they are not. This is a <b>moving-average</b> process.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="sumproc"><span class="num">10</span>Discrete-time processes II: sum processes &amp; the binomial counting process</h2>
+
+<div class="box def"><span class="bt">Sum process (lecturer)</span>
+<p>Let $V[n]$ be an iid sequence. The <b>sum process</b> is</p>
+$$\begin{aligned}
+S[n]&=\sum_{k=1}^{n}V[k],\qquad n=1,2,\dots\\
+&=S[n-1]+V[n],\qquad S[0]=0 .
+\end{aligned}$$
+<p>The second line is the key: the new value is the old value plus a fresh, independent input.</p></div>
+
+<p><b>The Markov property.</b> Look at the lecturer's table: four different input sequences (1,0,1,1), (0,1,1,1), (1,1,0,1), (0,1,1,1) all give $S[4]=3$. Once you know $S[n-1]$, the value $S[n]$ depends only on the new input $V[n]$, not on the exact sequence of past inputs that led to $S[n-1]$:</p>
+$$P\big(S[n+1]=j\ \big|\ S[n]=i,\ S[n-1]=i_{n-1},\dots,S[1]=i_1\big)=P\big(S[n+1]=j\ \big|\ S[n]=i\big).$$
+<p>"Given the present, the future is independent of the past." This is the <b>Markov property</b>, the main topic of Unit 5. Every sum process has it.</p>
+
+<div class="box def"><span class="bt">Independent and stationary increments</span>
+<p>An <b>increment</b> is the change over an interval: $S[m]-S[n]$ for $m\gt n$.</p>
+<ul>
+<li><b>Independent increments:</b> increments over non-overlapping intervals are independent. E.g. $S[n]$ and $S[m]-S[n]$ are independent for $m\gt n$, because $S[n]=V[1]+\dots+V[n]$ and $S[m]-S[n]=V[n+1]+\dots+V[m]$ use disjoint sets of the iid $V$'s.</li>
+<li><b>Stationary increments:</b> the distribution of an increment depends only on the length of the interval, not on where it starts: $S[m]-S[n]$ has the same distribution as $S[m-n]-S[0]=S[m-n]$. (It is a sum of $m-n$ iid $V$'s, wherever they are.)</li>
+</ul>
+<p>Sum processes, the binomial counting process, the random walk, the Poisson process and the Wiener process all have <b>both</b>. These two properties make every joint PMF/PDF computable from the first-order one alone.</p></div>
+
+<h3 id="binomial">The binomial counting process (lecturer)</h3>
+<div class="box def"><span class="bt">Definition</span>
+<p>The sum process of an iid Bernoulli($p$) sequence:</p>
+$$S[n]=\sum_{k=1}^nX[k]=S[n-1]+X[n],\qquad X[k]\overset{iid}{\sim}B(1,p).$$
+<p>$S[n]$ counts the successes (1s) in the first $n$ trials. It is DT, discrete-valued (non-negative integers), and climbs by 0 or 1 at each step.</p></div>
+<div data-plot="binCount"></div>
+
+<p><b>(a) First-order PMF.</b> A sum of $n$ iid Bernoulli($p$) RVs is Binomial($n,p$) (Unit 2):</p>
+$$P(S[n]=k)=\begin{cases}\binom nk p^k(1-p)^{n-k},&0\le k\le n\\0,&\text{elsewhere.}\end{cases}$$
+<p>This depends on $n$, so the process is <b>not SSS</b>.</p>
+
+<p><b>(b) Second-order PMF</b> ($m\gt n$). Turn the joint event into an event about non-overlapping increments, then use independent increments:</p>
+$$\begin{aligned}
+P\big(S[n]=k,\ S[m]=j\big)&=P\big(S[n]=k,\ S[m]-S[n]=j-k\big) &&\why{same event}\\
+&=P\big(S[n]=k\big)\,P\big(S[m]-S[n]=j-k\big) &&\why{independent increments}\\
+&=P\big(S[n]=k\big)\,P\big(S[m-n]=j-k\big) &&\why{stationary increments}\\
+&=\binom nk p^k(1-p)^{n-k}\cdot\binom{m-n}{j-k}p^{\,j-k}(1-p)^{m-n-j+k}.
+\end{aligned}$$
+<p>Valid for $0\le k\le n$ and $0\le j-k\le m-n$; zero otherwise. <b>Meaning:</b> "$k$ successes in the first $n$ trials, and $j-k$ successes in the next $m-n$ trials."</p>
+
+<p><b>Stationary increments, shown directly (lecturer).</b> The probability of $k$ successes in any block of $r$ consecutive trials is $\binom rkp^k(1-p)^{r-k}$, whether the block is trials $1\to r$, $3\to r+2$ or $m+1\to m+r$.</p>
+
+<p><b>(c) Third-order PMF</b> ($n\lt k\lt m$, values $\alpha_1\le\alpha_2\le\alpha_3$). Same trick, three pieces:</p>
+$$\begin{aligned}
+P(S_n=\alpha_1,S_k=\alpha_2,S_m=\alpha_3)&=P(S_n=\alpha_1,\ S_k-S_n=\alpha_2-\alpha_1,\ S_m-S_k=\alpha_3-\alpha_2)\\
+&=P(S_n=\alpha_1)\,P(S_{k-n}=\alpha_2-\alpha_1)\,P(S_{m-k}=\alpha_3-\alpha_2)\\
+&=\binom{n}{\alpha_1}p^{\alpha_1}q^{n-\alpha_1}\binom{k-n}{\alpha_2-\alpha_1}p^{\alpha_2-\alpha_1}q^{k-n-\alpha_2+\alpha_1}\binom{m-k}{\alpha_3-\alpha_2}p^{\alpha_3-\alpha_2}q^{m-k-\alpha_3+\alpha_2}.
+\end{aligned}$$
+<p><b>General $N$th order</b> (lecturer), with $k_0=0$, $\alpha_0=0$: $\displaystyle\prod_{i=1}^{N}\binom{k_i-k_{i-1}}{\alpha_i-\alpha_{i-1}}p^{\alpha_i-\alpha_{i-1}}(1-p)^{k_i-k_{i-1}-\alpha_i+\alpha_{i-1}}$. So <b>for a sum process the Nth-order PMF is built entirely from the first-order PMF.</b></p>
+
+<p><b>(d) Average description.</b></p>
+$$\begin{aligned}
+E[S[n]]&=\sum_{k=1}^nE[X[k]]=np,\\
+\Var[S[n]]&=\sum_{k=1}^n\Var[X[k]]=np(1-p) &&\why{independent ⇒ variances add}
+\end{aligned}$$
+<p>The mean grows with $n$ ⇒ <b>not WSS</b>.</p>
+<p><b>Autocovariance, method 1</b> (double sum, W4). For $k\le n$:</p>
+$$\begin{aligned}
+K_S[n,k]&=E\big[(S_n-np)(S_k-kp)\big]\\
+&=E\Big[\sum_{q=1}^{n}(X_q-p)\sum_{m=1}^{k}(X_m-p)\Big]\\
+&=\sum_{q=1}^{n}\sum_{m=1}^{k}E\big[(X_q-p)(X_m-p)\big]\\
+&=\sum_{q=1}^{k}E\big[(X_q-p)^2\big]+\underbrace{\sum_{q\ne m}E[X_q-p]\,E[X_m-p]}_{=0}\\
+&=k\,p(1-p).
+\end{aligned}$$
+<p><b>Method 2</b> (independent increments; lecturer's "alternate method"). For $n\lt k$, write $S_k-kp=(S_n-np)+\big(S_k-S_n-p(k-n)\big)$:</p>
+$$\begin{aligned}
+K_S[n,k]&=E\big[(S_n-np)\{(S_n-np)+(S_k-S_n-p(k-n))\}\big]\\
+&=E\big[(S_n-np)^2\big]+E\big[(S_n-np)\big]\,E\big[S_k-S_n-p(k-n)\big] &&\why{independent increments}\\
+&=np(1-p)+0\cdot0\\
+&=np(1-p).
+\end{aligned}$$
+<p>Both give the general result</p>
+$$K_S[n,k]=\min(n,k)\,p(1-p),\qquad R_S[n,k]=\min(n,k)\,p(1-p)+nk\,p^2 .$$
+<p>It depends on $\min(n,k)$, not on $n-k$ ⇒ again not WSS.</p>
+
+<div class="box key"><span class="bt">Binomial counting process: properties (lecturer)</span>
+<p>1. Markov. 2. Not SSS (and not WSS). 3. Independent increments. 4. Stationary increments. Mean $np$, variance $np(1-p)$, autocovariance $p(1-p)\min(n,k)$.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="walk"><span class="num">11</span>Discrete-time processes III: the random walk</h2>
+
+<div class="box def"><span class="bt">Discrete-time random walk (lecturer)</span>
+<p>Let $X_n$ be iid Bernoulli($p$) and $Y_n=2X_n-1$, so $P(Y_n=+1)=p$, $P(Y_n=-1)=1-p$. The random walk is the sum process of the $Y$'s:</p>
+$$W_n=\sum_{k=1}^nY_k=W_{n-1}+Y_n,\qquad W_0=0 .$$
+<p>A particle starts at 0 and at each tick steps one unit right (prob. $p$) or left (prob. $1-p$). Compare: $S_n=\sum X_k$ <em>counts</em>; $W_n=\sum Y_k$ <em>walks</em>. They are related by $W_n=2S_n-n$.</p></div>
+<div data-plot="walkPaths"></div>
+
+<p><b>(1) Markov:</b> $W[n]=W[n-1]+Y[n]$ is a sum process, so it is Markov, with independent and stationary increments.</p>
+
+<p><b>(2) Average description.</b></p>
+$$\begin{aligned}
+m_W[n]&=E\Big[\sum_{k=1}^nY_k\Big]=\sum_{k=1}^nE[Y_k]\\
+&=n\big[(1)p+(-1)(1-p)\big]\\
+&=n(2p-1).
+\end{aligned}$$
+<p>Not constant (unless $p=\frac12$) ⇒ <b>not WSS</b>. Interpretation: $p=\frac12$ gives mean 0 (as many right as left steps on average); $p=\frac34$ gives $n/2$ (drifts right); $p=\frac14$ gives $-n/2$ (drifts left).</p>
+<p>Autocovariance: $Y_k-(2p-1)=2(X_k-p)$, so (for $n\le m$, using W4):</p>
+$$\begin{aligned}
+K_W[n,m]&=E\big[(W_n-n(2p-1))(W_m-m(2p-1))\big]\\
+&=E\Big[\Big(\sum_{k=1}^{n}2(X_k-p)\Big)\Big(\sum_{q=1}^{m}2(X_q-p)\Big)\Big]\\
+&=4\sum_{k=1}^{n}\sum_{q=1}^{m}E\big[(X_k-p)(X_q-p)\big]\\
+&=4\min(n,m)\,p(1-p).
+\end{aligned}$$
+<p>So $\sigma_W^2[n]=4np(1-p)$ and $R_W[n,m]=4p(1-p)\min(n,m)+nm(2p-1)^2$. Even for the symmetric walk ($p=\frac12$: mean 0, variance $n$), $K_W=\min(n,m)$ is not a function of $n-m$ ⇒ <b>not WSS</b>. The spread grows like $\sqrt n$: the walk wanders further and further from 0.</p>
+
+<p><b>(3) Exact description: first-order PMF.</b> In $n$ steps, suppose $k$ are $+1$ and $n-k$ are $-1$. Then</p>
+$$\begin{aligned}
+W_n&=k-(n-k)=2k-n=j\\
+\Rightarrow\ k&=\frac{n+j}{2}.
+\end{aligned}$$
+<p>The number of $+1$ steps is Binomial($n,p$), so</p>
+$$P(W_n=j)=\begin{cases}\dbinom{n}{\frac{n+j}{2}}\,p^{\frac{n+j}{2}}(1-p)^{\frac{n-j}{2}},&n+j\ \text{even},\ |j|\le n\\[8pt]0,&n+j\ \text{odd}.\end{cases}$$
+<p>Parity: $k$ must be an integer, so after an even number of steps you can only be at an even position, and vice versa. Special cases (lecturer):</p>
+$$P(W_n=0)=\begin{cases}\binom{n}{n/2}p^{n/2}(1-p)^{n/2},&n\text{ even}\\0,&n\text{ odd},\end{cases}\qquad P(W_n=1)=\begin{cases}\binom{n}{\frac{n+1}2}p^{\frac{n+1}2}(1-p)^{\frac{n-1}2},&n\text{ odd}\\0,&n\text{ even}.\end{cases}$$
+<div data-plot="walkPmf"></div>
+
+<p><b>(4) Second- and third-order PMFs.</b> Exactly as for the binomial process: split into non-overlapping increments, then use independent and stationary increments. For $n\gt m$:</p>
+$$\begin{aligned}
+P(W_m=\alpha_2,\ W_n=\alpha_1)&=P(W_m=\alpha_2)\,P(W_n-W_m=\alpha_1-\alpha_2)\\
+&=P(W_m=\alpha_2)\,P(W_{n-m}=\alpha_1-\alpha_2)\\
+&=\binom{m}{\frac{m+\alpha_2}{2}}p^{\frac{m+\alpha_2}2}q^{\frac{m-\alpha_2}2}\cdot\binom{n-m}{\frac{n-m+\alpha_1-\alpha_2}{2}}p^{\frac{n-m+\alpha_1-\alpha_2}2}q^{\frac{n-m-\alpha_1+\alpha_2}2},
+\end{aligned}$$
+<p>nonzero only when $m+\alpha_2$ and $n+\alpha_1$ are both even. The lecturer's third-order version ($n\gt m\gt q$):</p>
+$$P(W_n=\alpha_1,W_m=\alpha_2,W_q=\alpha_3)=P(W_q=\alpha_3)\,P(W_{m-q}=\alpha_2-\alpha_3)\,P(W_{n-m}=\alpha_1-\alpha_2),$$
+<p>needing $q+\alpha_3$, $m+\alpha_2$, $n+\alpha_1$ all even.</p>
+
+<div class="box key"><span class="bt">Random walk summary (lecturer)</span>
+<p>1. Random walk with step size 1. 2. Sum process. 3. Independent increments. 4. Stationary increments. 5. Markov. 6. Not SSS ⇒ (with non-constant mean or $\min$-type covariance) not WSS.<br>
+Mean $n(2p-1)$; variance $4np(1-p)$; autocovariance $4p(1-p)\min(n,m)$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 11.1: symmetric walk</span>
+<p>$p=\frac12$. Find $P(W_4=2)$, $P(W_4=2,\ W_6=0)$ and $P(W_6=0\mid W_4=2)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>With $p=q=\frac12$ every path of length $n$ has probability $2^{-n}$, so $P(W_n=j)=\binom{n}{(n+j)/2}2^{-n}$.</p>
+$$\begin{aligned}
+P(W_4=2)&=\binom{4}{3}\frac1{16}=\frac4{16}=\frac14\quad(3\text{ up}, 1\text{ down}).\\[4pt]
+P(W_4=2,W_6=0)&=P(W_4=2)\,P(W_2=-2) &&\why{indep. + stationary increments}\\
+&=\frac14\cdot\binom20\frac14=\frac1{16}.\\[4pt]
+P(W_6=0\mid W_4=2)&=\frac{1/16}{1/4}=\frac14=P(W_2=-2).
+\end{aligned}$$
+<p>The last line shows the Markov/independent-increment idea: given where you are at time 4, the future is just a fresh walk from there.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="poisson"><span class="num">12</span>The Poisson process</h2>
+
+<div class="box why"><span class="bt">What it models</span>
+<p>Events that happen at random instants in continuous time, independently of each other, at a steady average rate: phone calls reaching an exchange, packets arriving at a router, customers entering a shop, radioactive decays, photons hitting a detector. $N(t)$ = the number of events in $[0,t]$. It is the continuous-time cousin of the binomial counting process: imagine tossing a coin with tiny success probability $\lambda\Delta t$ in every tiny slot $\Delta t$ (then Binomial → Poisson, exactly as in Unit 2). It is also the arrival model for the M/M/1 queues of Unit 5.</p></div>
+
+<div class="box def"><span class="bt">Counting process (lecturer)</span>
+<p>$N(t)$, $t\ge0$, is a <b>counting process</b> if it gives the total number of events (arrivals) in $(0,t]$. Observations:</p>
+<ol>
+<li>$N(t)\ge0$ and $N(0)=0$;</li>
+<li>$N(t)$ is integer-valued;</li>
+<li>$N(t)\ge N(u)$ if $t\gt u$ (it never decreases);</li>
+<li>$N(t)-N(u)$ = number of events in $(u,t]$.</li>
+</ol>
+<p>It is a CT, discrete-valued process. Its sample functions are staircases that jump by 1 at the arrival times $T_1\lt T_2\lt\dots$</p></div>
+<div data-plot="poissonPath"></div>
+
+<div class="box def"><span class="bt">Poisson process: two equivalent definitions (lecturer)</span>
+<p><b>Definition 1.</b> A counting process $N(t)$ is a Poisson process with rate $\lambda\gt0$ if</p>
+<ol>
+<li>$N(0)=0$;</li>
+<li>$N(t)$ has independent increments;</li>
+<li>the number of events in any interval of length $t$ is Poisson with mean $\lambda t$:
+$$P\big[N(t+s)-N(s)=k\big]=\frac{e^{-\lambda t}(\lambda t)^k}{k!},\qquad k=0,1,2,\dots$$
+(so it also has stationary increments).</li>
+</ol>
+<p><b>Definition 2.</b> A counting process whose inter-arrival times $\tau_1,\tau_2,\dots$ are iid exponential with rate λ:</p>
+$$f_\tau(\alpha)=\lambda e^{-\lambda\alpha}\,u(\alpha)\quad(\alpha\gt0).$$
+<p class="small"><b>Definition 3</b> <span class="tag-beyond">Beyond class notes</span>: independent, stationary increments with $P[\text{1 event in }(t,t+\Delta t]]=\lambda\Delta t+o(\Delta t)$ and $P[\ge2\text{ events}]=o(\Delta t)$. This "rare events" version is the one used to derive the Poisson PMF from scratch and leads to the birth–death equations of Unit 5.</p></div>
+
+<p><b>The processes hidden inside (lecturer):</b></p>
+<table>
+<tr><th>Process</th><th>Type</th><th>Distribution</th></tr>
+<tr><td>$\tau_n$: inter-arrival times, $\tau_n=T_n-T_{n-1}$</td><td>DT, continuous-valued</td><td>iid Exp(λ), mean $1/\lambda$</td></tr>
+<tr><td>$T_n$: arrival times, $T_n=\sum_{k=1}^n\tau_k$</td><td>DT, continuous-valued</td><td>Erlang($n$, λ), mean $n/\lambda$</td></tr>
+<tr><td>$N(t)$: counting process</td><td>CT, discrete-valued</td><td>Poisson(λt)</td></tr>
+</table>
+
+<h3 id="erlang">Arrival times are Erlang</h3>
+<p>$T_1=\tau_1\sim$ Exp(λ). $T_2=\tau_1+\tau_2$ has PDF $f_\tau*f_\tau$ (sum of independent RVs ⇒ convolution, Unit 3). In general $T_n$ has the $n$-fold convolution of the exponential PDF, which is the <b>Erlang</b> PDF:</p>
+$$f_{T_n}(\alpha)=\begin{cases}\dfrac{\lambda(\lambda\alpha)^{n-1}}{(n-1)!}\,e^{-\lambda\alpha},&\alpha\ge0\\[6pt]0,&\alpha\lt0.\end{cases}$$
+<p>Check $n=2$:</p>
+$$\begin{aligned}
+f_{T_2}(\alpha)&=\int_0^{\alpha}\lambda e^{-\lambda s}\cdot\lambda e^{-\lambda(\alpha-s)}\,ds\\
+&=\lambda^2e^{-\lambda\alpha}\int_0^{\alpha}ds\\
+&=\lambda^2\alpha\,e^{-\lambda\alpha}\ ✓
+\end{aligned}$$
+<div data-plot="erlangPdfs"></div>
+
+<h3 id="poispmf">First-order PMF: deriving the Poisson law (lecturer)</h3>
+<p>Start from Definition 2 and show $N(t)$ is Poisson. "Exactly $m$ arrivals by time $t$" means the $m$th arrival has happened but the $(m+1)$th has not:</p>
+$$\begin{aligned}
+P[N(t)=m]&=P[T_m\le t\lt T_{m+1}]\\
+&=P[T_m\le t,\ \ t\lt T_m+\tau_{m+1}] &&\why{$T_{m+1}=T_m+\tau_{m+1}$}\\
+&=P[T_m\le t,\ \ \tau_{m+1}\gt t-T_m].
+\end{aligned}$$
+<p>$T_m$ and $T_{m+1}$ are dependent, but $T_m$ and $\tau_{m+1}$ are <b>independent</b> (τ's are iid), which is why we rewrote it. The region is $\{0\le\alpha\le t,\ \beta\gt t-\alpha\}$ in the $(\alpha,\beta)=(T_m,\tau_{m+1})$ plane:</p>
+$$\begin{aligned}
+P[N(t)=m]&=\int_0^t\int_{t-\alpha}^{\infty}f_{T_m}(\alpha)\,f_{\tau}(\beta)\,d\beta\,d\alpha\\
+&=\int_0^tf_{T_m}(\alpha)\Big[\int_{t-\alpha}^{\infty}\lambda e^{-\lambda\beta}d\beta\Big]d\alpha\\
+&=\int_0^t\frac{\lambda(\lambda\alpha)^{m-1}}{(m-1)!}e^{-\lambda\alpha}\cdot e^{-\lambda(t-\alpha)}\,d\alpha &&\why{inner integral $=e^{-\lambda(t-\alpha)}$}\\
+&=\frac{\lambda^me^{-\lambda t}}{(m-1)!}\int_0^t\alpha^{m-1}\,d\alpha &&\why{the $e^{\pm\lambda\alpha}$ cancel}\\
+&=\frac{\lambda^me^{-\lambda t}}{(m-1)!}\cdot\frac{t^m}{m}\\
+&=\frac{(\lambda t)^m\,e^{-\lambda t}}{m!},\qquad m=0,1,2,\dots
+\end{aligned}$$
+<p>This is the Poisson PMF with parameter $a=\lambda t$. (For $m=0$: $P[N(t)=0]=P[\tau_1\gt t]=e^{-\lambda t}$ directly.)</p>
+
+<p><b>Mean and variance</b> (Poisson(a) has mean = variance = a):</p>
+$$E[N(t)]=\lambda t,\qquad\Var[N(t)]=\lambda t .$$
+<p>The mean changes with time ⇒ <b>not WSS</b> (and not SSS). λ is literally "expected arrivals per unit time".</p>
+
+<h3 id="poisjoint">Higher-order PMFs (lecturer)</h3>
+<p>For $t_2\gt t_1$, use independent and stationary increments, exactly as for the binomial process:</p>
+$$\begin{aligned}
+P[N(t_1)=m_1,\ N(t_2)=m_2]&=P[N(t_1)=m_1,\ N(t_2)-N(t_1)=m_2-m_1]\\
+&=P[N(t_1)=m_1]\cdot P[N(t_2)-N(t_1)=m_2-m_1] &&\why{indep. increments}\\
+&=\frac{(\lambda t_1)^{m_1}e^{-\lambda t_1}}{m_1!}\cdot\frac{\big(\lambda(t_2-t_1)\big)^{m_2-m_1}e^{-\lambda(t_2-t_1)}}{(m_2-m_1)!},
+\end{aligned}$$
+<p>for $m_2\ge m_1\ge0$. The same pattern gives any $k$th-order PMF.</p>
+<p class="small"><b>Careful with the lecturer's side remark</b> "if $X\sim P(a)$, $Y\sim P(b)$ then $X-Y\sim P(a-b)$". That is <em>not</em> true for independent $X,Y$ (a difference can be negative!). What is true: if $X,Y$ are independent Poissons, $X+Y\sim P(a+b)$. The correct reason $N(t_2)-N(t_1)\sim P(\lambda(t_2-t_1))$ is the stationary-increment property (Definition 1, part 3).</p>
+
+<h3 id="poisacf">Autocorrelation and autocovariance</h3>
+<p>For $t_2\gt t_1$, split $N(t_2)=N(t_1)+[N(t_2)-N(t_1)]$ so that independent increments can be used:</p>
+$$\begin{aligned}
+R_{NN}(t_1,t_2)&=E[N(t_1)N(t_2)]\\
+&=E\big[N(t_1)\{N(t_1)+N(t_2)-N(t_1)\}\big]\\
+&=E[N^2(t_1)]+E[N(t_1)]\,E[N(t_2)-N(t_1)] &&\why{indep. increments}\\
+&=(\lambda t_1+\lambda^2t_1^2)+\lambda t_1\cdot\lambda(t_2-t_1) &&\why{$E[N^2]=\Var+\text{mean}^2$}\\
+&=\lambda t_1+\lambda^2t_1t_2 .
+\end{aligned}$$
+<p>In general:</p>
+$$R_{NN}(t_1,t_2)=\lambda\min(t_1,t_2)+\lambda^2t_1t_2,\qquad K_{NN}(t_1,t_2)=\lambda\min(t_1,t_2).$$
+<p class="small">The handwritten notes have a sign slip here ($\lambda^2t_1t_2-\lambda\min$). The plus sign is right: e.g. at $t_1=t_2=t$, $R=E[N^2(t)]=\lambda t+\lambda^2t^2$.</p>
+
+<div class="box key"><span class="bt">Poisson process: properties (lecturer)</span>
+<p>1. Counting process. 2. Independent increments. 3. Stationary increments. 4. Not SSS. 5. Not WSS. (Also Markov, being an independent-increment process.)<br>
+$P[N(t)=k]=\frac{(\lambda t)^ke^{-\lambda t}}{k!}$; mean = variance = λt; $K(t_1,t_2)=\lambda\min(t_1,t_2)$; inter-arrivals Exp(λ); $n$th arrival Erlang($n$,λ).</p></div>
+
+<div class="box key"><span class="bt">The memoryless property: why increments are independent</span>
+<p>The exponential distribution is memoryless (Unit 2):</p>
+$$P(\tau\gt s+t\mid\tau\gt s)=\frac{e^{-\lambda(s+t)}}{e^{-\lambda s}}=e^{-\lambda t}=P(\tau\gt t).$$
+<p>Having waited $s$ already doesn't make an arrival "due". So at any instant the time to the next arrival is a fresh Exp(λ), regardless of the past. That is why what happens after time $s$ is independent of what happened before.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 12.1 (lecturer): inquiries</span>
+<p>Inquiries arrive as a Poisson process with rate 15 per minute. Find the probability that in a 1-minute period, 3 inquiries arrive during the first 10 seconds and 2 during the last 15 seconds.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>Units first.</b> $\lambda=\frac{15}{60}=\frac14$ per second. The two windows $[0,10]$ and $[45,60]$ don't overlap, so their counts are independent:</p>
+$$\begin{aligned}
+P[N(10)=3,\ N(60)-N(45)=2]&=P[N(10)=3]\cdot P[N(60)-N(45)=2] &&\why{indep. increments}\\
+&=P[N(10)=3]\cdot P[N(15)=2] &&\why{stationary increments}\\
+&=\frac{(10/4)^3e^{-10/4}}{3!}\cdot\frac{(15/4)^2e^{-15/4}}{2!}\\
+&=0.2138\times0.1654\\
+&\approx\mathbf{0.0354}.
+\end{aligned}$$
+<p>(The lecturer says leaving it in the unevaluated form is fine in exams.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 12.2 (lecturer): one arrival is uniformly placed</span>
+<p>Given that exactly one arrival occurred in $[0,t]$, let $X$ be its arrival time. Find the distribution of $X$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$X=T_1$ conditioned on $N(t)=1$. For $0\le x\le t$, "the arrival is by time $x$" means one arrival in $[0,x]$ and none in $(x,t]$:</p>
+$$\begin{aligned}
+P[X\le x]&=P[N(x)=1\mid N(t)=1]\\
+&=\frac{P[N(x)=1,\ N(t)=1]}{P[N(t)=1]}\\
+&=\frac{P[N(x)=1,\ N(t)-N(x)=0]}{P[N(t)=1]}\\
+&=\frac{P[N(x)=1]\;P[N(t-x)=0]}{P[N(t)=1]} &&\why{indep. + stationary increments}\\
+&=\frac{(\lambda x)e^{-\lambda x}\cdot e^{-\lambda(t-x)}}{(\lambda t)e^{-\lambda t}}\\
+&=\frac{x}{t}.
+\end{aligned}$$
+<p>This is the CDF of $U[0,t]$. <b>Meaning:</b> if you know one arrival happened, it is equally likely to be anywhere in the window. More generally, given $N(t)=n$, the $n$ arrival times are distributed like $n$ independent $U[0,t]$ points (sorted).</p>
+<div data-plot="condUnif"></div></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 12.3: waiting for the k-th arrival</span>
+<p>Calls arrive at rate λ = 2 per minute. (a) Expected time until the 5th call? (b) Probability the 5th call comes after 3 minutes?</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) $T_5\sim$ Erlang(5, 2), mean $5/\lambda=2.5$ min.</p>
+<p>(b) Don't integrate the Erlang PDF. Use the equivalence "5th arrival after $t$" ⇔ "at most 4 arrivals by $t$". With $\lambda t=6$:</p>
+$$\begin{aligned}
+P[T_5\gt3]&=P[N(3)\le4]\\
+&=e^{-6}\Big(1+6+\frac{36}{2}+\frac{216}{6}+\frac{1296}{24}\Big)\\
+&=e^{-6}(1+6+18+36+54)\\
+&=115e^{-6}\approx\mathbf{0.285}.
+\end{aligned}$$</details></div>
+
+<div class="box tip"><span class="bt">Merging and splitting <span class="tag-beyond">Beyond class notes</span></span>
+<p><b>Merging:</b> two independent Poisson processes with rates $\lambda_1,\lambda_2$ add up to a Poisson process with rate $\lambda_1+\lambda_2$. <b>Splitting (thinning):</b> if each arrival is independently kept with probability $p$, the kept arrivals form a Poisson process of rate $\lambda p$, and the discarded ones an independent Poisson process of rate $\lambda(1-p)$. Both are used in queueing problems (Unit 5).</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 12.4: random telegraph signal, a WSS process built from a Poisson process <span class="tag-beyond">Beyond class notes</span></span>
+<p>$X(t)=A\,(-1)^{N(t)}$, where $N(t)$ is Poisson with rate λ and $A=\pm1$ with probability ½ each, independent of $N$. The signal flips sign at every arrival. Find $m_X$ and $R_X$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Mean: $E[A]\,E[(-1)^{N(t)}]=0$. For $\tau\gt0$, $X(t)X(t+\tau)=A^2(-1)^{N(t)+N(t+\tau)}=(-1)^{N(t+\tau)-N(t)}$ (since $A^2=1$ and $(-1)^{2N(t)}=1$). The increment is Poisson(λτ):</p>
+$$\begin{aligned}
+R_X(\tau)&=E\big[(-1)^{N(t+\tau)-N(t)}\big]\\
+&=\sum_{k=0}^{\infty}(-1)^k\frac{(\lambda\tau)^ke^{-\lambda\tau}}{k!}\\
+&=e^{-\lambda\tau}\sum_{k=0}^{\infty}\frac{(-\lambda\tau)^k}{k!}\\
+&=e^{-\lambda\tau}e^{-\lambda\tau}=e^{-2\lambda\tau}.
+\end{aligned}$$
+<p>By evenness, $R_X(\tau)=e^{-2\lambda|\tau|}$: WSS, even though $N(t)$ itself is not. Its PSD is $\frac{4\lambda}{4\lambda^2+\omega^2}$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="wiener"><span class="num">13</span>The Wiener process (Brownian motion)</h2>
+
+<div class="box why"><span class="bt">What it models</span>
+<p>A pollen grain in water is hit by billions of molecules per second; each hit nudges it a tiny random amount. Its position is the sum of a huge number of tiny independent steps: a random walk with microscopic steps taken incredibly often. The <b>Wiener process</b> is the limit of a random walk as the step size and the time between steps both go to zero in the right proportion. By the CLT its value is Gaussian. It is the continuous-time, continuous-valued counterpart of the random walk, and the integral of white noise.</p></div>
+
+<h3 id="wienerderiv">Derivation as a limit of the random walk (lecturer)</h3>
+<p>Recall the symmetric walk $W_n=\sum_{k=1}^nY_k$, $Y_k=\pm1$: mean $n(2p-1)$, variance $4np(1-p)$, $K_W[n,k]=4\min(n,k)p(1-p)$. Now change the scale:</p>
+<ol>
+<li>size of each step = $h$;</li>
+<li>time between steps = δ;</li>
+<li>in a time $t$, the number of steps is $n=t/\delta$.</li>
+</ol>
+<p>The scaled walk is</p>
+$$W_\delta(t)=h\sum_{k=1}^{t/\delta}Y_k=h\,W_{t/\delta}.$$
+<p>For the symmetric walk ($p=\frac12$):</p>
+$$\begin{aligned}
+E[W_\delta(t)]&=h\cdot\frac{t}{\delta}(2p-1)=0,\\[4pt]
+\Var[W_\delta(t)]&=h^2\cdot\frac{t}{\delta}\cdot4p(1-p)=\frac{h^2t}{\delta}.
+\end{aligned}$$
+<p><b>Choosing the scaling.</b> If $h$ stays fixed while δ → 0, the variance $h^2t/\delta\to\infty$ (the walk explodes). If $h\to0$ faster than $\sqrt\delta$, the variance → 0 (nothing moves). To get a sensible, finite limit we must choose $h^2\propto\delta$:</p>
+$$h^2=\alpha\delta\quad\Longrightarrow\quad\Var[W_\delta(t)]=\alpha t,\ \ \text{mean }0 .$$
+<p>As δ → 0, $W_\delta(t)$ is a sum of $t/\delta\to\infty$ iid steps, so by the <b>central limit theorem</b> its distribution tends to Gaussian:</p>
+$$W(t)=\lim_{\delta\to0}W_\delta(t)\sim N(0,\ \alpha t),\qquad f_W(x;t)=\frac{1}{\sqrt{2\pi\alpha t}}\exp\Big\{-\frac{x^2}{2\alpha t}\Big\}.$$
+<p>The PDF depends on $t$ ⇒ <b>not SSS</b>. This $W(t)$ is the <b>Wiener process</b> (Brownian motion).</p>
+<div data-plot="walkToWiener"></div>
+
+<h3 id="wienerprops">Autocovariance and second-order PDF (lecturer)</h3>
+<p>From the walk's covariance $4h^2\min(n,k)p(1-p)$ with $n=t_1/\delta$, $k=t_2/\delta$, $p=\frac12$:</p>
+$$\begin{aligned}
+K_{WW}(t_1,t_2)&=4h^2\min\Big(\frac{t_1}{\delta},\frac{t_2}{\delta}\Big)\cdot\frac14\\
+&=\frac{h^2}{\delta}\min(t_1,t_2)\\
+&=\alpha\min(t_1,t_2) &&\why{$h^2=\alpha\delta$}
+\end{aligned}$$
+<p>Since the mean is 0, $R_{WW}(t_1,t_2)=K_{WW}(t_1,t_2)=\alpha\min(t_1,t_2)$. $W(t_1)$ and $W(t_2)$ are jointly Gaussian (a Wiener process is a Gaussian process), with variances $\alpha t_1$, $\alpha t_2$ and, for $t_2\gt t_1$, correlation coefficient</p>
+$$\rho=\frac{\alpha t_1}{\sqrt{\alpha t_1\cdot\alpha t_2}}=\sqrt{\frac{t_1}{t_2}} .$$
+<p>So $(W(t_1),W(t_2))\sim N\big(0,0,\ \alpha t_1,\ \alpha t_2,\ \sqrt{t_1/t_2}\big)$ for $t_2\gt t_1$.</p>
+<div data-plot="wienerPaths"></div>
+
+<div class="box key"><span class="bt">Wiener process: definition &amp; properties</span>
+<p>$W(t)$, $t\ge0$, with parameter α (often written σ²) is the process with</p>
+<ol>
+<li>$W(0)=0$;</li>
+<li><b>independent increments;</b></li>
+<li><b>stationary Gaussian increments:</b> $W(t)-W(s)\sim N\big(0,\ \alpha(t-s)\big)$ for $t\gt s$;</li>
+<li>(continuous sample paths, which are nowhere differentiable: infinitely jagged at every scale).</li>
+</ol>
+<p><b>Consequences:</b> mean $E[W(t)]=0$; variance $\alpha t$; $R_W(t_1,t_2)=K_W(t_1,t_2)=\alpha\min(t_1,t_2)$; Gaussian process; Markov; not SSS; not WSS (mean is constant, but the ACF is not a function of $t_1-t_2$ and the variance grows).</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 13.1: Wiener numericals</span>
+<p>$W(t)$ is a Wiener process with α = 1. Find (a) $P[W(4)\gt2]$; (b) $E[W(1)W(3)]$ and the correlation coefficient of $W(1)$, $W(3)$; (c) $\Var[W(3)-W(1)]$; (d) $E[W(1)\{W(3)-W(1)\}]$.</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+\text{(a)}\quad W(4)&\sim N(0,4),\ \sigma=2:\quad P[W(4)\gt2]=Q\Big(\frac22\Big)=Q(1)=\mathbf{0.1587}.\\[4pt]
+\text{(b)}\quad E[W(1)W(3)]&=\alpha\min(1,3)=\mathbf1,\qquad\rho=\sqrt{1/3}=\mathbf{0.577}.\\[4pt]
+\text{(c)}\quad W(3)-W(1)&\sim N(0,\ 3-1)\ \Rightarrow\ \Var=\mathbf2 .\\
+&\quad(\text{Check: }3+1-2\cdot1=2\ ✓)\\[4pt]
+\text{(d)}\quad E[W(1)\{W(3)-W(1)\}]&=E[W(1)W(3)]-E[W^2(1)]=1-1=\mathbf0 .
+\end{aligned}$$
+<p>(d) is independent increments in action: the position at time 1 is independent of what happens afterwards.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="summary"><span class="num">14</span>Summary: which process has which property</h2>
+<div class="qwrap"><table>
+<tr><th>Process</th><th>Time / values</th><th>Mean</th><th>Variance</th><th>Autocovariance</th><th>SSS</th><th>WSS</th><th>Indep. incr.</th><th>Stat. incr.</th><th>Markov</th></tr>
+<tr><td>Line process $At$, $A\sim U[0,1]$</td><td>CT / cont.</td><td>$t/2$</td><td>$t^2/12$</td><td>$t_1t_2/12$</td><td>✗</td><td>✗</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>$A\cos(\omega_0t+\Theta)$, Θ uniform on 2π</td><td>CT / cont.</td><td>0</td><td>$A^2/2$</td><td>$\frac{A^2}{2}\cos\omega_0\tau$</td><td>✓</td><td>✓</td><td>–</td><td>–</td><td>✗</td></tr>
+<tr><td>Gaussian, WSS</td><td>CT / cont.</td><td>const</td><td>const</td><td>$K(\tau)$</td><td>✓</td><td>✓</td><td>–</td><td>–</td><td>–</td></tr>
+<tr><td>Bernoulli (iid)</td><td>DT / discrete</td><td>$p$</td><td>$pq$</td><td>$pq\,\delta[n-k]$</td><td>✓</td><td>✓</td><td>–</td><td>–</td><td>✓</td></tr>
+<tr><td>Binomial counting $S_n$</td><td>DT / discrete</td><td>$np$</td><td>$npq$</td><td>$pq\min(n,k)$</td><td>✗</td><td>✗</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Random walk $W_n$</td><td>DT / discrete</td><td>$n(2p-1)$</td><td>$4npq$</td><td>$4pq\min(n,k)$</td><td>✗</td><td>✗</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Poisson $N(t)$</td><td>CT / discrete</td><td>$\lambda t$</td><td>$\lambda t$</td><td>$\lambda\min(t_1,t_2)$</td><td>✗</td><td>✗</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Wiener $W(t)$</td><td>CT / cont.</td><td>0</td><td>$\alpha t$</td><td>$\alpha\min(t_1,t_2)$</td><td>✗</td><td>✗</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Random telegraph</td><td>CT / ±1</td><td>0</td><td>1</td><td>$e^{-2\lambda|\tau|}$</td><td>✓</td><td>✓</td><td>✗</td><td>–</td><td>✓</td></tr>
+</table></div>
+<p><b>Pattern to remember:</b> every process with stationary independent increments and $X(0)=0$ has mean $\propto t$ and variance $\propto t$ and covariance $\propto\min(t_1,t_2)$ (Schaum: $E[X(t)]=\mu_1t$, $\Var[X(t)]=\sigma_1^2t$). So such processes are <b>never stationary</b>; it's their <em>increments</em> that are stationary.</p>
+
+<!-- ============================================================ -->
+<h2 id="mistakes"><span class="num">15</span>Mistakes to avoid &amp; self-check</h2>
+<div class="box warn"><span class="bt">Top mark-losers in Unit 4</span>
+<ol>
+<li><b>Stopping after the mean.</b> A constant mean is <em>not</em> enough for WSS. You must also show $R(t_1,t_2)$ depends only on $t_1-t_2$. (Conversely, a non-constant mean is enough to say "not WSS".)</li>
+<li><b>Not simplifying the ACF far enough.</b> $\cos\omega_0t_1\cos\omega_0t_2+\sin\omega_0t_1\sin\omega_0t_2$ <em>is</em> a function of $t_1-t_2$ (it equals $\cos\omega_0(t_1-t_2)$). Always use the identities before deciding.</li>
+<li><b>Averaging over a phase that isn't uniform over a full period.</b> $E[\cos(\omega t+\Theta)]=0$ needs Θ uniform over an interval of length 2π (or a multiple).</li>
+<li><b>Forgetting the cross terms</b> when expanding $E[(X(t_1)+X(t_2))^2]$ or a product of sums. Use $\sum_i\sum_jR(t_i-t_j)$.</li>
+<li><b>Mixing up $R$ and $K$.</b> $K=R-m_1m_2$. The variance is $R(0)-m^2$, not $R(0)$, unless the mean is 0. The Gaussian PDF needs the <em>covariance</em>.</li>
+<li><b>Claiming WSS ⇒ SSS</b> in general. It holds only for Gaussian processes. SSS ⇒ WSS always (finite second moments).</li>
+<li><b>Calling $R_{XY}$ even.</b> Only $R_{XY}(-\tau)=R_{YX}(\tau)$ holds.</li>
+<li><b>Poisson units.</b> Convert the rate to the same time unit as the interval ("15 per minute" and "10 seconds" ⇒ λ = 1/4 per second).</li>
+<li><b>Treating overlapping Poisson intervals as independent.</b> $N(t_1)$ and $N(t_2)$ are dependent; rewrite with non-overlapping increments $N(t_1)$ and $N(t_2)-N(t_1)$ first.</li>
+<li><b>Random-walk parity.</b> $P(W_n=j)=0$ when $n+j$ is odd.</li>
+<li><b>Saying a counting process / Wiener process is stationary.</b> Their <em>increments</em> are stationary; the processes are not (variance grows with $t$).</li>
+</ol></div>
+
+<div class="box tip"><span class="bt">Self-check (answers in §19)</span>
+<ol>
+<li>In $X(t,\xi)$, what do you get if you fix $t$ and let ξ vary? If you fix ξ?</li>
+<li>A process has constant mean and $R(t_1,t_2)=3+t_1t_2$. Is it WSS?</li>
+<li>Does SSS imply WSS? Does WSS imply SSS?</li>
+<li>Can $R_X(\tau)=e^{-\tau}$ (for all τ) be an autocorrelation function?</li>
+<li>A WSS process has $R_X(0)=10$ and $R_X(\tau)\to4$ as $|\tau|\to\infty$. Find $|m_X|$ and $\sigma_X^2$.</li>
+<li>A Gaussian process is WSS. Is it SSS?</li>
+<li>Is the Poisson process WSS? Why?</li>
+<li>Wiener process with α = 3: what is $\Var[W(2)]$? $\Cov[W(2),W(5)]$?</li>
+<li>Given that exactly one Poisson arrival occurred in $[0,t]$, how is its time distributed?</li>
+<li>Symmetric random walk: $P(W_5=0)$?</li>
+<li>Give a simple sufficient condition for a WSS process to be ergodic in the mean.</li>
+<li>How do you get the average power of a WSS process from its PSD?</li>
+</ol></div>
+
+<!-- ============================================================ -->
+<h2 id="practice"><span class="num">16</span>Practice problems</h2>
+<p class="muted small">Answers are in §19. Problems marked ★ are exam level.</p>
+<ol>
+<li>$X(t)=A+Bt$, where $A,B$ are independent, zero-mean, with variances $\sigma_A^2,\sigma_B^2$. Find $m_X(t)$ and $R_X(t_1,t_2)$. Is $X(t)$ WSS?</li>
+<li>$X(t)=\cos(t+\Theta)$ with $\Theta\sim U(0,\pi)$. Find the mean. Is $X(t)$ WSS?</li>
+<li>★ $X(t)=A\cos\omega_0t+B\sin\omega_0t$, with $A,B$ uncorrelated, zero mean, $E[A^2]=1$, $E[B^2]=2$. Find $R_X(t_1,t_2)$. Is it WSS? What changes if $E[B^2]=1$?</li>
+<li>Which can be ACFs of a WSS process? (a) $5e^{-3|\tau|}$ (b) $e^{-\tau^2}$ (c) $2+\cos3\tau$ (d) $4$ for $|\tau|\le2$, 0 otherwise (e) $1+\tau^2$ (f) $e^{-|\tau|}\cos\tau$.</li>
+<li>A WSS process has $R_X(\tau)=9e^{-|\tau|}+4$. Find $|m_X|$, the average power, the variance and the PSD.</li>
+<li>$X(t)$ is WSS with $R_X(\tau)=e^{-|\tau|}$. Let $Y(t)=X(t)+X(t-1)$. Find $R_Y(\tau)$ and $E[Y^2(t)]$.</li>
+<li>★ $X(t)$ is a zero-mean Gaussian WSS process with $R_X(\tau)=9e^{-|\tau|}$. Find $P[X(1)\gt3]$ and $P\big[|X(1)-X(2)|\gt3\big]$.</li>
+<li>$X(t)=A$ for all $t$, with $E[A]=2$, $\Var A=1$. Find $m_X$, $R_X(\tau)$. Is it WSS? Is it ergodic in the mean?</li>
+<li>Calls arrive as a Poisson process at 2 per minute. Find $P[N(1)=3]$, $P[N(2)=4\mid N(1)=1]$, $E[N(3)]$, $\Var[N(3)]$ and $\Cov[N(1),N(3)]$.</li>
+<li>★ For a Poisson process: given $N(10)=1$, find $P[T_1\lt4]$. Given $N(10)=3$, find $P[N(4)=1]$.</li>
+<li>Binomial counting process with $p=0.3$. Find $E[S_{10}]$, $\Var[S_{10}]$, $\Cov(S_5,S_{10})$ and $P(S_5=2,\ S_{10}=3)$.</li>
+<li>Symmetric random walk. Find $P(W_6=2)$ and $P(W_2=0,\ W_6=2)$.</li>
+<li>Wiener process with α = 2. Find $\Var[W(3)]$, $P[|W(3)|\lt\sqrt6]$, $\Cov[W(2),W(5)]$ and the correlation coefficient of $W(2),W(5)$.</li>
+<li>★ $X[n]$ iid, zero mean, variance σ². $Y[n]=X[n]-X[n-1]$. Find $R_Y[k]$ and $S_Y(\Omega)$. Is the filter low-pass or high-pass?</li>
+<li>$X(t)$, $Y(t)$ are independent, zero-mean, WSS. Show that $Z(t)=X(t)+Y(t)$ is WSS with $R_Z=R_X+R_Y$.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="pyq"><span class="num">17</span>Past-paper questions, fully solved</h2>
+<p class="muted small">Every Unit 4 question from the 10 papers (ES = end-sem; the mid-sems stop at Unit 3), grouped by topic. Each solution starts with <b>What to notice</b>: the observation that tells you which tool to use. Then the working, one step per line, with reasons, and finally a check or interpretation. "Define/explain" questions get model answers of the length the marks call for (5 marks ≈ one page). ES June 2026 Q4b (state and prove the CLT) is a Unit 3 topic: see Unit 3 §11 and §14H.</p>
+
+<h3>A. Definitions &amp; theory</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q4a(ii)</span> Differentiate between strict-sense stationary and wide-sense stationary processes.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>What to notice.</b> The examiner wants: both definitions with formulas, the "exact vs average" distinction, the implication SSS ⇒ WSS (with reason), the failure of the converse, and the Gaussian exception. A table scores well.</p>
+<p><b>SSS.</b> $X(t)$ is strict-sense stationary if, for every order $N$, all instants $t_1,\dots,t_N$ and every shift $T$,</p>
+$$f_X(x_1,\dots,x_N;\,t_1,\dots,t_N)=f_X(x_1,\dots,x_N;\,t_1+T,\dots,t_N+T).$$
+<p>All statistical properties are unchanged by a shift of the time origin. In particular the first-order PDF doesn't depend on $t$, and the second-order PDF depends only on $t_2-t_1$.</p>
+<p><b>WSS.</b> $X(t)$ is wide-sense stationary if (i) $E[X(t)]=m_X$ is constant, (ii) $R_X(t_1,t_2)=E[X(t_1)X(t_2)]$ depends only on $\tau=t_2-t_1$, and (iii) $E[X^2(t)]=R_X(0)\lt\infty$.</p>
+<table>
+<tr><th>Point</th><th>SSS</th><th>WSS</th></tr>
+<tr><td>Condition on</td><td>PDFs of every order</td><td>first two moments only</td></tr>
+<tr><td>Kind of description</td><td>exact / complete</td><td>average / partial</td></tr>
+<tr><td>Strength</td><td>stronger</td><td>weaker</td></tr>
+<tr><td>Checking</td><td>needs all joint PDFs: hard</td><td>compute $m_X(t)$ and $R_X(t_1,t_2)$: easy</td></tr>
+<tr><td>Implication</td><td>SSS ⇒ WSS (if $E[X^2]\lt\infty$)</td><td>WSS ⇏ SSS in general</td></tr>
+<tr><td>Example</td><td>iid process; Bernoulli process; WSS Gaussian process</td><td>$\cos(\omega_0t+\Theta)$; $A\cos\omega_0t+B\sin\omega_0t$</td></tr>
+</table>
+<p><b>Why SSS ⇒ WSS:</b> taking $N=1$ and $T=-t$ gives $f_X(x;t)=f_X(x;0)$, so the mean is constant; taking $N=2$ and $T=-t_2$ gives $f_X(x_1,x_2;t_1,t_2)=f_X(x_1,x_2;t_1-t_2,0)$, so $R_X$ depends only on $t_1-t_2$.</p>
+<p><b>Why not the converse:</b> WSS constrains only means and correlations; the PDF shapes can still change with time (e.g. independent samples that are $N(0,1)$ at integer times and $U(-\sqrt3,\sqrt3)$ at other times: same mean 0 and variance 1, so WSS, but not SSS).</p>
+<p><b>Exception:</b> for a Gaussian process, WSS ⇒ SSS, because mean and covariance determine every Gaussian PDF.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q4a</span> (5 marks) Define in detail: (i) stationary random process, (ii) ergodic process.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>What to notice.</b> "In detail" for 5 marks: give SSS and WSS for (i), time averages and the two kinds of ergodicity for (ii), one example and one non-example each.</p>
+<p><b>(i) Stationary process.</b> A random process whose statistical properties do not change with time, i.e. are invariant to a shift of the time origin.</p>
+<ul>
+<li><b>Strict-sense stationary:</b> $f_X(x_1..x_N;t_1..t_N)=f_X(x_1..x_N;t_1+T..t_N+T)$ for all $N$, $t_i$, $T$. Consequences: first-order PDF independent of $t$; constant mean and variance; second-order PDF and ACF depend only on the lag.</li>
+<li><b>Wide-sense stationary:</b> $E[X(t)]=m_X$ constant and $R_X(t,t+\tau)=R_X(\tau)$, with $R_X(0)\lt\infty$.</li>
+<li>SSS ⇒ WSS; WSS ⇒ SSS only for Gaussian processes.</li>
+<li><em>Example:</em> $X(t)=A\cos(\omega_0t+\Theta)$, Θ ~ U[0, 2π]: $m_X=0$, $R_X(\tau)=\frac{A^2}{2}\cos\omega_0\tau$ ⇒ WSS. <em>Non-example:</em> Poisson process (mean λt grows).</li>
+</ul>
+<p><b>(ii) Ergodic process.</b> A stationary process for which time averages computed from a single sample function equal the corresponding ensemble (statistical) averages, with probability 1. With</p>
+$$\langle x\rangle=\lim_{T\to\infty}\frac1{2T}\int_{-T}^Tx(t)\,dt,\qquad\mathcal R_x(\tau)=\lim_{T\to\infty}\frac1{2T}\int_{-T}^Tx(t)x(t+\tau)\,dt,$$
+<ul>
+<li><b>ergodic in the mean</b> if $\langle x\rangle=E[X(t)]=m_X$;</li>
+<li><b>ergodic in the autocorrelation</b> if $\mathcal R_x(\tau)=R_X(\tau)$ for all τ.</li>
+<li>A WSS process is mean-ergodic iff $\Var\big[\frac1{2T}\int_{-T}^TX\,dt\big]\to0$; sufficient: $K_X(\tau)\to0$ as $|\tau|\to\infty$.</li>
+<li>Every ergodic process is stationary, but not conversely. <em>Example:</em> random-phase sinusoid (ergodic in mean and ACF). <em>Non-example:</em> $X(t)=A$, a random constant: stationary, but its time average is $a$, not $E[A]$.</li>
+<li><b>Importance:</b> ergodicity lets us estimate the mean, power and ACF of a process (e.g. noise) from one long recording.</li>
+</ul></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q5b</span> (5 marks) What do you understand by (i) an independent increment process, (ii) a stationary increment process, (iii) an ergodic random process? Explain with suitable examples.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>What to notice.</b> Definitions with formulas, and one worked example each. The binomial counting / Poisson process illustrate (i) and (ii) in one line each.</p>
+<p><b>(i) Independent increments.</b> $X(t)$ has independent increments if, for any $0\le t_1\lt t_2\lt\dots\lt t_n$, the increments</p>
+$$X(t_1)-X(0),\ X(t_2)-X(t_1),\ \dots,\ X(t_n)-X(t_{n-1})$$
+<p>are independent RVs: what happens over non-overlapping intervals is independent. <em>Example:</em> the binomial counting process $S_n=\sum_{k=1}^nX_k$ ($X_k$ iid Bernoulli): $S_n$ uses $X_1..X_n$ and $S_m-S_n$ uses $X_{n+1}..X_m$, disjoint sets of independent RVs. Also the Poisson process (counts in disjoint intervals are independent) and the Wiener process. <em>Consequence:</em> joint PMFs factor, e.g. $P[N(t_1)=m_1,N(t_2)=m_2]=P[N(t_1)=m_1]P[N(t_2)-N(t_1)=m_2-m_1]$; and the process is Markov.</p>
+<p><b>(ii) Stationary increments.</b> The distribution of $X(t+h)-X(s+h)$ is the same as that of $X(t)-X(s)$ for all $h$: it depends only on the interval length $t-s$. <em>Example:</em> Poisson process, $N(t+s)-N(s)\sim$ Poisson(λt) whatever $s$ is; random walk, $W_m-W_n$ has the same PMF as $W_{m-n}$. <em>Note:</em> a process with stationary independent increments and $X(0)=0$ has $E[X(t)]=\mu_1t$ and $\Var[X(t)]=\sigma_1^2t$, so the process itself is <b>not</b> stationary (Poisson: mean = variance = λt).</p>
+<p><b>(iii) Ergodic process.</b> A stationary process whose time averages over one sample function equal the ensemble averages: $\langle x\rangle=m_X$ (ergodic in mean), $\mathcal R_x(\tau)=R_X(\tau)$ (ergodic in ACF). <em>Example:</em> $X(t)=A\cos(\omega t+\Theta)$, Θ ~ U(−π, π): the time average of every sample function is 0 = $E[X(t)]$ and the time ACF is $\frac{A^2}{2}\cos\omega\tau=R_X(\tau)$. <em>Non-example:</em> $X(t)=A$ (random constant): time average $a$ varies from path to path, ensemble mean $E[A]$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q4b</span> (5 marks) Define Gaussian random process and mention at least four properties.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>Definition.</b> A random process $X(t)$ is Gaussian if for every $n$ and every set of instants $t_1,\dots,t_n$, the RVs $X(t_1),\dots,X(t_n)$ are jointly Gaussian, with joint PDF</p>
+$$f_X(\mathbf x;\mathbf t)=\frac{1}{(2\pi)^{n/2}|\mathbf K|^{1/2}}\exp\Big\{-\tfrac12(\mathbf x-\boldsymbol\mu)^T\mathbf K^{-1}(\mathbf x-\boldsymbol\mu)\Big\},$$
+<p>where $\mu_i=m_X(t_i)$ and $K_{ij}=K_X(t_i,t_j)$. (Equivalently: every linear functional $\int g(t)X(t)dt$ is a Gaussian RV.)</p>
+<p><b>Properties.</b></p>
+<ol>
+<li><b>Completely specified by its mean $m_X(t)$ and autocovariance $K_X(t_1,t_2)$</b>, since these fix $\boldsymbol\mu$ and $\mathbf K$ for every $n$. The second-order statistics give the whole process.</li>
+<li><b>WSS ⇒ SSS.</b> If $m_X$ is constant and $K_X$ depends only on $t_2-t_1$, then $\boldsymbol\mu$ and $\mathbf K$ are unchanged by a time shift, so every PDF is unchanged.</li>
+<li><b>Uncorrelated ⇒ independent.</b> If $K_X(t_i,t_j)=0$ for $i\ne j$, $\mathbf K$ is diagonal and the joint PDF factors into a product of marginals.</li>
+<li><b>Closed under linear operations.</b> The output of a linear system driven by a Gaussian process (filter, derivative, integral, linear combination) is again a Gaussian process.</li>
+<li>Each sample $X(t)\sim N(m_X(t),K_X(t,t))$, and any $\sum a_iX(t_i)$ is Gaussian with mean $\sum a_im_X(t_i)$ and variance $\sum\sum a_ia_jK_X(t_i,t_j)$.</li>
+</ol>
+<p><b>Example:</b> thermal noise; the Wiener process (mean 0, $K=\alpha\min(t_1,t_2)$).</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q4b</span> (5 marks) Write a detailed note on the Gaussian random process. Show that if a Gaussian random process is WSS, then it is also SSS.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>What to notice.</b> Two halves: the note (definition + properties, as in the previous answer, kept shorter) and the proof (the main marks).</p>
+<p><b>Note.</b> $X(t)$ is a Gaussian process if any finite set of its samples is jointly Gaussian: $[X(t_1),\dots,X(t_n)]\sim N(\boldsymbol\mu,\mathbf K)$ with $\mu_i=m_X(t_i)$, $K_{ij}=K_X(t_i,t_j)$. It is fully described by $m_X(t)$ and $K_X(t_1,t_2)$. Uncorrelated samples are independent; linear filtering preserves Gaussianity; it models thermal noise (CLT). Example: zero-mean WSS Gaussian noise with $R_X(\tau)=4e^{-2|\tau|}$, for which $X(t)\sim N(0,4)$ at every $t$.</p>
+<p><b>Proof that WSS ⇒ SSS.</b> Let $X(t)$ be Gaussian and WSS. Take any $n$, instants $t_1..t_n$ and shift $T$. Compare the vectors $\mathbf X=[X(t_1),..,X(t_n)]$ and $\mathbf X'=[X(t_1+T),..,X(t_n+T)]$.</p>
+<p><b>Step 1: mean vectors are equal.</b> WSS ⇒ constant mean:</p>
+$$E[X(t_i+T)]=m_X=E[X(t_i)],\quad i=1,\dots,n\quad\Rightarrow\quad\boldsymbol\mu'=\boldsymbol\mu .$$
+<p><b>Step 2: covariance matrices are equal.</b> WSS ⇒ covariance depends only on the lag:</p>
+$$\begin{aligned}
+K'_{ij}&=K_X(t_i+T,\ t_j+T)\\
+&=K_X\big((t_j+T)-(t_i+T)\big)\\
+&=K_X(t_j-t_i)\\
+&=K_X(t_i,t_j)=K_{ij}\quad\Rightarrow\quad\mathbf K'=\mathbf K .
+\end{aligned}$$
+<p><b>Step 3: PDFs are equal.</b> Both $\mathbf X$ and $\mathbf X'$ are jointly Gaussian (Gaussian process), and a jointly Gaussian PDF depends only on its mean vector and covariance matrix:</p>
+$$\begin{aligned}
+f_X(\mathbf x;\,t_1+T,\dots,t_n+T)&=\frac{1}{(2\pi)^{n/2}|\mathbf K'|^{1/2}}e^{-\frac12(\mathbf x-\boldsymbol\mu')^T\mathbf K'^{-1}(\mathbf x-\boldsymbol\mu')}\\
+&=\frac{1}{(2\pi)^{n/2}|\mathbf K|^{1/2}}e^{-\frac12(\mathbf x-\boldsymbol\mu)^T\mathbf K^{-1}(\mathbf x-\boldsymbol\mu)}\\
+&=f_X(\mathbf x;\,t_1,\dots,t_n).
+\end{aligned}$$
+<p><b>Step 4.</b> Since $n$, the $t_i$ and $T$ were arbitrary, $X(t)$ is SSS. ∎</p>
+<p><b>Remark.</b> The argument fails for non-Gaussian processes: equal means and covariances don't force equal PDFs, since higher-order moments can differ.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q4c</span> (5 marks) If the random process is wide-sense stationary, prove that $R_{XX}(-\tau)=R_{XX}(\tau)$.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>What to notice.</b> The whole proof is a change of variable plus the WSS property "the ACF doesn't depend on the starting time". State the definition first, then point out exactly where WSS is used.</p>
+<p><b>Definition.</b> For a WSS process, $R_{XX}(\tau)=E[X(t)X(t+\tau)]$, and this is the same for every $t$.</p>
+<p><b>Proof.</b></p>
+$$\begin{aligned}
+R_{XX}(-\tau)&=E\big[X(t)\,X(t-\tau)\big] &&\why{definition with lag $-\tau$}\\
+&=E\big[X(s+\tau)\,X(s)\big] &&\why{let $s=t-\tau$, so $t=s+\tau$}\\
+&=E\big[X(s)\,X(s+\tau)\big] &&\why{the product of two numbers commutes}\\
+&=R_{XX}(\tau) &&\why{WSS: same value for every starting time $s$}
+\end{aligned}$$
+<p>∎ So the ACF of a WSS process is an <b>even function</b> of τ.</p>
+<p><b>Interpretation.</b> The correlation between the present and τ seconds later equals the correlation between the present and τ seconds earlier, because a WSS process has no preferred time origin. Consequences: $R_{XX}$ is symmetric about τ = 0, its Fourier transform (the PSD) is real and even, and we only need $R_{XX}(\tau)$ for $\tau\ge0$.</p>
+<p class="small">To score full marks you may add the related facts $R_{XX}(0)=E[X^2(t)]\ge0$ and $|R_{XX}(\tau)|\le R_{XX}(0)$, and note that for two jointly WSS processes the analogue is $R_{XY}(-\tau)=R_{YX}(\tau)$, not evenness.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q5c</span> (5 marks) Write down the properties of the auto-correlation and cross-correlation function of a random process in detail.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>What to notice.</b> "In detail" means: state each property and give the one-line proof. Assume WSS / jointly WSS and state your convention $R_X(\tau)=E[X(t)X(t+\tau)]$, $R_{XY}(\tau)=E[X(t)Y(t+\tau)]$.</p>
+<p><b>Autocorrelation $R_X(\tau)$:</b></p>
+<ol>
+<li><b>Mean-square value / average power:</b> $R_X(0)=E[X^2(t)]\ge0$.</li>
+<li><b>Even:</b> $R_X(-\tau)=R_X(\tau)$. Proof: put $s=t-\tau$ in $E[X(t)X(t-\tau)]$ to get $E[X(s+\tau)X(s)]=R_X(\tau)$.</li>
+<li><b>Maximum at the origin:</b> $|R_X(\tau)|\le R_X(0)$. Proof: $0\le E[(X(t+\tau)\pm X(t))^2]=2R_X(0)\pm2R_X(\tau)$.</li>
+<li><b>Periodicity:</b> if $R_X(T_0)=R_X(0)$ for some $T_0\ne0$, then $R_X$ is periodic with period $T_0$; a periodic component in $X(t)$ gives a periodic component of the same period in $R_X$.</li>
+<li><b>Mean from the ACF:</b> if $X$ has no periodic component, $\lim_{|\tau|\to\infty}R_X(\tau)=m_X^2$, and $\sigma_X^2=R_X(0)-m_X^2$.</li>
+<li><b>Non-negative definite:</b> $\sum_i\sum_ja_ia_jR_X(t_i-t_j)\ge0$; equivalently its Fourier transform, the PSD $S_X(\omega)$, is real, even and $\ge0$ (Wiener–Khinchin).</li>
+<li>Relation to the autocovariance: $K_X(\tau)=R_X(\tau)-m_X^2$.</li>
+</ol>
+<p><b>Cross-correlation $R_{XY}(\tau)$:</b></p>
+<ol>
+<li><b>Symmetry:</b> $R_{XY}(-\tau)=R_{YX}(\tau)$. Proof: $E[X(t)Y(t-\tau)]=E[Y(s)X(s+\tau)]$ with $s=t-\tau$. It is <em>not</em> even in general, and its peak need not be at τ = 0.</li>
+<li><b>Cauchy–Schwarz bound:</b> $|R_{XY}(\tau)|\le\sqrt{R_X(0)\,R_Y(0)}$.</li>
+<li><b>Arithmetic-mean bound:</b> $|R_{XY}(\tau)|\le\frac12[R_X(0)+R_Y(0)]$, from $E[(X(t)\pm Y(t+\tau))^2]\ge0$.</li>
+<li><b>Orthogonal</b> processes: $R_{XY}(\tau)=0$ for all τ. <b>Uncorrelated:</b> $R_{XY}(\tau)=m_Xm_Y$. <b>Independent</b> ⇒ uncorrelated.</li>
+<li>If $Z=X+Y$: $R_Z(\tau)=R_X(\tau)+R_Y(\tau)+R_{XY}(\tau)+R_{YX}(\tau)$; for orthogonal $X,Y$ the powers add.</li>
+<li>Its Fourier transform is the cross-PSD $S_{XY}(\omega)$, complex in general, with $S_{XY}(\omega)=S_{YX}^*(\omega)$.</li>
+</ol></details></div>
+
+<h3>B. Mean, autocorrelation and the WSS test</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q4b</span> &amp; <span class="tag-pyq">ES Nov–Dec 2024 Q4b(i)</span> $X(t)=A\cos(\omega_0t+\theta)$, $A$, $\omega_0$ constants, θ uniform on $(-\pi,\pi)$. Show that $X(t)$ is WSS.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Only θ is random, and it is uniform over a full period (length 2π). So any sinusoid with θ (or 2θ) in its argument averages to 0 (warm-up W2). WSS needs two checks: constant mean and an ACF depending only on the lag.</p>
+<p><b>PDF of θ:</b> $f_\theta(\theta)=\frac{1}{2\pi}$ for $-\pi\lt\theta\lt\pi$.</p>
+<p><b>Step 1: mean.</b></p>
+$$\begin{aligned}
+E[X(t)]&=\int_{-\pi}^{\pi}A\cos(\omega_0t+\theta)\,\frac{1}{2\pi}\,d\theta\\
+&=\frac{A}{2\pi}\Big[\sin(\omega_0t+\theta)\Big]_{-\pi}^{\pi}\\
+&=\frac{A}{2\pi}\big[\sin(\omega_0t+\pi)-\sin(\omega_0t-\pi)\big]\\
+&=\frac{A}{2\pi}\big[-\sin\omega_0t+\sin\omega_0t\big]\\
+&=0 .
+\end{aligned}$$
+<p>Constant ✓.</p>
+<p><b>Step 2: ACF.</b> Use $\cos P\cos Q=\frac12[\cos(P-Q)+\cos(P+Q)]$ with $P=\omega_0(t+\tau)+\theta$, $Q=\omega_0t+\theta$. Then $P-Q=\omega_0\tau$ (no θ!) and $P+Q=2\omega_0t+\omega_0\tau+2\theta$:</p>
+$$\begin{aligned}
+R_X(t,t+\tau)&=E\big[A\cos(\omega_0t+\theta)\cdot A\cos(\omega_0t+\omega_0\tau+\theta)\big]\\
+&=\frac{A^2}{2}E\big[\cos\omega_0\tau\big]+\frac{A^2}{2}E\big[\cos(2\omega_0t+\omega_0\tau+2\theta)\big]\\
+&=\frac{A^2}{2}\cos\omega_0\tau+\frac{A^2}{2}\cdot\frac{1}{2\pi}\int_{-\pi}^{\pi}\cos(2\omega_0t+\omega_0\tau+2\theta)\,d\theta\\
+&=\frac{A^2}{2}\cos\omega_0\tau+\frac{A^2}{2}\cdot\frac{1}{4\pi}\Big[\sin(2\omega_0t+\omega_0\tau+2\theta)\Big]_{-\pi}^{\pi}\\
+&=\frac{A^2}{2}\cos\omega_0\tau+0 &&\why{sin has period $2\pi$; the two ends are $4\pi$ apart}
+\end{aligned}$$
+$$\boxed{R_X(\tau)=\frac{A^2}{2}\cos\omega_0\tau}$$
+<p><b>Conclusion.</b> The mean is constant (0) and the ACF depends only on τ, not on $t$. Also $E[X^2]=R_X(0)=\frac{A^2}{2}\lt\infty$. Hence $X(t)$ is <b>WSS</b>.</p>
+<p><b>Checks/interpretation.</b> $R_X(0)=A^2/2$ is the familiar average power of a sinusoid of amplitude $A$ ✓; $R_X$ is even and periodic with the same frequency as the signal ✓ (§5). The random phase is what removes the time dependence: with a fixed phase the "process" would be a deterministic cosine whose mean $A\cos(\omega_0t+\theta_0)$ varies with $t$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q4a</span> (5 marks) $X(t)=A\cos\omega_0t+B\sin\omega_0t$, $Y(t)=B\cos\omega_0t-A\sin\omega_0t$, where $A,B$ are uncorrelated zero-mean RVs with the same variance σ², and $\omega_0$ is a constant. $X(t)$ and $Y(t)$ are WSS. Find the cross-correlation $R_{XY}(t,t+\tau)$.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Everything random is in $A$ and $B$, and we know their second moments: $E[A^2]=E[B^2]=\sigma^2$ (zero mean ⇒ $E[A^2]=\Var A$) and $E[AB]=E[A]E[B]=0$ (uncorrelated, zero means). So: multiply out, keep only the $A^2$ and $B^2$ terms, then combine with a trig identity.</p>
+<p>Abbreviate $c_1=\cos\omega_0t$, $s_1=\sin\omega_0t$, $c_2=\cos\omega_0(t+\tau)$, $s_2=\sin\omega_0(t+\tau)$.</p>
+<p><b>Step 1: multiply out.</b></p>
+$$\begin{aligned}
+X(t)\,Y(t+\tau)&=(Ac_1+Bs_1)(Bc_2-As_2)\\
+&=AB\,c_1c_2-A^2\,c_1s_2+B^2\,s_1c_2-AB\,s_1s_2 .
+\end{aligned}$$
+<p><b>Step 2: take expectations</b> (the $c$'s and $s$'s are constants):</p>
+$$\begin{aligned}
+R_{XY}(t,t+\tau)&=E[AB]\,c_1c_2-E[A^2]\,c_1s_2+E[B^2]\,s_1c_2-E[AB]\,s_1s_2\\
+&=0-\sigma^2c_1s_2+\sigma^2s_1c_2-0\\
+&=\sigma^2\big(s_1c_2-c_1s_2\big).
+\end{aligned}$$
+<p><b>Step 3: trig identity</b> $\sin P\cos Q-\cos P\sin Q=\sin(P-Q)$ with $P=\omega_0t$, $Q=\omega_0(t+\tau)$:</p>
+$$\begin{aligned}
+R_{XY}(t,t+\tau)&=\sigma^2\sin\big(\omega_0t-\omega_0(t+\tau)\big)\\
+&=\sigma^2\sin(-\omega_0\tau)\\
+&=-\sigma^2\sin\omega_0\tau .
+\end{aligned}$$
+$$\boxed{R_{XY}(\tau)=-\sigma^2\sin\omega_0\tau}$$
+<p><b>Checks and interpretation.</b></p>
+<ul>
+<li>It depends only on τ, so $X$ and $Y$ are <b>jointly WSS</b>. (Each is WSS with $R_X(\tau)=R_Y(\tau)=\sigma^2\cos\omega_0\tau$, Example 4.3.)</li>
+<li>It is an <em>odd</em> function, confirming that a cross-correlation need not be even. By the symmetry property, $R_{YX}(\tau)=R_{XY}(-\tau)=\sigma^2\sin\omega_0\tau$.</li>
+<li>$R_{XY}(0)=0$: $X(t)$ and $Y(t)$ at the <em>same</em> instant are orthogonal. In fact $Y$ is $X$ shifted by a quarter period: $Y(t)=X(t+\frac{\pi}{2\omega_0})$, which is why the cross-correlation is a shifted cosine, $\sigma^2\cos\big(\omega_0(\tau+\frac{\pi}{2\omega_0})\big)=-\sigma^2\sin\omega_0\tau$.</li>
+<li>Bound: $|R_{XY}|\le\sigma^2=\sqrt{R_X(0)R_Y(0)}$ ✓.</li>
+</ul></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q4a</span> (5 marks) $Y(t)=e^{-At}\cos(\Omega t+\Theta)$ for $t\ge0$ and 0 elsewhere, where $A,\Omega,\Theta$ are independent and uniform on $[0,1]$, $[0,2]$ and $[0,2\pi]$ respectively. Find (i) $E[Y(t)]$, (ii) $R_{YY}(t_1,t_2)$, (iii) is the process WSS?</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Three independent RVs, so expectations of products split into products of expectations. Θ is uniform over a full period, so averaging over Θ first kills every term containing Θ, even though Ω is also random (condition on Ω: for each fixed Ω the phase average is 0). The factor $e^{-At}$ is what will spoil stationarity.</p>
+<p>Take $t,t_1,t_2\ge0$ (for negative times $Y=0$, so the mean and ACF are 0 there).</p>
+<p><b>(i) Mean.</b> By independence of $A$ from $(\Omega,\Theta)$:</p>
+$$\begin{aligned}
+E[Y(t)]&=E[e^{-At}]\cdot E[\cos(\Omega t+\Theta)]\\
+&=E[e^{-At}]\cdot E_\Omega\Big[E_\Theta\big[\cos(\Omega t+\Theta)\,\big|\,\Omega\big]\Big] &&\why{average over Θ first}\\
+&=E[e^{-At}]\cdot E_\Omega[0] &&\why{W2: full-period average}\\
+&=0 .
+\end{aligned}$$
+<p><b>(ii) ACF.</b></p>
+$$\begin{aligned}
+R_{YY}(t_1,t_2)&=E\big[e^{-At_1}e^{-At_2}\cos(\Omega t_1+\Theta)\cos(\Omega t_2+\Theta)\big]\\
+&=E\big[e^{-A(t_1+t_2)}\big]\cdot E\big[\cos(\Omega t_1+\Theta)\cos(\Omega t_2+\Theta)\big] &&\why{$A$ independent of $(\Omega,\Theta)$}
+\end{aligned}$$
+<p><b>First factor.</b> With $s=t_1+t_2\gt0$ and $f_A=1$ on $[0,1]$:</p>
+$$\begin{aligned}
+E\big[e^{-As}\big]&=\int_0^1e^{-as}\,da\\
+&=\Big[-\frac{e^{-as}}{s}\Big]_0^1\\
+&=\frac{1-e^{-s}}{s}=\frac{1-e^{-(t_1+t_2)}}{t_1+t_2}.
+\end{aligned}$$
+<p><b>Second factor.</b> Product-to-sum, then average over Θ (the sum term dies) and then over Ω with $f_\Omega=\frac12$ on $[0,2]$. Let $\tau=t_1-t_2\ne0$:</p>
+$$\begin{aligned}
+E\big[\cos(\Omega t_1+\Theta)\cos(\Omega t_2+\Theta)\big]&=\tfrac12E\big[\cos\Omega(t_1-t_2)\big]+\tfrac12E\big[\cos(\Omega(t_1+t_2)+2\Theta)\big]\\
+&=\tfrac12E[\cos\Omega\tau]+0\\
+&=\frac12\int_0^2\cos(\omega\tau)\,\frac12\,d\omega\\
+&=\frac14\Big[\frac{\sin\omega\tau}{\tau}\Big]_0^2\\
+&=\frac{\sin2\tau}{4\tau}.
+\end{aligned}$$
+<p><b>Combine:</b></p>
+$$\boxed{R_{YY}(t_1,t_2)=\frac{1-e^{-(t_1+t_2)}}{t_1+t_2}\cdot\frac{\sin2(t_1-t_2)}{4(t_1-t_2)}},\qquad t_1,t_2\ge0,$$
+<p>with the limits $\frac{\sin2\tau}{4\tau}\to\frac12$ as τ → 0 and $\frac{1-e^{-s}}{s}\to1$ as $s\to0$.</p>
+<p><b>(iii) WSS?</b> The mean is constant (0), but the ACF contains $t_1+t_2$ through the first factor, so it is not a function of $t_1-t_2$ alone. Concretely, the mean-square value</p>
+$$E[Y^2(t)]=R_{YY}(t,t)=\frac{1-e^{-2t}}{2t}\cdot\frac12=\frac{1-e^{-2t}}{4t}$$
+<p>decreases with $t$ (it is ½ at $t\to0$, 0.123 at $t=2$, and tends to 0). Hence the process is <b>not WSS</b> (and not SSS).</p>
+<p><b>Interpretation.</b> Each sample function is a damped cosine with a random decay rate, random frequency and random phase. The random phase makes the mean zero, but the damping makes the power die out over time, which no stationary process can do.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q4a</span> (5 marks) $X(t)=Ae^{-Bt}$, $t\gt0$, where $A,B$ are independent and uniform on $[-1,1]$ and $[0,1]$. (i) Find the first-order density of the process. (ii) Compute $E[X(t)]$. (iii) Determine $R_{XX}(t,u)$. (iv) Is $X(t)$ WSS?</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Parts (ii)–(iv) are routine: split expectations by independence. Part (i) is the hard part: $X(t)$ is a function of <em>two</em> RVs. The clean way is to <b>condition on $B$</b>: for fixed $B=b$, $X(t)=Ae^{-bt}$ is just a scaled uniform, which is uniform. Then average the conditional PDF over $b$ (total probability for densities: $f_X(x)=\int f_{X|B}(x|b)\,f_B(b)\,db$).</p>
+<p>Fix $t\gt0$ throughout.</p>
+<p><b>(i) First-order PDF.</b></p>
+<p><b>Step 1: conditional PDF.</b> Given $B=b$, let $c=e^{-bt}\in[e^{-t},1]$. Then $X=cA$ with $A\sim U[-1,1]$, so $X$ is uniform on $[-c,c]$:</p>
+$$f_{X|B}(x\mid b)=\begin{cases}\dfrac{1}{2c}=\dfrac{e^{bt}}{2},&|x|\le e^{-bt}\\[6pt]0,&\text{otherwise.}\end{cases}$$
+<p><b>Step 2: average over $B$</b> ($f_B=1$ on $[0,1]$):</p>
+$$f_X(x;t)=\int_0^1\frac{e^{bt}}{2}\,\mathbf 1\{|x|\le e^{-bt}\}\,db .$$
+<p><b>Step 3: which $b$ are allowed?</b> The indicator is 1 when</p>
+$$\begin{aligned}
+|x|&\le e^{-bt}\\
+\iff\ \ln|x|&\le-bt\\
+\iff\ b&\le\frac{1}{t}\ln\frac1{|x|}=:b^*(x).
+\end{aligned}$$
+<p>So the integral runs over $0\le b\le\min(1,b^*)$. Three cases, according to where $|x|$ is:</p>
+<ul>
+<li><b>$|x|\le e^{-t}$</b> (the middle): then $b^*\ge1$, so every $b\in[0,1]$ qualifies:
+$$f_X(x;t)=\int_0^1\frac{e^{bt}}{2}\,db=\frac{e^{t}-1}{2t}.$$</li>
+<li><b>$e^{-t}\lt|x|\le1$</b>: then $0\le b^*\lt1$:
+$$\begin{aligned}
+f_X(x;t)&=\int_0^{b^*}\frac{e^{bt}}{2}\,db=\frac{e^{b^*t}-1}{2t}\\
+&=\frac{1}{2t}\Big(\frac{1}{|x|}-1\Big) &&\why{$e^{b^*t}=1/|x|$}
+\end{aligned}$$</li>
+<li><b>$|x|\gt1$</b>: impossible since $|X|\le|A|\le1$: $f_X=0$.</li>
+</ul>
+$$\boxed{f_X(x;t)=\begin{cases}\dfrac{e^{t}-1}{2t},&|x|\le e^{-t}\\[8pt]\dfrac{1}{2t}\Big(\dfrac{1}{|x|}-1\Big),&e^{-t}\lt|x|\le1\\[8pt]0,&|x|\gt1\end{cases}}$$
+<div data-plot="pyqAeBt"></div>
+<p><b>Check that it integrates to 1</b> (it's even, so double the right half):</p>
+$$\begin{aligned}
+2\Big[e^{-t}\cdot\frac{e^t-1}{2t}+\int_{e^{-t}}^1\frac{1}{2t}\Big(\frac1x-1\Big)dx\Big]&=\frac{1-e^{-t}}{t}+\frac1t\Big[\ln x-x\Big]_{e^{-t}}^{1}\\
+&=\frac{1-e^{-t}}{t}+\frac1t\big[(0-1)-(-t-e^{-t})\big]\\
+&=\frac{1-e^{-t}}{t}+\frac{t-1+e^{-t}}{t}\\
+&=1\ ✓
+\end{aligned}$$
+<p>The PDF depends on $t$ ⇒ the process is not SSS.</p>
+<p><b>(ii) Mean.</b></p>
+$$\begin{aligned}
+E[X(t)]&=E[A]\cdot E[e^{-Bt}] &&\why{independence}\\
+&=0\cdot\frac{1-e^{-t}}{t}=0 .
+\end{aligned}$$
+<p><b>(iii) ACF.</b></p>
+$$\begin{aligned}
+R_{XX}(t,u)&=E\big[Ae^{-Bt}\cdot Ae^{-Bu}\big]\\
+&=E[A^2]\cdot E\big[e^{-B(t+u)}\big] &&\why{independence}\\
+&=\frac13\cdot\int_0^1e^{-b(t+u)}\,db &&\why{$E[A^2]=\frac{(1-(-1))^2}{12}=\frac13$}\\
+&=\frac{1-e^{-(t+u)}}{3(t+u)}.
+\end{aligned}$$
+<p><b>(iv) WSS?</b> The mean is constant, but $R_{XX}(t,u)$ depends on $t+u$, not on $t-u$. E.g. $E[X^2(t)]=R_{XX}(t,t)=\frac{1-e^{-2t}}{6t}$ falls from $\frac13$ (as $t\to0$) towards 0. So $X(t)$ is <b>not WSS</b>.</p>
+<p><b>Interpretation.</b> Every sample function is an exponential decaying towards 0 from a random start $A$ at a random rate $B$. As time passes all paths squeeze towards 0: that's why the PDF gets taller and narrower (a flat top of width $2e^{-t}$) and the power decays.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q4a</span> (5 marks) The autocorrelation function of a random process is $R_{XX}(\tau)=25+\dfrac{4}{1+6\tau^2}$. Calculate the mean and variance of the process.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> $R_{XX}$ is given as a function of τ only, so the process is WSS. Two ACF properties do all the work: $R_X(0)=E[X^2]$ (total power) and $R_X(\infty)=m_X^2$ (DC power), valid since there is no periodic component.</p>
+<p><b>Step 1: the mean.</b> As $|\tau|\to\infty$ the covariance dies out and only the mean's contribution remains:</p>
+$$\begin{aligned}
+m_X^2&=\lim_{|\tau|\to\infty}R_{XX}(\tau)\\
+&=\lim_{|\tau|\to\infty}\Big(25+\frac{4}{1+6\tau^2}\Big)\\
+&=25+0=25\\
+\Rightarrow\quad m_X&=\pm5 .
+\end{aligned}$$
+<p><b>Step 2: the mean-square value.</b></p>
+$$\begin{aligned}
+E[X^2(t)]&=R_{XX}(0)\\
+&=25+\frac{4}{1+0}=29 .
+\end{aligned}$$
+<p><b>Step 3: the variance.</b></p>
+$$\begin{aligned}
+\sigma_X^2&=E[X^2]-m_X^2\\
+&=29-25=\mathbf4 .
+\end{aligned}$$
+<p><b>Answer:</b> $|m_X|=5$ (the ACF can't distinguish $+5$ from $-5$, since $X$ and $-X$ have the same ACF), $\sigma_X^2=4$.</p>
+<p><b>Interpretation.</b> Total power 29 = DC power 25 + AC (fluctuation) power 4. The autocovariance is $K_X(\tau)=\frac{4}{1+6\tau^2}$, which decays to 0, so the process is ergodic in the mean. See the plot in §5.</p></details></div>
+
+<h3>C. Ergodicity</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q4c</span> (5 marks) Define an ergodic random process. Given $X(t)=A\cos(\omega t+\theta)$, where $A,\omega$ are constants and θ is uniform over $(-\pi,\pi)$. Is $X(t)$ ergodic in both mean and autocorrelation? Justify.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Compute four things and compare in pairs: ensemble mean vs time mean, ensemble ACF vs time ACF. The ensemble side is the standard WSS calculation (§17B). For the time side, fix the outcome θ (one sample function) and average over $t$ from −T to T, then let T → ∞.</p>
+<p><b>Definition.</b> A WSS process is ergodic if time averages of (almost) every sample function equal the ensemble averages. Ergodic in the mean: $\langle x\rangle=\lim_{T\to\infty}\frac1{2T}\int_{-T}^{T}x(t)dt=E[X(t)]$. Ergodic in the autocorrelation: $\mathcal R_x(\tau)=\lim_{T\to\infty}\frac1{2T}\int_{-T}^{T}x(t)x(t+\tau)dt=R_X(\tau)$.</p>
+<p><b>Ensemble averages</b> (computed in §17B):</p>
+$$E[X(t)]=0,\qquad R_X(\tau)=\frac{A^2}{2}\cos\omega\tau .$$
+<p><b>Time mean</b> of the sample function $x(t)=A\cos(\omega t+\theta)$ with θ fixed:</p>
+$$\begin{aligned}
+\langle x\rangle&=\lim_{T\to\infty}\frac{1}{2T}\int_{-T}^{T}A\cos(\omega t+\theta)\,dt\\
+&=\lim_{T\to\infty}\frac{A}{2T\omega}\Big[\sin(\omega t+\theta)\Big]_{-T}^{T}\\
+&=\lim_{T\to\infty}\frac{A}{2T\omega}\big[\sin(\omega T+\theta)-\sin(-\omega T+\theta)\big]\\
+&=\lim_{T\to\infty}\frac{A\cos\theta\,\sin\omega T}{T\omega} &&\why{$\sin P-\sin Q=2\cos\frac{P+Q}2\sin\frac{P-Q}2$}\\
+&=0 &&\why{numerator bounded by $A$, denominator → ∞}
+\end{aligned}$$
+<p>$\langle x\rangle=0=E[X(t)]$ for <em>every</em> θ ⇒ <b>ergodic in the mean</b>.</p>
+<p><b>Time ACF:</b></p>
+$$\begin{aligned}
+\mathcal R_x(\tau)&=\lim_{T\to\infty}\frac{1}{2T}\int_{-T}^{T}A\cos(\omega t+\theta)\,A\cos(\omega t+\omega\tau+\theta)\,dt\\
+&=\lim_{T\to\infty}\frac{A^2}{4T}\int_{-T}^{T}\big[\cos\omega\tau+\cos(2\omega t+\omega\tau+2\theta)\big]dt &&\why{product-to-sum}\\
+&=\lim_{T\to\infty}\frac{A^2}{4T}\Big[2T\cos\omega\tau+\frac{\sin(2\omega t+\omega\tau+2\theta)}{2\omega}\Big|_{-T}^{T}\Big]\\
+&=\frac{A^2}{2}\cos\omega\tau+\lim_{T\to\infty}\frac{A^2\cdot(\text{something between }-\frac1\omega\text{ and }\frac1\omega)}{4T}\\
+&=\frac{A^2}{2}\cos\omega\tau .
+\end{aligned}$$
+<p>$\mathcal R_x(\tau)=R_X(\tau)$ for every θ ⇒ <b>ergodic in the autocorrelation</b>.</p>
+<p><b>Answer: yes</b>, $X(t)$ is ergodic in both the mean and the autocorrelation.</p>
+<p><b>Why it works / contrast.</b> Every sample function is the same cosine, just shifted in time; a long time average sweeps through all phases, which is exactly what the ensemble average (over θ) does. If instead the <em>amplitude</em> were random ($X=A\cos(\omega t+\theta)$ with $A$ random too), the time ACF would be $\frac{a^2}{2}\cos\omega\tau$ for the observed $a$, while the ensemble ACF is $\frac{E[A^2]}2\cos\omega\tau$: still mean-ergodic, but <em>not</em> ergodic in the ACF.</p></details></div>
+
+<h3>D. Gaussian processes: numericals</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q4b</span> (5 marks) $X(t)$ is a continuous-time Gaussian WSS process with mean $m_X=1$ and $R_X(\tau)=3-|\tau|$ for $-2\le\tau\le2$, and $R_X(\tau)=1$ elsewhere. (1) Find the joint PDF of $X(3)$, $X(-2)$. (2) Find $E[(X(1)+X(2)+X(3))^2]$.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> A Gaussian process is pinned down by its mean and <em>covariance</em>, so first convert the given <em>correlation</em> into covariance: $K_X(\tau)=R_X(\tau)-m_X^2=R_X(\tau)-1$. For part (2), expand the square: a mean-square of a sum of samples is the double sum of $R$ over all pairs (§5).</p>
+<p><b>Step 0: autocovariance.</b></p>
+$$K_X(\tau)=R_X(\tau)-1=\begin{cases}2-|\tau|,&|\tau|\le2\\0,&|\tau|\gt2.\end{cases}$$
+<p>(A triangle. Note $R$ is continuous at $|\tau|=2$: $3-2=1$ ✓.) So each sample has variance $K_X(0)=2$: $X(t)\sim N(1,2)$.</p>
+<p><b>(1)</b> The two instants are $5$ apart: $\tau=3-(-2)=5$, and $|\tau|\gt2$, so</p>
+$$\Cov[X(3),X(-2)]=K_X(5)=0 .$$
+<p>$X(3)$ and $X(-2)$ are jointly Gaussian (Gaussian process) and uncorrelated, hence <b>independent</b> (Gaussian property). Each is $N(1,2)$, so the joint PDF is the product of the two marginals:</p>
+$$\begin{aligned}
+f(x_1,x_2)&=\frac{1}{\sqrt{2\pi\cdot2}}e^{-\frac{(x_1-1)^2}{4}}\cdot\frac{1}{\sqrt{2\pi\cdot2}}e^{-\frac{(x_2-1)^2}{4}}\\
+&=\frac{1}{4\pi}\exp\Big\{-\frac{(x_1-1)^2+(x_2-1)^2}{4}\Big\}.
+\end{aligned}$$
+<p><b>(2)</b> Expand $(X_1+X_2+X_3)^2$ (writing $X_i=X(i)$) into all 9 products and use $E[X_iX_j]=R_X(i-j)$:</p>
+$$\begin{aligned}
+E\big[(X_1+X_2+X_3)^2\big]&=\sum_{i=1}^3\sum_{j=1}^3R_X(i-j)\\
+&=3R_X(0)+2\big[R_X(1)+R_X(1)+R_X(2)\big] &&\why{diagonal + each off-diagonal pair twice}\\
+&=3(3)+2\big[2+2+1\big] &&\why{$R(0)=3$, $R(1)=2$, $R(2)=1$}\\
+&=9+10=\mathbf{19}.
+\end{aligned}$$
+<p>(The off-diagonal pairs are (1,2) gap 1, (2,3) gap 1, (1,3) gap 2.)</p>
+<p><b>Check by mean + variance.</b> $S=X_1+X_2+X_3$ has mean $3m_X=3$ and variance $\sum\sum K(i-j)=3(2)+2[1+1+0]=10$, so $E[S^2]=10+3^2=19$ ✓.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q5c</span> (5 marks) $X(t)$ is a continuous-time Gaussian random process with mean $m_X(t)=3t$ and covariance $C_X(t_1,t_2)=9e^{-2|t_1-t_2|}$. Find $P[X(3)\lt6]$ and $P[X(1)+X(2)\gt2]$.</span>
+<details class="sol"><summary>Solution</summary>
+<p class="small">The paper prints $9e^{2|t_1-t_2|}$; that would violate $|C(\tau)|\le C(0)$ (it would grow without bound), so it must be $9e^{-2|t_1-t_2|}$, as in Leon-Garcia's version of this problem.</p>
+<p><b>What to notice.</b> The process is <em>not</em> WSS (mean $3t$ changes), but that doesn't matter: for a Gaussian process each sample, and each linear combination of samples, is Gaussian with mean and variance computed from $m_X(t)$ and $C_X$. Then standardise and use the Q-function.</p>
+<p><b>Part 1.</b> $X(3)$ has</p>
+$$\begin{aligned}
+E[X(3)]&=3\cdot3=9,\\
+\Var[X(3)]&=C_X(3,3)=9e^0=9,\quad\sigma=3 .
+\end{aligned}$$
+$$\begin{aligned}
+P[X(3)\lt6]&=P\Big[\frac{X(3)-9}{3}\lt\frac{6-9}{3}\Big]\\
+&=P[Z\lt-1]\\
+&=Q(1)=\mathbf{0.1587}.
+\end{aligned}$$
+<p><b>Part 2.</b> $S=X(1)+X(2)$ is a linear combination of jointly Gaussian RVs, so Gaussian.</p>
+$$\begin{aligned}
+E[S]&=m_X(1)+m_X(2)=3+6=9,\\[4pt]
+\Var[S]&=\Var X(1)+\Var X(2)+2\Cov[X(1),X(2)]\\
+&=C_X(1,1)+C_X(2,2)+2C_X(1,2)\\
+&=9+9+2\cdot9e^{-2}\\
+&=18(1+e^{-2})\\
+&=18\times1.1353=20.44,\qquad\sigma_S=4.521 .
+\end{aligned}$$
+$$\begin{aligned}
+P[S\gt2]&=P\Big[Z\gt\frac{2-9}{4.521}\Big]\\
+&=P[Z\gt-1.548]\\
+&=1-Q(1.548)\\
+&=1-0.0608=\mathbf{0.939}.
+\end{aligned}$$
+<p><b>Interpretation.</b> $X(3)$ is centred at 9; getting below 6 is a one-σ shortfall (≈16%). The sum is centred at 9 with σ ≈ 4.5; being above 2 is very likely. The positive covariance between $X(1)$ and $X(2)$ made the variance of the sum larger than 18.</p></details></div>
+
+<h3>E. Discrete-time processes &amp; random walk</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q4c</span> (5 marks) $X_n$ is a sequence of independent Bernoulli RVs, an iid process taking values in {0, 1}. An up–down counter is driven by +1 or −1: the input is $D_n=2X_n-1$, i.e. $D_n=+1$ if $X_n=1$ and $-1$ if $X_n=0$. Find the mean and variance of $D_n$.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> $D_n$ is a linear function of a Bernoulli RV, so use $E[aX+b]=aE[X]+b$ and $\Var[aX+b]=a^2\Var X$. Let $P(X_n=1)=p$ (the paper doesn't give $p$; for a fair source take $p=\frac12$).</p>
+<p><b>PMF of $D_n$:</b> $P(D_n=1)=p$, $P(D_n=-1)=1-p$.</p>
+<p><b>Mean.</b></p>
+$$\begin{aligned}
+E[D_n]&=(+1)\,p+(-1)(1-p)\\
+&=2p-1 .
+\end{aligned}$$
+<p><b>Variance.</b> Since $D_n^2=1$ always, $E[D_n^2]=1$:</p>
+$$\begin{aligned}
+\Var[D_n]&=E[D_n^2]-(E[D_n])^2\\
+&=1-(2p-1)^2\\
+&=4p(1-p).
+\end{aligned}$$
+<p>Check with the linear rule: $\Var[2X_n-1]=4\Var[X_n]=4p(1-p)$ ✓.</p>
+<p><b>For $p=\frac12$:</b> mean 0, variance 1.</p>
+<p><b>Going further (the counter itself).</b> The counter value after $n$ inputs is the random walk $W_n=\sum_{k=1}^nD_k$, with mean $n(2p-1)$, variance $4np(1-p)$ and autocovariance $4p(1-p)\min(n,m)$ (§11). The input process $D_n$ is iid, so it is SSS and WSS with $R_D[n,m]=(2p-1)^2$ for $n\ne m$ and 1 for $n=m$; the counter $W_n$ is not stationary.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q4c</span> (5 marks) Describe the random walk process in detail. Derive the expressions for the second-order joint PMF, the mean and the autocorrelation function.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Structure: definition → why it is a sum process (independent and stationary increments, Markov) → first-order PMF (needed for the second-order one) → second-order PMF by splitting into increments → mean → autocovariance → ACF. All derivations are in §11; here is the exam-length version.</p>
+<p><b>Description.</b> Let $X_k$ be iid Bernoulli($p$) and $Y_k=2X_k-1\in\{+1,-1\}$ with $P(Y_k=1)=p$. The random walk is</p>
+$$W_n=\sum_{k=1}^nY_k=W_{n-1}+Y_n,\qquad W_0=0 .$$
+<p>A particle moves one step right with probability $p$ or left with probability $q=1-p$ at each time instant. It is a discrete-time, discrete-valued sum process, so it has independent increments ($W_n$ and $W_m-W_n$ use disjoint $Y$'s), stationary increments ($W_m-W_n\sim W_{m-n}$) and the Markov property.</p>
+<p><b>First-order PMF.</b> If $k$ of the $n$ steps are $+1$, then $W_n=k-(n-k)=2k-n$. Setting this equal to $j$ gives $k=\frac{n+j}2$, and $k\sim$ Binomial($n,p$):</p>
+$$P(W_n=j)=\binom{n}{\frac{n+j}{2}}p^{\frac{n+j}{2}}q^{\frac{n-j}{2}},\qquad j\in\{-n,-n+2,\dots,n\},$$
+<p>and 0 if $n+j$ is odd.</p>
+<p><b>Second-order PMF</b> ($m\gt n$):</p>
+$$\begin{aligned}
+P(W_n=i,\ W_m=j)&=P(W_n=i,\ W_m-W_n=j-i) &&\why{same event}\\
+&=P(W_n=i)\,P(W_m-W_n=j-i) &&\why{independent increments}\\
+&=P(W_n=i)\,P(W_{m-n}=j-i) &&\why{stationary increments}\\
+&=\binom{n}{\frac{n+i}{2}}p^{\frac{n+i}{2}}q^{\frac{n-i}{2}}\cdot\binom{m-n}{\frac{m-n+j-i}{2}}p^{\frac{m-n+j-i}{2}}q^{\frac{m-n-j+i}{2}},
+\end{aligned}$$
+<p>nonzero only if $n+i$ and $m+j$ are even, $|i|\le n$, $|j-i|\le m-n$.</p>
+<p><b>Mean.</b></p>
+$$\begin{aligned}
+E[W_n]&=\sum_{k=1}^nE[Y_k]=n\big[p-(1-p)\big]=n(2p-1).
+\end{aligned}$$
+<p><b>Autocovariance</b> ($n\le m$). Since $Y_k-(2p-1)=2(X_k-p)$, the centred walk is $2\sum(X_k-p)$; all cross terms vanish by independence (W4):</p>
+$$\begin{aligned}
+K_W[n,m]&=E\Big[\Big(2\sum_{k=1}^n(X_k-p)\Big)\Big(2\sum_{l=1}^m(X_l-p)\Big)\Big]\\
+&=4\sum_{k=1}^{n}\sum_{l=1}^{m}E\big[(X_k-p)(X_l-p)\big]\\
+&=4\sum_{k=1}^{\min(n,m)}\Var[X_k]\\
+&=4p(1-p)\min(n,m).
+\end{aligned}$$
+<p><b>Autocorrelation:</b></p>
+$$\begin{aligned}
+R_W[n,m]&=K_W[n,m]+E[W_n]E[W_m]\\
+&=4p(1-p)\min(n,m)+nm(2p-1)^2 .
+\end{aligned}$$
+<p><b>Symmetric case</b> $p=\frac12$: $E[W_n]=0$, $\Var[W_n]=n$, $R_W[n,m]=\min(n,m)$.</p>
+<p><b>Conclusion.</b> The mean depends on $n$ (unless $p=\frac12$) and the ACF depends on $\min(n,m)$, not on $m-n$, so the random walk is <b>neither WSS nor SSS</b>; its spread grows like $\sqrt n$. In the limit of tiny, frequent steps it becomes the Wiener process.</p></details></div>
+
+<h3>F. Poisson and Wiener processes</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q5a</span> (5 marks) (i) What is a Poisson process? (ii) Let $\{N(t),t\in[0,\infty)\}$ be a Poisson process with rate λ = 0.5. (a) Find the probability of no arrivals in (3, 5]. (b) Find the probability that there is exactly one arrival in each of the intervals (0, 1], (1, 2], (2, 3] and (3, 4].</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>(i) Definition.</b> A counting process $N(t)$ is a Poisson process with rate $\lambda\gt0$ if (1) $N(0)=0$; (2) it has independent increments; (3) the number of arrivals in any interval of length $t$ is Poisson with mean λt: $P[N(s+t)-N(s)=k]=\frac{(\lambda t)^ke^{-\lambda t}}{k!}$, $k=0,1,\dots$ Equivalently, the inter-arrival times are iid exponential with mean $1/\lambda$. Consequences: $E[N(t)]=\Var[N(t)]=\lambda t$, stationary increments, not stationary itself.</p>
+<p><b>What to notice for (ii).</b> Only the <em>length</em> of each interval matters (stationary increments), and disjoint intervals are independent (independent increments).</p>
+<p><b>(a)</b> The interval (3, 5] has length 2, so the count is Poisson($\lambda\cdot2=1$):</p>
+$$\begin{aligned}
+P[N(5)-N(3)=0]&=P[N(2)=0]\\
+&=\frac{1^0e^{-1}}{0!}\\
+&=e^{-1}=\mathbf{0.3679}.
+\end{aligned}$$
+<p><b>(b)</b> Four disjoint intervals of length 1. Each count is Poisson(0.5), and they are independent:</p>
+$$\begin{aligned}
+P[\text{one in each}]&=\prod_{k=1}^{4}P\big[N(k)-N(k-1)=1\big] &&\why{independent increments}\\
+&=\big(P[N(1)=1]\big)^4 &&\why{stationary increments}\\
+&=\big(0.5\,e^{-0.5}\big)^4\\
+&=0.0625\,e^{-2}\\
+&\approx\mathbf{0.00846}.
+\end{aligned}$$
+<p><b>Sanity check.</b> $P[N(1)=1]=0.5e^{-0.5}=0.303$; four independent events of probability 0.303 each: $0.303^4\approx0.0085$ ✓. Note this is much smaller than $P[N(4)=4]=\frac{2^4e^{-2}}{24}=0.090$, because "exactly 4 in total" allows them to bunch up, while (b) forces one per interval.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q4c</span> (5 marks) Patients arrive at a doctor's office according to a Poisson process with rate λ = 1/10 per minute. The doctor will not see a patient until at least 3 patients are in the waiting room. (i) Find the expected waiting time until the first patient is admitted to see the doctor. (ii) What is the probability that nobody is admitted to see the doctor in the first hour?</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> "The first patient is admitted" happens exactly when the <b>3rd</b> patient arrives. So the waiting time is the 3rd arrival time $T_3$, which is Erlang(3, λ) (sum of 3 iid exponential inter-arrival times). For (ii), switch from a statement about $T_3$ to a statement about the count $N(t)$, which is Poisson: "$T_3\gt60$" ⇔ "fewer than 3 arrivals in 60 minutes".</p>
+<p><b>(i)</b> $T_3=\tau_1+\tau_2+\tau_3$, each $\tau_i\sim$ Exp(λ) with mean $1/\lambda=10$ min:</p>
+$$\begin{aligned}
+E[T_3]&=E[\tau_1]+E[\tau_2]+E[\tau_3] &&\why{linearity}\\
+&=\frac{3}{\lambda}=3\times10\\
+&=\mathbf{30\ minutes}.
+\end{aligned}$$
+<p><b>(ii)</b> In 60 minutes, $N(60)\sim$ Poisson($\lambda t$) with $\lambda t=\frac{60}{10}=6$:</p>
+$$\begin{aligned}
+P[\text{nobody admitted in first hour}]&=P[T_3\gt60]\\
+&=P[N(60)\le2]\\
+&=e^{-6}\Big(\frac{6^0}{0!}+\frac{6^1}{1!}+\frac{6^2}{2!}\Big)\\
+&=e^{-6}(1+6+18)\\
+&=25e^{-6}\\
+&\approx\mathbf{0.0620}.
+\end{aligned}$$
+<div data-plot="poisPmf6"></div>
+<p><b>Interpretation.</b> On average 6 patients arrive per hour, so having fewer than 3 is unusual (about 6%). Equivalent route (longer): integrate the Erlang PDF, $P[T_3\gt60]=\int_{60}^{\infty}\frac{\lambda(\lambda x)^2}{2}e^{-\lambda x}dx$, which gives the same $25e^{-6}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q4c</span> (5 marks) Let $X(t)$ be a Poisson process with rate λ. Find $P\big(X(t-d)=k\mid X(t)=j\big)$, $d\gt0$.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> We condition on the <em>later</em> count. $X(t-d)$ and $X(t)$ overlap, so they are dependent. Rewrite the joint event using the non-overlapping pieces $[0,t-d]$ and $(t-d,t]$, then apply independent and stationary increments, then Bayes' definition of conditional probability. Assume $0\lt d\lt t$ and write $s=t-d$.</p>
+<p><b>Step 1: conditional probability.</b></p>
+$$P\big(X(s)=k\mid X(t)=j\big)=\frac{P\big(X(s)=k,\ X(t)=j\big)}{P\big(X(t)=j\big)} .$$
+<p><b>Step 2: numerator via increments.</b> For $0\le k\le j$:</p>
+$$\begin{aligned}
+P\big(X(s)=k,\ X(t)=j\big)&=P\big(X(s)=k,\ X(t)-X(s)=j-k\big)\\
+&=P\big(X(s)=k\big)\,P\big(X(t)-X(s)=j-k\big) &&\why{independent increments}\\
+&=\frac{(\lambda s)^ke^{-\lambda s}}{k!}\cdot\frac{(\lambda d)^{j-k}e^{-\lambda d}}{(j-k)!} &&\why{interval lengths $s$ and $t-s=d$}
+\end{aligned}$$
+<p><b>Step 3: divide.</b> Note $e^{-\lambda s}e^{-\lambda d}=e^{-\lambda t}$ and $\lambda^k\lambda^{j-k}=\lambda^j$, so λ cancels completely:</p>
+$$\begin{aligned}
+P\big(X(s)=k\mid X(t)=j\big)&=\frac{\dfrac{\lambda^js^kd^{\,j-k}e^{-\lambda t}}{k!\,(j-k)!}}{\dfrac{\lambda^jt^je^{-\lambda t}}{j!}}\\
+&=\frac{j!}{k!\,(j-k)!}\cdot\frac{s^k\,d^{\,j-k}}{t^j}\\
+&=\binom{j}{k}\Big(\frac{s}{t}\Big)^k\Big(\frac{d}{t}\Big)^{j-k}.
+\end{aligned}$$
+$$\boxed{P\big(X(t-d)=k\mid X(t)=j\big)=\binom{j}{k}\Big(\frac{t-d}{t}\Big)^k\Big(\frac{d}{t}\Big)^{j-k},\quad k=0,1,\dots,j}$$
+<p>and 0 for $k\gt j$ (the count can't decrease). If $d\ge t$, then $t-d\le0$, $X(t-d)=0$, and the probability is 1 for $k=0$.</p>
+<p><b>Interpretation.</b> Given $j$ arrivals in $[0,t]$, each arrival independently lies in the earlier part $[0,t-d]$ with probability $\frac{t-d}{t}$ (they are uniformly scattered, Example 12.2). So the number in the earlier part is Binomial$\big(j,\frac{t-d}{t}\big)$, and the rate λ doesn't matter. Check: summing over $k$ gives $\big(\frac{t-d}{t}+\frac dt\big)^j=1$ ✓; mean $j\frac{t-d}{t}$.</p>
+<div data-plot="es22c"></div></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q4a(i)</span> Write a short note on the Wiener process. State the expectation, variance, autocorrelation and autocovariance function for a Wiener process $X(t)$.</span>
+<details class="sol"><summary>Model answer</summary>
+<p><b>Short note.</b> The Wiener process (Brownian motion) models the position of a particle buffeted by countless molecular collisions. It is the limit of a symmetric random walk with step size $h$ taken every δ seconds, as δ → 0 with $h^2=\alpha\delta$ (so the variance stays finite). By the CLT the limit is Gaussian. Formally, $\{X(t),t\ge0\}$ is a Wiener process with parameter α (or σ²) if</p>
+<ol>
+<li>$X(0)=0$;</li>
+<li>it has independent increments;</li>
+<li>it has stationary Gaussian increments: $X(t)-X(s)\sim N\big(0,\alpha(t-s)\big)$ for $t\gt s$;</li>
+<li>(its sample paths are continuous, but nowhere differentiable).</li>
+</ol>
+<p>First-order PDF: $f_X(x;t)=\dfrac{1}{\sqrt{2\pi\alpha t}}e^{-x^2/2\alpha t}$, $t\gt0$.</p>
+<p><b>Expectation:</b> $E[X(t)]=0$.</p>
+<p><b>Variance:</b> $\Var[X(t)]=\alpha t$ (grows linearly in time).</p>
+<p><b>Autocorrelation</b> (derivation for $t_1\le t_2$, using independent increments):</p>
+$$\begin{aligned}
+R_X(t_1,t_2)&=E\big[X(t_1)\{X(t_1)+(X(t_2)-X(t_1))\}\big]\\
+&=E[X^2(t_1)]+E[X(t_1)]\,E[X(t_2)-X(t_1)]\\
+&=\alpha t_1+0\\
+\Rightarrow\ R_X(t_1,t_2)&=\alpha\min(t_1,t_2).
+\end{aligned}$$
+<p><b>Autocovariance:</b> $C_X(t_1,t_2)=R_X(t_1,t_2)-0\cdot0=\alpha\min(t_1,t_2)$.</p>
+<p><b>Remarks.</b> It is a Gaussian process (any samples are jointly Gaussian, e.g. $(X(t_1),X(t_2))\sim N(0,0,\alpha t_1,\alpha t_2,\sqrt{t_1/t_2})$), Markov, and <b>not stationary</b> (neither WSS nor SSS: the variance $\alpha t$ and $R=\alpha\min(t_1,t_2)$ depend on absolute time). It is also the integral of white Gaussian noise.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="sheet"><span class="num">18</span>Formula sheet: Unit 4</h2>
+<div class="sheet">
+  <div><h4>Basics</h4>$X(t,\xi)$: fix ξ → sample function; fix $t$ → RV<br>CT: $t\in\mathbb R$; DT: $t\in\mathbb Z$<br>Exact: $f_X(\alpha_1..\alpha_N;t_1..t_N)$ ∀N<br>Average: $m_X(t)$, $R_X(t_1,t_2)$</div>
+  <div><h4>Moment functions</h4>$m_X(t)=E[X(t)]$<br>$R_X(t_1,t_2)=E[X(t_1)X(t_2)]$<br>$K_X=R_X-m_X(t_1)m_X(t_2)$<br>$\sigma_X^2(t)=R_X(t,t)-m_X^2(t)$<br>$R_{XY}=E[X(t_1)Y(t_2)]$, $K_{XY}=R_{XY}-m_Xm_Y$</div>
+  <div><h4>Process types</h4>Independent: $f=\prod f(\alpha_i;t_i)$<br>Uncorrelated: $K(t_i,t_j)=0$, $i\ne j$<br>Orthogonal: $R(t_i,t_j)=0$, $i\ne j$<br>Indep. ⇒ uncorr.; Gaussian: ⇔</div>
+  <div><h4>Stationarity</h4>SSS: all PDFs shift-invariant<br>WSS: $m_X$ const, $R_X(t,t+\tau)=R_X(\tau)$<br>SSS ⇒ WSS; WSS ⇒ SSS only if Gaussian<br>Test: compare $R(0,5)$ vs $R(1,6)$; $R(t,t)$ const?</div>
+  <div><h4>Standard results</h4>$A\cos(\omega_0t+\Theta)$, Θ~U(2π): $m=0$, $R=\frac{A^2}2\cos\omega_0\tau$<br>$A\cos\omega_0t+B\sin\omega_0t$ (uncorr., var σ²): $\sigma^2\cos\omega_0\tau$<br>$R_{XY}$ for $Y=B\cos-A\sin$: $-\sigma^2\sin\omega_0\tau$<br>$A\cos\omega_0t$: not WSS</div>
+  <div><h4>ACF properties (WSS)</h4>$R(0)=E[X^2]\ge0$ = power<br>$R(-\tau)=R(\tau)$<br>$|R(\tau)|\le R(0)$<br>$R(\infty)=m^2$ (no periodic part); $\sigma^2=R(0)-R(\infty)$<br>periodic $X$ ⇒ periodic $R$; $\mathcal F\{R\}\ge0$<br>$E[(\sum X(t_i))^2]=\sum\sum R(t_i-t_j)$</div>
+  <div><h4>Cross-correlation</h4>$R_{XY}(-\tau)=R_{YX}(\tau)$<br>$|R_{XY}|\le\sqrt{R_X(0)R_Y(0)}\le\frac12[R_X(0)+R_Y(0)]$<br>orthogonal: $R_{XY}=0$; uncorr.: $R_{XY}=m_Xm_Y$</div>
+  <div><h4>Gaussian process</h4>All samples jointly Gaussian $N(\boldsymbol\mu,\mathbf K)$<br>Fixed by $m_X$, $K_X$; WSS ⇒ SSS<br>uncorrelated ⇒ independent; linear ops keep it Gaussian<br>$\rho(t_1,t_2)=K(t_1,t_2)/\sqrt{K(t_1,t_1)K(t_2,t_2)}$</div>
+  <div><h4>Ergodicity</h4>$\langle x\rangle=\lim\frac1{2T}\int_{-T}^Tx\,dt$<br>$\mathcal R_x(\tau)=\lim\frac1{2T}\int x(t)x(t+\tau)dt$<br>mean-ergodic: $\langle x\rangle=m_X$ ⇐ $K_X(\tau)\to0$<br>$X=A$ (random const): not ergodic<br>random-phase cosine: ergodic in mean &amp; ACF</div>
+  <div><h4>PSD</h4>$S_X(\omega)=\int R_X(\tau)e^{-j\omega\tau}d\tau$<br>$R_X(\tau)=\frac1{2\pi}\int S_X e^{j\omega\tau}d\omega$<br>real, even, ≥ 0; power $=\frac1{2\pi}\int S_X d\omega$<br>$e^{-a|\tau|}\leftrightarrow\frac{2a}{a^2+\omega^2}$; $\delta\leftrightarrow1$; $\cos\omega_0\tau\leftrightarrow\pi[\delta(\omega\mp\omega_0)]$<br>LTI: $S_Y=|H|^2S_X$, $m_Y=H(0)m_X$</div>
+  <div><h4>Bernoulli family</h4>Bernoulli: $m=p$, $\sigma^2=pq$, iid, SSS<br>$2X-1$: $m=2p-1$, $\sigma^2=4pq$<br>$S_n$: $\binom nk p^kq^{n-k}$, $np$, $npq$, $K=pq\min(n,k)$<br>$W_n$: $\binom n{\frac{n+j}2}p^{\frac{n+j}2}q^{\frac{n-j}2}$ ($n+j$ even)<br>$\quad m=n(2p-1)$, $\sigma^2=4npq$, $K=4pq\min$</div>
+  <div><h4>Increments</h4>Joint PMF ($m\gt n$): $P(S_n=k)\,P(S_{m-n}=j-k)$<br>independent increments ⇒ Markov<br>stationary + independent incr., $X(0)=0$:<br>$\quad$mean ∝ t, var ∝ t, $K\propto\min(t_1,t_2)$ ⇒ not stationary</div>
+  <div><h4>Poisson process</h4>$P[N(t)=k]=\frac{(\lambda t)^ke^{-\lambda t}}{k!}$; mean = var = λt<br>$\tau_n$ iid Exp(λ); $T_n$ Erlang: $\frac{\lambda(\lambda x)^{n-1}}{(n-1)!}e^{-\lambda x}$, mean $n/\lambda$<br>$R=\lambda\min+\lambda^2t_1t_2$, $K=\lambda\min(t_1,t_2)$<br>$P[T_n\gt t]=P[N(t)\le n-1]$<br>Given $N(t)=1$: $T_1\sim U[0,t]$<br>$N(s)\mid N(t)=j\sim$ Bin$(j,s/t)$</div>
+  <div><h4>Wiener process</h4>$W(0)=0$; indep. stationary Gaussian increments<br>$W(t)\sim N(0,\alpha t)$, $W(t)-W(s)\sim N(0,\alpha(t-s))$<br>$R=K=\alpha\min(t_1,t_2)$; $\rho=\sqrt{t_1/t_2}$<br>limit of walk with $h^2=\alpha\delta$; not stationary</div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="answers"><span class="num">19</span>Answer key</h2>
+<h4>Self-check</h4>
+<ol class="answer-key">
+  <li>Fix $t$: a random variable $X(t)$. Fix ξ: a sample function (a deterministic waveform).</li>
+  <li>No: $t_1t_2$ is not a function of $t_1-t_2$ (e.g. $R(0,1)=3\ne R(1,2)=5$).</li>
+  <li>SSS ⇒ WSS (when $E[X^2]\lt\infty$). WSS ⇏ SSS in general; it does for Gaussian processes.</li>
+  <li>No: it isn't even ($R(-1)=e\gt R(0)=1$, which also breaks $|R|\le R(0)$).</li>
+  <li>$|m_X|=2$, $\sigma_X^2=10-4=6$.</li>
+  <li>Yes.</li>
+  <li>No: $E[N(t)]=\lambda t$ changes with time (and $K=\lambda\min(t_1,t_2)$).</li>
+  <li>$\Var=3\times2=6$; $\Cov=3\min(2,5)=6$.</li>
+  <li>Uniform on $[0,t]$.</li>
+  <li>0 (5 + 0 is odd).</li>
+  <li>$K_X(\tau)\to0$ as $|\tau|\to\infty$ (or $\int|K_X|\,d\tau\lt\infty$).</li>
+  <li>$E[X^2]=R_X(0)=\frac1{2\pi}\int_{-\infty}^{\infty}S_X(\omega)\,d\omega$.</li>
+</ol>
+<h4>Practice problems</h4>
+<ol class="answer-key">
+  <li>$m_X=0$; $R_X(t_1,t_2)=\sigma_A^2+\sigma_B^2t_1t_2$ (cross terms vanish). Not WSS (unless $\sigma_B=0$).</li>
+  <li>$m_X(t)=\frac1\pi[\sin(t+\pi)-\sin t]=-\frac2\pi\sin t$. Not WSS.</li>
+  <li>$R=\cos\omega_0t_1\cos\omega_0t_2+2\sin\omega_0t_1\sin\omega_0t_2=\frac32\cos\omega_0(t_1-t_2)-\frac12\cos\omega_0(t_1+t_2)$: not WSS. With $E[B^2]=1$: $R=\cos\omega_0(t_1-t_2)$, WSS.</li>
+  <li>(a) ✓ (b) ✓ (FT is a Gaussian, > 0) (c) ✓ (impulses with positive weights) (d) ✗ (FT $\frac{8\sin2\omega}{\omega}$ goes negative) (e) ✗ ($g(1)=2\gt g(0)$) (f) ✓ (FT $=\frac{1}{1+(\omega-1)^2}+\frac{1}{1+(\omega+1)^2}\gt0$).</li>
+  <li>$|m_X|=2$; power $R(0)=13$; variance 9; $S_X(\omega)=\frac{18}{1+\omega^2}+8\pi\delta(\omega)$.</li>
+  <li>$R_Y(\tau)=2e^{-|\tau|}+e^{-|\tau+1|}+e^{-|\tau-1|}$; $E[Y^2]=R_Y(0)=2+2e^{-1}=2.736$.</li>
+  <li>$X(1)\sim N(0,9)$: $P[X(1)\gt3]=Q(1)=0.1587$. $X(1)-X(2)\sim N\big(0,\ 18(1-e^{-1})=11.38\big)$, σ = 3.373: $P=2Q(0.889)=0.374$.</li>
+  <li>$m_X=2$, $R_X(\tau)=E[A^2]=5$ for all τ: WSS (even SSS). Not mean-ergodic: the time average of a path is $a$, not 2 ($K_X=1$ never decays).</li>
+  <li>$P[N(1)=3]=\frac{8e^{-2}}{6}=0.180$; $P[N(2)=4\mid N(1)=1]=P[N(1)=3]=0.180$; $E[N(3)]=\Var[N(3)]=6$; $\Cov[N(1),N(3)]=\lambda\min(1,3)=2$.</li>
+  <li>$P[T_1\lt4\mid N(10)=1]=0.4$. $P[N(4)=1\mid N(10)=3]=\binom31(0.4)(0.6)^2=0.432$.</li>
+  <li>$E=3$; $\Var=2.1$; $\Cov=5\times0.21=1.05$; $P=\big[\binom52(0.3)^2(0.7)^3\big]\big[\binom51(0.3)(0.7)^4\big]=0.3087\times0.3602=0.111$.</li>
+  <li>$P(W_6=2)=\binom64/64=\frac{15}{64}$. $P(W_2=0)P(W_4=2)=\frac12\cdot\frac14=\frac18$.</li>
+  <li>$\Var=6$; $P[|W(3)|\lt\sqrt6]=1-2Q(1)=0.683$; $\Cov=2\min(2,5)=4$; $\rho=\sqrt{2/5}=0.632$.</li>
+  <li>$R_Y[0]=2\sigma^2$, $R_Y[\pm1]=-\sigma^2$, else 0. $S_Y(\Omega)=2\sigma^2(1-\cos\Omega)$: zero at Ω = 0, largest at Ω = π ⇒ high-pass.</li>
+  <li>$m_Z=0$; $R_Z(\tau)=R_X(\tau)+R_Y(\tau)+E[X(t)]E[Y(t+\tau)]+E[Y(t)]E[X(t+\tau)]=R_X+R_Y$ (independence + zero means), a function of τ only ⇒ WSS.</li>
+</ol>
+
+<p class="muted small" style="margin-top:40px">Sources: lecturer's handwritten notes (pp. 83–121) and end-semester papers 2021–2026. Sections marked "Beyond class notes" (ACF/cross-correlation properties, ergodicity, power spectral density, random telegraph signal, merging/splitting) cover syllabus topics the handwritten notes skip; they follow standard textbook treatments (Schaum's Outline, Hsu, Ch. 5–6; Leon-Garcia).</p>
+</main>
+</body>
+</html>

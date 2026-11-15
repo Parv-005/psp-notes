@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSP Notes</title>
+<link rel="stylesheet" href="Notes/assets/style.css">
+<style>
+  main.home { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
+  .units { display: grid; gap: 14px; margin-top: 22px; }
+  .unit { display: block; padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg2); color: var(--fg); text-decoration: none; }
+  .unit:hover { border-color: var(--accent); text-decoration: none; }
+  .unit .n { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .unit h2 { margin: 2px 0 4px; font-size: 20px; border: 0; padding: 0; }
+  .unit p { margin: 0; color: var(--muted); font-size: 14.5px; }
+</style>
+</head>
+<body>
+<main class="home">
+  <header class="unit-head">
+    <div class="kicker">Probability &amp; Stochastic Processes</div>
+    <h1>PSP Notes</h1>
+    <p>Self-study notes, one page per unit: worked derivations, graphs, practice problems and fully solved past-paper questions. Use the ☰ Contents button inside a unit to jump around; ◐ switches dark mode.</p>
+  </header>
+  <div class="units">
+    <a class="unit" href="Notes/Unit1.html"><div class="n">Unit 1</div><h2>Probability</h2><p>Sample spaces, axioms, conditional probability, Bayes, independence, combinatorics</p></a>
+    <a class="unit" href="Notes/Unit2.html"><div class="n">Unit 2</div><h2>Random Variables</h2><p>CDF, PMF, PDF, standard distributions, expectation, variance, MGF, Markov &amp; Chebyshev</p></a>
+    <a class="unit" href="Notes/Unit3.html"><div class="n">Unit 3</div><h2>Multiple Random Variables</h2><p>Joint distributions, independence, conditional densities, covariance, jointly Gaussian, functions of RVs, CLT</p></a>
+    <a class="unit" href="Notes/Unit4.html"><div class="n">Unit 4</div><h2>Random Processes</h2><p>Mean &amp; autocorrelation, SSS/WSS, ergodicity, PSD, Bernoulli, random walk, Poisson, Wiener</p></a>
+    <a class="unit" href="Notes/Unit5.html"><div class="n">Unit 5</div><h2>Markov Chains &amp; Queues</h2><p>Transition matrices, Chapman–Kolmogorov, classification, stationary distributions, birth–death, M/M/1, M/M/1/N</p></a>
+  </div>
+</main>
+</body>
+</html>

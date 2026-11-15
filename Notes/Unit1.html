@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSP Unit 1 — Probability</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="assets/plot.js"></script>
+<script defer src="assets/unit1-figs.js"></script>
+<script defer src="assets/common.js"></script>
+</head>
+<body>
+<button id="tocbtn" class="tool">☰ Contents</button>
+<nav id="toc">
+  <div class="toc-title">PSP · Unit 1</div>
+  <div class="toc-sub">Probability: sample space, axioms, counting, conditional probability, Bayes</div>
+  <div class="toc-tools"></div>
+  <ol></ol>
+</nav>
+
+<main>
+<header class="unit-head">
+  <div class="kicker">Probability &amp; Stochastic Processes · Unit 1 · compact revision</div>
+  <h1>Probability: The Foundations</h1>
+  <p>Definitions of probability · sample space · events · σ-fields · counting · conditional probability · independence · total probability · Bayes' rule</p>
+</header>
+
+<div class="box tip">
+  <span class="bt">How to use these notes</span>
+  <p>This unit is written as a <b>compact revision</b>, since you already know it. Every unit uses the same colour code:</p>
+  <table>
+    <tr><td><span class="box def" style="display:inline-block;margin:0;padding:0 8px">Definition</span></td><td>exact definitions worth memorising</td></tr>
+    <tr><td><span class="box thm" style="display:inline-block;margin:0;padding:0 8px">Theorem / Result</span></td><td>results with proofs (proofs are asked in exams)</td></tr>
+    <tr><td><span class="box key" style="display:inline-block;margin:0;padding:0 8px">Key formula / Recipe</span></td><td>what to use, step by step</td></tr>
+    <tr><td><span class="box warn" style="display:inline-block;margin:0;padding:0 8px">Common mistake</span></td><td>traps that cost marks</td></tr>
+    <tr><td><span class="ex" style="display:inline-block;margin:0;padding:0 8px">Example</span></td><td>worked examples, levelled <span class="tag-lvl lvl-e">Easy</span><span class="tag-lvl lvl-m">Medium</span><span class="tag-lvl lvl-h">Exam</span></td></tr>
+    <tr><td><span class="tag-beyond">Beyond class notes</span></td><td>material not in your lecturer's handwritten notes; it is on the syllabus or asked in past papers, so it comes from Schaum / Leon-Garcia</td></tr>
+    <tr><td><span class="tag-pyq">PYQ</span></td><td>a past-year exam question, tagged with the paper it came from</td></tr>
+  </table>
+  <p class="small muted">Solutions are folded: click <b>▸ Solution</b>. Try each problem yourself first. The sidebar has buttons to open or close all solutions and to switch the theme.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="map"><span class="num">0</span>Unit map &amp; notation</h2>
+<p>The whole unit is one chain of ideas. Each box needs the one before it:</p>
+<figure class="diagram map-wrap"><div id="fig-map"></div><figcaption>How the ideas in Unit 1 depend on each other</figcaption></figure>
+
+<h3 id="notation">Notation used by your lecturer (and in these notes)</h3>
+<table>
+  <tr><th>Symbol</th><th>Meaning</th><th>Other books write</th></tr>
+  <tr><td>$\Omega$</td><td>sample space (set of all outcomes)</td><td>$S$</td></tr>
+  <tr><td>$\zeta$, $\omega$</td><td>a single outcome</td><td>$s$, $\xi$</td></tr>
+  <tr><td>$E, A, B$</td><td>events (subsets of $\Omega$)</td><td></td></tr>
+  <tr><td>$\mathcal F$</td><td>σ-field: the collection of events we can assign probability to</td><td>$\mathcal{A}$, "event space"</td></tr>
+  <tr><td>$A^c,\ \bar A,\ A'$</td><td>complement: "A does not occur"</td><td></td></tr>
+  <tr><td>$AB$</td><td>shorthand for $A\cap B$: "both occur"</td><td></td></tr>
+  <tr><td>$A\cup B$</td><td>"at least one occurs"</td><td>$A+B$ (old books)</td></tr>
+  <tr><td>$P(A\mid B)$ or $P(A/B)$</td><td>probability of $A$ given $B$ has occurred</td><td></td></tr>
+  <tr><td>$\phi$ or $\varnothing$</td><td>impossible (null) event</td><td></td></tr>
+  <tr><td>$n_A$</td><td>number of times $A$ occurred in $n$ trials</td><td></td></tr>
+  <tr><td>$^nC_k=\binom nk$</td><td>number of ways to choose $k$ from $n$</td><td>$C(n,k)$</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="experiment"><span class="num">1</span>Random experiments, sample space &amp; events</h2>
+
+<div class="box why"><span class="bt">Why this matters</span>
+<p>Probability is a <b>mathematical model of chance</b>. Before we can calculate anything, we must say exactly <em>what can happen</em> (the sample space) and <em>which questions we are allowed to ask</em> (the events). Everything later in the course (random variables, processes, Markov chains) is built on this.</p></div>
+
+<div class="box def"><span class="bt">Probabilistic model (lecturer's three conditions)</span>
+<p>An experiment can be modelled probabilistically if:</p>
+<ol>
+  <li>it can be <b>repeated under identical conditions</b>;</li>
+  <li>on every trial the outcome is <b>subject to chance</b>, and the measure of this chance is called <em>probability</em>;</li>
+  <li>over a large number of trials the outcomes show <b>statistical regularity</b>: the relative frequencies settle down (see the graph in §5).</li>
+</ol></div>
+
+<p>For a die: a mathematical model needs three things:</p>
+<ol>
+  <li>a <b>sample space</b> $\Omega=\{1,2,3,4,5,6\}$;</li>
+  <li><b>events</b> $E\subset\Omega$, e.g. $E=\{2,4,6\}$ = "even";</li>
+  <li>a <b>probability</b> $E\mapsto P(E)$, the measure of the chance that $E$ occurs.</li>
+</ol>
+<p>The model is <b>complete</b> if and only if we can assign a probability to <em>every</em> event associated with $\Omega$.</p>
+
+<div class="box def"><span class="bt">Definitions</span>
+<ul>
+  <li><b>Outcome</b> $\zeta$: one possible result of a single trial.</li>
+  <li><b>Sample space</b> $\Omega$: the set of all outcomes. It can be <em>finite</em> (die), <em>countably infinite</em> (number of tosses until the first head: $\{1,2,3,\dots\}$), or <em>uncountable</em> (a voltage reading in $[0,5]$).</li>
+  <li><b>Event</b>: a subset of $\Omega$. An event "occurs" if the outcome lies in it.</li>
+  <li><b>Elementary (simple) event</b>: a single outcome $\{\zeta\}$. <b>Sure event</b>: $\Omega$. <b>Impossible event</b>: $\varnothing$.</li>
+</ul></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 1.1: writing sample spaces</span>
+<ol>
+  <li>Toss a coin 3 times: $\Omega=\{HHH,HHT,HTH,HTT,THH,THT,TTH,TTT\}$, so 8 outcomes.<br>Event "exactly two heads" $=\{HHT,HTH,THH\}$.</li>
+  <li>Roll a die until a 6 appears; record the number of rolls: $\Omega=\{1,2,3,\dots\}$, countably infinite.</li>
+  <li>Measure the lifetime of a bulb: $\Omega=[0,\infty)$, uncountable.</li>
+</ol></div>
+
+<!-- ============================================================ -->
+<h2 id="sets"><span class="num">2</span>Set operations (event algebra)</h2>
+<p>Since events are sets, combining events means doing set operations on them. Picture each one with a Venn diagram: the rectangle is $\Omega$, and the shaded part is the event.</p>
+<div class="plots-row" id="venn-row"></div>
+
+<table>
+  <tr><th>Words</th><th>Set notation</th></tr>
+  <tr><td>at least one of $A$, $B$ occurs</td><td>$A\cup B$</td></tr>
+  <tr><td>both occur</td><td>$A\cap B = AB$</td></tr>
+  <tr><td>$A$ does not occur</td><td>$A^c$</td></tr>
+  <tr><td>$A$ occurs but not $B$</td><td>$A\cap B^c = A-B$</td></tr>
+  <tr><td>exactly one occurs (symmetric difference)</td><td>$A\,\triangle\, B=(A\cap B^c)\cup(A^c\cap B)=(A\cup B)\cap\overline{(A\cap B)}$</td></tr>
+  <tr><td>neither occurs</td><td>$A^c\cap B^c=(A\cup B)^c$</td></tr>
+  <tr><td>$A$ and $B$ cannot happen together (<b>mutually exclusive / disjoint</b>)</td><td>$A\cap B=\varnothing$</td></tr>
+  <tr><td>if $A$ occurs then $B$ occurs</td><td>$A\subset B$</td></tr>
+</table>
+
+<div class="box key"><span class="bt">Laws you must know</span>
+<ul>
+  <li><b>Commutative, associative</b>: $A\cup B=B\cup A$, $(A\cup B)\cup C=A\cup(B\cup C)$, and the same for $\cap$.</li>
+  <li><b>Distributive</b>: $A\cap(B\cup C)=(A\cap B)\cup(A\cap C)$ and $A\cup(B\cap C)=(A\cup B)\cap(A\cup C)$.</li>
+  <li><b>De Morgan</b>: $\overline{A\cup B}=\bar A\cap\bar B$ and $\overline{A\cap B}=\bar A\cup\bar B$. These extend to any number of events.</li>
+  <li><b>Splitting a set</b>: $A=(A\cap B)\cup(A\cap B^c)$, and the two pieces are disjoint. This one identity solves half the exam problems.</li>
+</ul></div>
+
+<div class="box def"><span class="bt">Partition</span>
+<p>Events $A_1,\dots,A_n$ form a <b>partition</b> of $\Omega$ if they are pairwise disjoint ($A_i\cap A_j=\varnothing$ for $i\ne j$) and together cover everything ($\bigcup_i A_i=\Omega$). Exactly one of them happens on every trial. Partitions are the basis of the Total Probability Theorem (§9).</p></div>
+
+<!-- ============================================================ -->
+<h2 id="sigma"><span class="num">3</span>σ-field (sigma algebra) &amp; probability space</h2>
+
+<div class="box why"><span class="bt">Why do we need a σ-field?</span>
+<p>We want to assign probabilities to events and still be able to combine them. If we know $P(A)$, we must also be able to talk about $P(A^c)$. If we know $P(A_1),P(A_2),\dots$, we must be able to talk about "at least one of them". A σ-field is simply a collection of events that is <b>closed</b> under these operations, so the calculations never take us outside it.</p></div>
+
+<div class="box def"><span class="bt">Definition: σ-field</span>
+<p>A collection $\mathcal F$ of subsets of a non-empty set $\Omega$ is a <b>σ-field</b> over $\Omega$ if</p>
+<ol type="i">
+  <li>$\Omega\in\mathcal F$;</li>
+  <li>if $E\in\mathcal F$ then $E^c\in\mathcal F$ (closed under complement);</li>
+  <li>if $E_1,E_2,\ldots\in\mathcal F$ then $\bigcup_{i=1}^{\infty}E_i\in\mathcal F$ (closed under countable union).</li>
+</ol>
+<p class="small">Consequences: $\varnothing=\Omega^c\in\mathcal F$, and by De Morgan, $\mathcal F$ is also closed under countable intersections.</p></div>
+
+<h4>Examples from class</h4>
+<ol type="a">
+  <li>$\mathcal F_1=\{\varnothing,\Omega\}$: valid, the <b>trivial</b> (smallest) σ-field.</li>
+  <li>With one event $E_1$: $\mathcal F_2=\{\Omega,\varnothing,E_1,E_1^c\}$ is valid. It is the smallest σ-field containing $E_1$.</li>
+  <li>With two events $E_1,E_2$ we must include all their complements, unions and intersections:
+  $\mathcal F_3=\{\Omega,\varnothing,E_1,E_1^c,E_2,E_2^c,E_1\cup E_2,\ E_1\cup E_2^c,\ E_1^c\cup E_2,\ E_1^c\cup E_2^c,\ \dots\}$. In general this has 16 members, generated by the 4 "atoms" $E_1E_2,\ E_1E_2^c,\ E_1^cE_2,\ E_1^cE_2^c$.</li>
+  <li>$\Omega=\{1,2,3\}$:
+    <ul>
+      <li>$\mathcal F_0=\{\Omega,\varnothing\}$ (trivial)</li>
+      <li>$\mathcal F_1=\{\Omega,\varnothing,\{1\},\{2,3\}\}$</li>
+      <li>$\mathcal F_2=\{\Omega,\varnothing,\{1\},\{2\},\{2,3\},\{1,3\}\}$ <span class="muted small">(as written in class; note it is <b>not</b> closed under union, since $\{1\}\cup\{2\}=\{1,2\}$ is missing. Adding $\{1,2\}$ and $\{3\}$ gives the power set.)</span></li>
+      <li>$\mathcal F_3=$ the <b>power set</b>, all $2^3=8$ subsets. This is the <b>largest</b> σ-field.</li>
+    </ul></li>
+  <li>$\Omega=\mathbb R$: $\mathcal F_0=\{\varnothing,\mathbb R\}$ and $\mathcal F_1=\{\varnothing,\mathbb R,(-\infty,0),[0,\infty)\}$ are both valid.</li>
+</ol>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 3.1: checking a σ-field</span>
+<p>$\Omega=\{1,2,3,4\}$. Is $\mathcal G=\{\varnothing,\Omega,\{1\},\{2,3,4\},\{1,2\}\}$ a σ-field? If not, find the smallest σ-field containing $\{1\}$ and $\{1,2\}$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>No. $\{1,2\}^c=\{3,4\}\notin\mathcal G$, so condition (ii) fails.</p>
+<p>The smallest σ-field containing $\{1\},\{1,2\}$ is built from the atoms $\{1\},\{2\},\{3,4\}$ (the finest pieces the two sets cut $\Omega$ into). Take all unions of atoms, $2^3=8$ sets:</p>
+<p>$\{\varnothing,\{1\},\{2\},\{3,4\},\{1,2\},\{1,3,4\},\{2,3,4\},\Omega\}$.</p>
+</details></div>
+
+<div class="box def"><span class="bt">Probability space</span>
+<p>A probability space is the 3-tuple $(\Omega,\mathcal F,P)$, where $P:\mathcal F\to[0,1]$ maps <b>sets</b> (the domain) to <b>real numbers between 0 and 1</b> (the range). It measures the chance of occurrence of each element of $\mathcal F$.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="joint"><span class="num">4</span>Joint events (combined experiments)</h2>
+<p>If experiment 1 has sample space $\Omega_1$ and experiment 2 has $\Omega_2$, doing both gives the <b>combined sample space</b>, which is the <b>Cartesian product</b>:</p>
+$$\Omega_{12}=\Omega_1\times\Omega_2=\{(\zeta_1,\zeta_2):\zeta_1\in\Omega_1,\ \zeta_2\in\Omega_2\}.$$
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.1 (class): coin + die</span>
+<p>Toss a coin, $\Omega_1=\{0,1\}$, then throw a die, $\Omega_2=\{1,\dots,6\}$. Then $\Omega_{12}=\{01,02,\dots,06,\ 11,12,\dots,16\}$, which has $2\times6=12$ outcomes. Any subset, e.g. $B=\{11,12,06,05\}\subset\Omega_{12}$, is a <b>joint event</b>.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="definitions"><span class="num">5</span>Three definitions of probability</h2>
+
+<h3>(1) Laplace's classical definition</h3>
+$$P(A)=\frac{\text{number of outcomes favourable to }A}{\text{total number of possible outcomes}}$$
+<p>Valid <b>only</b> when there are finitely many outcomes and they are <b>equally likely</b>. It is circular ("equally likely" already means "equally probable"), and it fails for a loaded die. This is where counting (§7) comes in.</p>
+
+<h3>(2) Relative-frequency definition</h3>
+<p>Repeat the experiment $n$ times. If $A$ occurs $n_A$ times, then</p>
+$$P(A)=\lim_{n\to\infty}\frac{n_A}{n}.$$
+<p>This captures "statistical regularity". The graph below simulates 600 throws of a fair die (fixed random seed) and plots the running fraction of sixes. It wanders a lot early on, then settles near $1/6\approx0.167$. Its weakness is that we can never actually take $n\to\infty$.</p>
+<div data-plot="relfreq"></div>
+
+<h3>(3) Kolmogorov's axiomatic definition (the one we actually use)</h3>
+<div class="box def"><span class="bt">Axioms of probability</span>
+<p>Let $\Omega$ be a sample space and $\mathcal F$ a σ-field over $\Omega$. A real-valued set function $P$ on $\mathcal F$ is a <b>probability</b> if</p>
+<ol type="i">
+  <li>$P(\Omega)=1$</li>
+  <li>$P(E)\ge0$ for every $E\in\mathcal F$</li>
+  <li>if $E_1\cap E_2=\varnothing$ (mutually exclusive) then $P(E_1\cup E_2)=P(E_1)+P(E_2)$.<br>
+  Countable version: if $A_1,A_2,\dots$ are pairwise disjoint, $P\big(\bigcup_{k=1}^\infty A_k\big)=\sum_{k=1}^\infty P(A_k)$.</li>
+</ol>
+<p class="small">The axioms do not say <em>what</em> the probabilities are. They are the rules any sensible assignment must obey. The classical and relative-frequency definitions both satisfy them.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="properties"><span class="num">6</span>Consequences of the axioms (with proofs)</h2>
+<p>Every rule below follows from the three axioms. Exams often say "prove using the axioms", so know these proofs.</p>
+
+<div class="box thm"><span class="bt">Result 1: $P(\varnothing)=0$</span>
+<p><b>Proof.</b> $\Omega=\Omega\cup\varnothing$, and $\Omega,\varnothing$ are mutually exclusive. By axiom (iii), $P(\Omega)=P(\Omega)+P(\varnothing)$, so $P(\varnothing)=0$. ∎</p></div>
+
+<div class="box thm"><span class="bt">Result 2: complement rule $P(E^c)=1-P(E)$</span>
+<p><b>Proof.</b> $E\cup E^c=\Omega$ and $E\cap E^c=\varnothing$. By axioms (iii) and (i), $P(E)+P(E^c)=1$. ∎</p>
+<p class="small">Use it whenever a question says <b>"at least one"</b>: $P(\text{at least one})=1-P(\text{none})$.</p></div>
+
+<div class="box thm"><span class="bt">Result 3: $P(A\cap B^c)=P(A)-P(A\cap B)$</span>
+<p><b>Proof.</b> $A=(A\cap B)\cup(A\cap B^c)$, and the two pieces are disjoint. By axiom (iii), $P(A)=P(AB)+P(AB^c)$. ∎</p></div>
+
+<div class="box thm"><span class="bt">Result 4: monotonicity. If $A\subset B$ then $P(A)\le P(B)$; also $0\le P(A)\le1$</span>
+<p><b>Proof.</b> If $A\subset B$ then $B=A\cup(B\cap A^c)$ (disjoint), so $P(B)=P(A)+P(BA^c)\ge P(A)$ by axiom (ii). Taking $B=\Omega$ gives $P(A)\le1$. ∎</p></div>
+
+<div class="box thm"><span class="bt">Result 5: addition rule $P(A\cup B)=P(A)+P(B)-P(A\cap B)$</span>
+<p><b>Proof.</b> $A\cup B=A\cup(A^c\cap B)$ is a disjoint union, so $P(A\cup B)=P(A)+P(A^cB)$. By Result 3 (with the roles swapped), $P(A^cB)=P(B)-P(AB)$. ∎</p>
+<p class="small">Why subtract? The overlap $A\cap B$ is counted once inside $A$ and again inside $B$.</p></div>
+
+<div class="box thm"><span class="bt">Result 6: inclusion–exclusion for three events <span class="tag-pyq">PYQ ×2</span></span>
+$$P(A\cup B\cup C)=P(A)+P(B)+P(C)-P(AB)-P(AC)-P(BC)+P(ABC)$$
+<p><b>Proof.</b> Put $D=B\cup C$. By Result 5, $P(A\cup D)=P(A)+P(D)-P(A\cap D)$.</p>
+<ul>
+  <li>$P(D)=P(B)+P(C)-P(BC)$.</li>
+  <li>By the distributive law $A\cap D=(AB)\cup(AC)$, so $P(A\cap D)=P(AB)+P(AC)-P(AB\cap AC)=P(AB)+P(AC)-P(ABC)$.</li>
+</ul>
+<p>Substituting both gives the result. ∎</p></div>
+
+<div class="box key"><span class="bt">Useful inequalities</span>
+<ul>
+  <li><b>Boole</b>: $P(A\cup B)\le P(A)+P(B)$, and in general $P(\bigcup A_i)\le\sum P(A_i)$.</li>
+  <li><b>Bonferroni</b>: $P(A\cap B)\ge P(A)+P(B)-1$. For example $P(A)=0.9$ and $P(B)=0.8$ give $P(AB)\ge0.7$.</li>
+  <li>$P(A\cap B)\le \min\{P(A),P(B)\}\le \max\{P(A),P(B)\}\le P(A\cup B)$.</li>
+</ul></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 6.1: everything from three numbers</span>
+<p>Given $P(A)=0.9$, $P(B)=0.8$ and $P(A\cap B)=0.75$, find $P(A\cup B)$, $P(A\cap B^c)$, $P(A^c\cap B)$, $P(A^c\cap B^c)$ and $P(A^c\cup B^c)$.</p>
+<details class="sol"><summary>Solution</summary>
+<ul>
+  <li>$P(A\cup B)=0.9+0.8-0.75=\mathbf{0.95}$</li>
+  <li>$P(AB^c)=P(A)-P(AB)=0.9-0.75=\mathbf{0.15}$</li>
+  <li>$P(A^cB)=P(B)-P(AB)=0.8-0.75=\mathbf{0.05}$</li>
+  <li>$P(A^cB^c)=P\big((A\cup B)^c\big)=1-0.95=\mathbf{0.05}$ (De Morgan)</li>
+  <li>$P(A^c\cup B^c)=P\big((AB)^c\big)=1-0.75=\mathbf{0.25}$</li>
+</ul>
+<p class="small muted">Check: the four "atoms" $AB, AB^c, A^cB, A^cB^c$ must add to 1: $0.75+0.15+0.05+0.05=1$ ✓.</p>
+</details></div>
+
+<div class="box tip"><span class="bt">Exam trick: the four-atom table</span>
+<p>For any question about two events, fill in this 2×2 table. Every probability asked is a sum of cells.</p>
+<table class="center">
+<tr><th></th><th>$B$</th><th>$B^c$</th><th>total</th></tr>
+<tr><th>$A$</th><td>$P(AB)$</td><td>$P(AB^c)$</td><td>$P(A)$</td></tr>
+<tr><th>$A^c$</th><td>$P(A^cB)$</td><td>$P(A^cB^c)$</td><td>$P(A^c)$</td></tr>
+<tr><th>total</th><td>$P(B)$</td><td>$P(B^c)$</td><td>1</td></tr>
+</table></div>
+
+<h3>Two examples from class (infinite sequences)</h3>
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 6.2 (class)</span>
+<p>(a) A fair coin is tossed repeatedly. What is the probability that the <b>first</b> head occurs on the $n$-th toss?<br>
+(b) What is the probability that a head occurs within the first $n$ tosses? What is the probability that a head occurs eventually?</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) "First head on toss $n$" means the sequence $TT\cdots TH$ ($n-1$ tails, then a head). Its probability is $(1/2)^{n-1}\cdot(1/2)=2^{-n}$.</p>
+<p>(b) Let $A_i$ = "first head on toss $i$". These events are mutually exclusive, so by axiom (iii)</p>
+$$P(\text{head within }n\text{ tosses})=\sum_{i=1}^{n}2^{-i}=1-2^{-n}.$$
+<p>Equivalently, $1-P(\text{all }n\text{ tails})=1-2^{-n}$. As $n\to\infty$ this tends to $1$: a head occurs <b>eventually</b> with probability 1 (countable additivity).</p>
+</details></div>
+
+<!-- ============================================================ -->
+<h2 id="counting"><span class="num">7</span>Counting (combinatorial analysis) <span class="tag-beyond">Beyond class notes</span></h2>
+<div class="box why"><span class="bt">Why</span>
+<p>The classical definition needs "number of favourable outcomes ÷ total outcomes". When outcomes number in the thousands you can't list them, so you count them with these rules. The syllabus lists "Basics of Combinatorial Analysis".</p></div>
+
+<div class="box key"><span class="bt">The counting toolkit</span>
+<ol>
+  <li><b>Multiplication principle</b>: if a task is done in $k$ stages with $n_1,n_2,\dots,n_k$ choices each, there are $n_1n_2\cdots n_k$ ways. For example, a 4-digit PIN has $10^4$ possibilities.</li>
+  <li><b>Permutations</b> (order matters, no repetition): arranging $k$ out of $n$ distinct objects gives $^nP_k=\dfrac{n!}{(n-k)!}$. Arranging all $n$ gives $n!$.</li>
+  <li><b>Combinations</b> (order doesn't matter): choosing $k$ out of $n$ gives $\binom nk=\dfrac{n!}{k!(n-k)!}$.</li>
+  <li><b>With repetition, ordered</b>: $n^k$, e.g. $k$ tosses of a coin give $2^k$ sequences.</li>
+  <li><b>Arrangements with identical objects</b>: $\dfrac{n!}{n_1!\,n_2!\cdots n_r!}$ (multinomial). For example, BANANA has $\frac{6!}{3!\,2!\,1!}=60$ arrangements.</li>
+</ol></div>
+
+<div class="box recipe"><span class="bt">Recipe: which formula?</span>
+<ol>
+  <li>Does <b>order</b> matter (positions, ranks, sequences)? Yes → permutations / $n^k$. No → combinations.</li>
+  <li>Is <b>repetition</b> allowed (with replacement)? Yes → $n^k$. No → $^nP_k$ or $\binom nk$.</li>
+  <li>For "exactly $r$ of type 1 and $s$ of type 2" from a mixed group, use $\dfrac{\binom{N_1}{r}\binom{N_2}{s}}{\binom{N_1+N_2}{r+s}}$ (hypergeometric).</li>
+  <li>For "at least one", count the complement.</li>
+</ol></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 7.1: committee (Schaum 1.33)</span>
+<p>A committee of 5 is chosen at random from 5 men and 10 women. Find P(2 men and 3 women) and P(all women).</p>
+<details class="sol"><summary>Solution</summary>
+<p>Total number of committees: $\binom{15}{5}=3003$, all equally likely.</p>
+<p>P(2M, 3W) $=\dfrac{\binom52\binom{10}3}{3003}=\dfrac{10\cdot120}{3003}=\dfrac{1200}{3003}\approx\mathbf{0.400}$.</p>
+<p>P(all women) $=\dfrac{\binom{10}5}{3003}=\dfrac{252}{3003}\approx\mathbf{0.084}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 7.2: birthday problem (Schaum 1.32)</span>
+<p>$n$ people are in a room (365 equally likely birthdays, ignoring leap years). Find P(at least two share a birthday).</p>
+<details class="sol"><summary>Solution</summary>
+<p>Count the complement A = "all birthdays different". In order, the people can have $365\cdot364\cdots(365-n+1)$ distinct-birthday assignments, out of $365^n$ total.</p>
+$$P(\text{at least two share})=1-\frac{365\cdot364\cdots(365-n+1)}{365^n}.$$
+<p>For $n=23$ this is $\approx\mathbf{0.507}$, which is already more than half. This surprises most people.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 7.3: drawing cards</span>
+<p>Two cards are drawn without replacement from a 52-card deck. Find P(both aces).</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>Counting:</b> $\dfrac{\binom42}{\binom{52}2}=\dfrac{6}{1326}=\dfrac1{221}$.</p>
+<p><b>Sequentially</b> (multiplication rule, §8): $\dfrac4{52}\cdot\dfrac3{51}=\dfrac1{221}$. Both methods agree.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="conditional"><span class="num">8</span>Conditional probability &amp; the multiplication rule</h2>
+
+<div class="box why"><span class="bt">Why</span>
+<p>Information changes probabilities. If you're told "the die shows an even number", the chance of a 6 rises from 1/6 to 1/3. Conditioning on $B$ means <b>throwing away every outcome outside $B$</b> and re-scaling, so $B$ becomes the new sample space.</p></div>
+
+<div class="box def"><span class="bt">Definition</span>
+$$P(A\mid B)=\frac{P(A\cap B)}{P(B)},\qquad P(B)\gt0.$$
+<p><b>Relative-frequency motivation (class):</b> in $n$ trials, $B$ occurs $n_B$ times and both occur $n_{AB}$ times. Among the trials where $B$ occurred, the fraction where $A$ also occurred is</p>
+$$\frac{n_{AB}}{n_B}=\frac{n_{AB}/n}{n_B/n}\ \longrightarrow\ \frac{P(AB)}{P(B)}.$$</div>
+
+<div id="fig-cond" class="diagram"></div>
+
+<p>Rearranging the definition both ways gives $P(AB)=P(A\mid B)P(B)=P(B\mid A)P(A)$, and therefore</p>
+$$P(A\mid B)=\frac{P(A)\,P(B\mid A)}{P(B)}\qquad\text{(the seed of Bayes' rule)}$$
+
+<div class="box key"><span class="bt">Observations (class) and properties</span>
+<ol type="i">
+  <li>$P(A\mid B)\ge0$.</li>
+  <li>If $B\subset A$ then $P(A\mid B)=\dfrac{P(B)}{P(B)}=1$: if $B$ happened, $A$ surely happened.</li>
+  <li>If $A\subset B$ then $P(A\mid B)=\dfrac{P(A)}{P(B)}\ge P(A)$: knowing $B$ can only make $A$ more likely.</li>
+  <li>If $A\cap B=\varnothing$ then $P(A\mid B)=0$.</li>
+  <li>$P(\Omega\mid B)=1$, and $P(A\cup C\mid B)=P(A\mid B)+P(C\mid B)$ if $A\cap C=\varnothing$. So $P(\cdot\mid B)$ satisfies all three axioms: it is a genuine probability on the reduced space $B$.</li>
+  <li>Hence every rule from §6 holds conditionally, e.g. $P(A^c\mid B)=1-P(A\mid B)$.</li>
+</ol></div>
+
+<div class="box thm"><span class="bt">Multiplication (chain) rule</span>
+<p>If $P(A_1\cap\cdots\cap A_{n-1})\gt0$, then</p>
+$$P(A_1\cap A_2\cap\cdots\cap A_n)=P(A_1)\,P(A_2\mid A_1)\,P(A_3\mid A_1A_2)\cdots P(A_n\mid A_1\cdots A_{n-1}).$$
+<p class="small">Use it for <b>sequential draws without replacement</b>. It is also the same idea behind Markov chains in Unit 5.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 8.1: dice with information (Schaum 1.40)</span>
+<p>Two fair dice are thrown. Let A = "both faces equal". Find $P(A)$, and $P(A\mid B)$ where B = "sum ≤ 3".</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(A)=6/36=1/6$. $B=\{(1,1),(1,2),(2,1)\}$ and $A\cap B=\{(1,1)\}$.</p>
+<p>$P(A\mid B)=\dfrac{1/36}{3/36}=\mathbf{\tfrac13}$. Equivalently, the reduced space $B$ has 3 equally likely points and 1 of them is in A. The information doubled the probability.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 8.2: chips without replacement (Schaum 1.42)</span>
+<p>A lot of 100 chips contains 20 defective. Two are drawn without replacement. Find P(both defective).</p>
+<details class="sol"><summary>Solution</summary>
+<p>Let $D_1$, $D_2$ be the events that the first and second chips are defective. Then $P(D_1)=20/100$ and $P(D_2\mid D_1)=19/99$, since 99 chips remain and 19 of them are defective.</p>
+<p>By the chain rule, $P(D_1D_2)=0.2\times\frac{19}{99}\approx\mathbf{0.0384}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 8.3: proving the chain rule for 3 events <span class="tag-pyq">MS 2024 Q1a(c)</span></span>
+<p>Show that $P(A\cap B\cap C)=P(A\mid B\cap C)\,P(B\mid C)\,P(C)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Use the definition of conditional probability twice:</p>
+$$\text{RHS}=\frac{P(A\cap B\cap C)}{P(B\cap C)}\cdot\frac{P(B\cap C)}{P(C)}\cdot P(C)=P(A\cap B\cap C).\ \blacksquare$$
+<p class="small">This assumes $P(B\cap C)\gt0$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="independence"><span class="num">9</span>Independence</h2>
+
+<div class="box def"><span class="bt">Definition</span>
+<p>Events $A$ and $B$ are <b>independent</b> if</p>
+$$P(A\cap B)=P(A)\,P(B).$$
+<p>Equivalently, when $P(B)\gt0$: $P(A\mid B)=P(A)$. Knowing that B happened doesn't change the chance of A.</p></div>
+
+<div class="box warn"><span class="bt">Common mistake: independent ≠ mutually exclusive</span>
+<p>Mutually exclusive means $P(AB)=0$: if one happens, the other <b>cannot</b>. That is strong <em>dependence</em>. If $P(A),P(B)\gt0$, disjoint events are <b>never</b> independent, because $0\ne P(A)P(B)$.</p>
+<p>Independence is about probabilities. You usually can't see it on a Venn diagram.</p></div>
+
+<div class="box thm"><span class="bt">Theorem (class): complements of independent events are independent</span>
+<p>If $A,B$ are independent, so are $(A,\bar B)$, $(\bar A,B)$ and $(\bar A,\bar B)$.</p>
+<p><b>Proof.</b></p>
+<ol>
+  <li>$P(A\bar B)=P(A)-P(AB)=P(A)-P(A)P(B)=P(A)\big(1-P(B)\big)=P(A)P(\bar B)$.</li>
+  <li>$(\bar A,B)$ follows by the same argument with the roles swapped.</li>
+  <li>$P(\bar A\bar B)=P(\overline{A\cup B})=1-P(A)-P(B)+P(A)P(B)=\big(1-P(A)\big)\big(1-P(B)\big)=P(\bar A)P(\bar B)$. ∎</li>
+</ol></div>
+
+<div class="box def"><span class="bt">Three or more events</span>
+<p>$A,B,C$ are <b>(mutually) independent</b> if <em>all four</em> of these hold:</p>
+$$P(AB)=P(A)P(B),\quad P(AC)=P(A)P(C),\quad P(BC)=P(B)P(C),\quad P(ABC)=P(A)P(B)P(C).$$
+<p>If only the first three hold, they are <b>pairwise independent</b>. Pairwise independence does <b>not</b> imply mutual independence (see the dice PYQ in §12). For $n$ events, every sub-collection must factorise, which is $2^n-n-1$ conditions.</p></div>
+
+<div class="box key"><span class="bt">Reliability of systems (independent components)</span>
+<p>Component $k$ fails with probability $p_k$, independently of the others.</p>
+<ul>
+  <li><b>Series</b> (works only if <em>all</em> work): $P(\text{works})=\prod_{k=1}^n(1-p_k)$.</li>
+  <li><b>Parallel</b> (works if <em>at least one</em> works): $P(\text{works})=1-\prod_{k=1}^n p_k$.</li>
+</ul>
+<div id="fig-sys"></div></div>
+
+<!-- ============================================================ -->
+<h2 id="bayes"><span class="num">10</span>Total probability theorem &amp; Bayes' rule</h2>
+
+<div class="box why"><span class="bt">Why</span>
+<p>Often $P(B)$ is hard to get directly, but easy <b>once you know which "case" you're in</b>: which factory, which basket, male or female. Total probability <b>averages over the cases</b>. Bayes then <b>reverses</b> the conditioning: from "P(effect | cause)" to "P(cause | effect)".</p></div>
+
+<div id="fig-partition" class="diagram"></div>
+
+<div class="box thm"><span class="bt">Total probability theorem</span>
+<p>Let $A_1,A_2,\dots,A_n$ be a partition of $\Omega$, i.e. $A_i\cap A_j=\varnothing$ for $i\ne j$ and $\bigcup A_i=\Omega$. Then for any event $B$,</p>
+$$P(B)=\sum_{i=1}^{n}P(B\mid A_i)\,P(A_i).$$
+<p><b>Proof (class).</b> $B=B\cap\Omega=B\cap\big(\bigcup_i A_i\big)=\bigcup_i(B\cap A_i)$, and the pieces $B\cap A_i$ are disjoint. By axiom (iii), $P(B)=\sum_iP(B\cap A_i)=\sum_iP(B\mid A_i)P(A_i)$. ∎</p></div>
+
+<div class="box thm"><span class="bt">Bayes' theorem</span>
+$$P(A_i\mid B)=\frac{P(A_i)\,P(B\mid A_i)}{\sum_{j=1}^{n}P(A_j)\,P(B\mid A_j)}$$
+<p>Here $P(A_i)$ is the <b>prior</b> (before seeing B), $P(B\mid A_i)$ is the <b>likelihood</b>, and $P(A_i\mid B)$ is the <b>posterior</b> (after seeing B). The denominator is just $P(B)$ from total probability.</p></div>
+
+<div class="box recipe"><span class="bt">Recipe for every Bayes problem</span>
+<ol>
+  <li>Name the <b>cases</b> $A_1,\dots,A_n$ (they must form a partition) and the <b>observed event</b> $B$.</li>
+  <li>Write the priors $P(A_i)$ and the likelihoods $P(B\mid A_i)$ from the question.</li>
+  <li>Draw a <b>tree</b>: first branch = case, second branch = B or not B. Multiply along each path.</li>
+  <li>$P(B)$ = sum of the path products that end in B.</li>
+  <li>$P(A_i\mid B)$ = (path product for $A_i$ and B) ÷ $P(B)$.</li>
+</ol></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 10.1 (class): smokers</span>
+<p>45% of a population are female and 55% male. 70% of males and 10% of females smoke. Find the probability that a randomly chosen smoker is male.</p>
+<details class="sol" open><summary>Solution</summary>
+<div id="fig-tree"></div>
+<p>Cases: M, F with $P(M)=0.55$ and $P(F)=0.45$. Observed: S (smoker), with $P(S\mid M)=0.7$ and $P(S\mid F)=0.1$.</p>
+<p>$P(S)=0.55(0.7)+0.45(0.1)=0.385+0.045=0.43$</p>
+$$P(M\mid S)=\frac{0.385}{0.43}=\mathbf{0.895}$$
+<p class="small muted">Before the information, P(male) was 0.55. Learning "smoker" raised it to 0.895.</p>
+</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 10.2: two plants (Schaum 1.41)</span>
+<p>Plant 1 makes 1000 parts, of which 100 are defective. Plant 2 makes 2000 parts, of which 150 are defective. A randomly chosen part is defective. Find P(it came from plant 1).</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(P_1)=1/3$, $P(D\mid P_1)=0.1$, $P(P_2)=2/3$, $P(D\mid P_2)=0.075$.</p>
+<p>$P(D)=\frac13(0.1)+\frac23(0.075)=\frac{250}{3000}$.</p>
+<p>$P(P_1\mid D)=\dfrac{100/3000}{250/3000}=\mathbf{0.4}$.</p>
+<p>Shortcut: 100 of the 250 defective parts come from plant 1.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 10.3: binary channel</span>
+<p>A binary channel sends 0 with probability 0.6 and 1 with probability 0.4. A sent 0 is received as 1 with probability 0.1. A sent 1 is received as 0 with probability 0.2. Find (a) P(receive 1), (b) P(sent 1 | received 1), (c) P(error).</p>
+<details class="sol"><summary>Solution</summary>
+<ol type="a">
+  <li>$P(R_1)=P(R_1\mid S_0)P(S_0)+P(R_1\mid S_1)P(S_1)=0.1(0.6)+0.8(0.4)=0.06+0.32=\mathbf{0.38}$</li>
+  <li>$P(S_1\mid R_1)=0.32/0.38\approx\mathbf{0.842}$</li>
+  <li>An error happens when 0 is sent and 1 received, or 1 is sent and 0 received: $0.6(0.1)+0.4(0.2)=\mathbf{0.14}$</li>
+</ol></details></div>
+
+<!-- ============================================================ -->
+<h2 id="mistakes"><span class="num">11</span>Common mistakes &amp; self-check</h2>
+<div class="box warn"><span class="bt">Common mistakes in Unit 1</span>
+<ul>
+  <li>Writing $P(A\cup B)=P(A)+P(B)$ without checking that $A\cap B=\varnothing$.</li>
+  <li>Assuming independence when the problem doesn't say so, especially for draws <b>without replacement</b>, which are dependent.</li>
+  <li>Confusing $P(A\mid B)$ with $P(B\mid A)$. In general they are very different, and Bayes converts one into the other.</li>
+  <li>Thinking "disjoint" means "independent". It's the opposite (see §9).</li>
+  <li>Using Bayes with cases that don't form a <b>partition</b> (overlapping, or not covering everything).</li>
+  <li>For "at least one", adding probabilities instead of using $1-P(\text{none})$.</li>
+  <li>Taking pairwise independence of three events as enough for $P(ABC)=P(A)P(B)P(C)$.</li>
+</ul></div>
+
+<h3>Self-check (answers in the Answer Key)</h3>
+<ol class="checks">
+  <li>Can two events with positive probability be both mutually exclusive and independent?</li>
+  <li>If $P(A\mid B)=P(A)$, is $P(B\mid A)=P(B)$? (Assume both probabilities are positive.)</li>
+  <li>Is $\{\varnothing,\Omega,\{a\},\{b\}\}$ a σ-field on $\Omega=\{a,b,c\}$?</li>
+  <li>If $A\subset B$, which is bigger: $P(A\mid B)$ or $P(A)$?</li>
+  <li>True or false: $P(A\cup B\mid C)=P(A\mid C)+P(B\mid C)$ always.</li>
+  <li>How many members does the power-set σ-field of a 4-element $\Omega$ have?</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="practice"><span class="num">12</span>Practice problems</h2>
+<p>Answers (not full solutions) are in the Answer Key at the end. Do these before the PYQs.</p>
+<ol class="practice">
+  <li><span class="tag-lvl lvl-e">E</span>$\Omega=\{a,b,c\}$ with $P(\{a,c\})=0.75$ and $P(\{b,c\})=0.6$. Find $P(a)$, $P(b)$ and $P(c)$.</li>
+  <li><span class="tag-lvl lvl-e">E</span>An urn has 8 white and 4 red balls. Two are drawn without replacement. Find P(both white).</li>
+  <li><span class="tag-lvl lvl-e">E</span>How many distinct arrangements of the letters of PROBABILITY are there?</li>
+  <li><span class="tag-lvl lvl-m">M</span>A box has 3 red and 5 blue balls. Three are drawn at random. Find P(exactly 2 red).</li>
+  <li><span class="tag-lvl lvl-m">M</span>A pair of fair dice is thrown 10 times. Find P(at least one double six).</li>
+  <li><span class="tag-lvl lvl-m">M</span>Two boys and two girls take four seats in a row at random. Find P(the girls take both end seats).</li>
+  <li><span class="tag-lvl lvl-m">M</span>$A,B$ are independent with $P(A\cap B)=0.16$ and $P(A\cup B)=0.64$. Find $P(A)$ and $P(B)$ (assume they are equal).</li>
+  <li><span class="tag-lvl lvl-m">M</span>Express in terms of $A,B,C$: (a) B or C occurs but not A; (b) exactly one of the three occurs.</li>
+  <li><span class="tag-lvl lvl-h">H</span>Of 100 patients, 10 receive a drug that raises the cure rate from 50% to 75%. A patient is known to be cured. Find P(they received the drug).</li>
+  <li><span class="tag-lvl lvl-h">H</span>A system has components 1 and 2 in parallel, and that block in series with component 3. The failure probabilities are 0.1, 0.2 and 0.05, independent. Find P(system works).</li>
+  <li><span class="tag-lvl lvl-h">H</span>Show that if $P(A)\gt P(B)\gt0$, then $P(A\mid B)\gt P(B\mid A)$.</li>
+  <li><span class="tag-lvl lvl-h">H</span>A test detects a disease with probability 0.99 if it is present and gives a false positive with probability 0.02. 1% of people have the disease. A person tests positive. Find P(disease).</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="pyq"><span class="num">13</span>Past-year questions (fully solved)</h2>
+<p class="muted small">Grouped by topic. Tag format: MS = mid-sem, ES = end-sem; then year and question number. "ES 2022/23" is the paper saved as both <code>endsem 2022.pdf</code> and <code>INECC06_ITECC06_2023.pdf</code>.</p>
+
+<h3>A. Axioms, set identities &amp; the addition rule</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022/23 Q1a</span> (5 marks)</span>
+<p>$P[A]=1/4$, $P[B]=1/8$, $P[C]=5/8$, $P[D]=3/8$. A and B are disjoint, while C and D are independent.<br>
+(i) Find $P[A\cap B]$, $P[A\cup B]$, $P[A\cap B^c]$, $P[A\cup B^c]$. (ii) Are A and B independent? (iii) Find $P[C\cap D^c]$ and $P[C^c\cup D^c]$. (iv) Are $C^c$ and $D^c$ independent?</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) Disjoint means $P[A\cap B]=\mathbf 0$, so $P[A\cup B]=\frac14+\frac18=\mathbf{\frac38}$.<br>
+$P[A\cap B^c]=P[A]-P[A\cap B]=\mathbf{\frac14}$.<br>
+Since $A\cap B=\varnothing$, $A\subset B^c$, hence $A\cup B^c=B^c$ and $P[A\cup B^c]=1-\frac18=\mathbf{\frac78}$.</p>
+<p>(ii) $P[A]P[B]=\frac1{32}\ne0=P[A\cap B]$, so they are <b>not independent</b>. Disjoint events with positive probabilities are always dependent.</p>
+<p>(iii) $C$, $D^c$ are independent (theorem in §9), so $P[C\cap D^c]=\frac58\cdot\frac58=\mathbf{\frac{25}{64}}$.<br>
+$P[C^c\cup D^c]=1-P[C\cap D]=1-\frac58\cdot\frac38=1-\frac{15}{64}=\mathbf{\frac{49}{64}}$.</p>
+<p>(iv) <b>Yes.</b> If C and D are independent, so are their complements: $P[C^cD^c]=\frac38\cdot\frac58=\frac{15}{64}=P[C^c]P[D^c]$.</p>
+</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022/23 Q1b</span> (5 marks)</span>
+<p>Show that (i) $P[A\cup B]\ge P[A]$, (ii) $P[A\cup B]\ge P[B]$, (iii) $P[A\cap B]\le P[A]$, (iv) $P[A\cap B]\le P[B]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>All four follow from <b>monotonicity</b>: if $E\subset F$ then $P(E)\le P(F)$. Proof: $F=E\cup(F\cap E^c)$ is a disjoint union, so $P(F)=P(E)+P(F\cap E^c)\ge P(E)$ by axioms (iii) and (ii).</p>
+<ul>
+  <li>(i), (ii): $A\subset A\cup B$ and $B\subset A\cup B$.</li>
+  <li>(iii), (iv): $A\cap B\subset A$ and $A\cap B\subset B$.</li>
+</ul>
+<p>Alternatively, for (i): $P[A\cup B]-P[A]=P[B]-P[AB]=P[A^cB]\ge0$.</p>
+</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022/23 Q1c</span> (5 marks)</span>
+<p>The symmetric difference is $A\triangle B=(A\cup B)\cap\overline{(A\cap B)}$. Show that (i) $P(\bar A\cup\bar B)=1-P(A\cap B)$, (ii) $P(A\cap B)=1-P(\bar A)-P(\bar B)$, (iii) $P(A\triangle B)=P(A\cup B)-P(A\cap B)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) De Morgan: $\bar A\cup\bar B=\overline{A\cap B}$. So by the complement rule, $P(\bar A\cup\bar B)=1-P(A\cap B)$. ∎</p>
+<p>(ii) <b>Careful: as printed, this is not true in general.</b> The correct identity is</p>
+$$P(A\cap B)=1-P(\bar A\cup\bar B)=1-\big[P(\bar A)+P(\bar B)-P(\bar A\cap\bar B)\big]=1-P(\bar A)-P(\bar B)+P(\bar A\cap\bar B).$$
+<p>It reduces to the printed form exactly when $P(\bar A\cap\bar B)=0$, i.e. when $A\cup B$ is the whole sample space. In general we only get the inequality $P(A\cap B)\ge1-P(\bar A)-P(\bar B)$ (Bonferroni). In the exam, prove the correct identity and state this condition.</p>
+<p>(iii) $A\cap B\subset A\cup B$, so $A\cup B=(A\triangle B)\cup(A\cap B)$, a disjoint union: the overlap and the "exactly one" part. By axiom (iii), $P(A\cup B)=P(A\triangle B)+P(A\cap B)$. ∎</p>
+<p class="small muted">Equivalently, $P(A\triangle B)=P(A)+P(B)-2P(A\cap B)$.</p>
+</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q1a</span> (4 marks)</span>
+<p>Given $P(A)=0.9$, $P(B)=0.8$ and $P(A\cap B)=0.75$, find (i) $P(A\cup B)$, (ii) $P(A\cap B^c)$, (iii) $P(A^c\cap B)$, (iv) $P(A^c\cup B^c)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>This is Example 6.1. Answers: (i) 0.95, (ii) 0.15, (iii) 0.05, (iv) 0.25. Part (iii) is printed as $P(A\cap B^c)$ a second time. The intended part is probably $P(A^c\cap B)=0.05$ or $P(A^c\cap B^c)=0.05$, and both give 0.05.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2025 Q1a</span> (3 marks)</span>
+<p>$P[A]=x$, $P[B]=y$, $P[A\cup B]=z$. Find $P[A\cap B]$, $P[A^c\cap B^c]$, $P[A^c\cup B^c]$, $P[A\cap B^c]$ and $P[A^c\cup B]$.</p>
+<details class="sol"><summary>Solution</summary>
+<ul>
+  <li>$P[A\cap B]=x+y-z$ (addition rule)</li>
+  <li>$P[A^c\cap B^c]=P[(A\cup B)^c]=1-z$</li>
+  <li>$P[A^c\cup B^c]=P[(A\cap B)^c]=1-(x+y-z)=1-x-y+z$</li>
+  <li>$P[A\cap B^c]=P[A]-P[A\cap B]=x-(x+y-z)=z-y$</li>
+  <li>$P[A^c\cup B]=1-P[(A^c\cup B)^c]=1-P[A\cap B^c]=1-z+y$</li>
+</ul></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q2a</span> <span class="tag-pyq">ES 2025 Q1b</span> (4–5 marks)</span>
+<p>Prove $P(A_1\cup A_2\cup A_3)=P(A_1)+P(A_2)+P(A_3)-P(A_1A_2)-P(A_1A_3)-P(A_2A_3)+P(A_1A_2A_3)$.</p>
+<details class="sol"><summary>Solution</summary><p>See Result 6 in §6, and write out every step: let $D=A_2\cup A_3$, apply the two-event addition rule twice, and use the distributive law.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2024 Q1a</span> (3 marks)</span>
+<p>(a) Find $P[A\cup B]$ if A and B are independent. (b) Find $P[A\cup B]$ if they are mutually exclusive. (c) Show $P[A\cap B\cap C]=P[A\mid B\cap C]P[B\mid C]P[C]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) $P(A)+P(B)-P(A)P(B)$, or equivalently $1-P(\bar A)P(\bar B)$.</p>
+<p>(b) $P(A)+P(B)$.</p>
+<p>(c) See Example 8.3.</p></details></div>
+
+<h3>B. Conditional probability &amp; independence</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2025 Q1b</span> (1 mark)</span>
+<p>Find $P[A\mid B]$ if (i) $A\cap B=\varnothing$, (ii) $A\subset B$, (iii) $A\supset B$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $0$. (ii) $P(A\cap B)=P(A)$, so the answer is $P(A)/P(B)$. (iii) $A\cap B=B$, so the answer is $1$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q1a</span> (5 marks)</span>
+<p>Events A and B are independent. Which of the following are true and which are false? Give reasons.<br>
+(i) $P(A\mid B)=P(A)$ &nbsp; (ii) $P(A\cup B\mid C)=P(A\mid C)+P(B\mid C)$ &nbsp; (iii) $P(A)=0$, or $P(B)=0$, or both &nbsp; (iv) $\dfrac{P(A\mid B)}{P(B)}=\dfrac{P(B\mid A)}{P(A)}$ &nbsp; (v) $P(AB)=P(A)P(B)$</p>
+<details class="sol"><summary>Solution</summary>
+<ol type="i">
+  <li><b>True</b> (for $P(B)\gt0$): $P(A\mid B)=P(AB)/P(B)=P(A)P(B)/P(B)=P(A)$.</li>
+  <li><b>False</b> in general. In fact $P(A\cup B\mid C)=P(A\mid C)+P(B\mid C)-P(AB\mid C)$, so it holds only if $P(ABC)=0$. Independence doesn't make that term vanish. Counterexample: take $C=\Omega$. Then LHS $=P(A)+P(B)-P(A)P(B)\ne P(A)+P(B)$ when both are positive.</li>
+  <li><b>False.</b> Independence doesn't force a zero probability. For two fair coin tosses, A = "first is H" and B = "second is H" are independent with $P=\frac12$ each. (Statement (iii) would follow if A and B were <em>both</em> independent and mutually exclusive.)</li>
+  <li><b>False</b> in general. With independence, LHS $=P(A)/P(B)$ and RHS $=P(B)/P(A)$. These are equal only if $P(A)=P(B)$.</li>
+  <li><b>True</b>: this is the definition of independence.</li>
+</ol></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q1c</span> (5 marks)</span>
+<p>Two fair dice are thrown. A = first die odd, B = second die odd, C = sum odd. Show that A, B, C are pairwise independent but not independent.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(A)=P(B)=\frac12$. The sum is odd exactly when one die is odd and the other even, so $P(C)=\frac12\cdot\frac12+\frac12\cdot\frac12=\frac12$.</p>
+<ul>
+  <li>$P(AB)=\frac14=P(A)P(B)$ ✓</li>
+  <li>$A\cap C$ = first odd <em>and</em> second even, so $P(AC)=\frac14=P(A)P(C)$ ✓</li>
+  <li>$B\cap C$ = second odd and first even, so $P(BC)=\frac14=P(B)P(C)$ ✓</li>
+</ul>
+<p>So they are <b>pairwise independent</b>. But $A\cap B\cap C$ = both odd <em>and</em> sum odd, which is impossible (odd + odd = even). So $P(ABC)=0\ne\frac18=P(A)P(B)P(C)$, and they are <b>not mutually independent</b>. ∎</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q1a</span> (5 marks)</span>
+<p>A box has 100 resistors:</p>
+<table class="center"><tr><th>Resistance</th><th>5% tolerance</th><th>10% tolerance</th><th>Total</th></tr>
+<tr><td>22 Ω</td><td>10</td><td>14</td><td>24</td></tr><tr><td>47 Ω</td><td>28</td><td>16</td><td>44</td></tr><tr><td>100 Ω</td><td>24</td><td>8</td><td>32</td></tr><tr><th>Total</th><td>62</td><td>38</td><td>100</td></tr></table>
+<p>One resistor is drawn at random. A = 47 Ω, B = 5% tolerance, C = 100 Ω. Find $P(A\mid B)$, $P(A\mid C)$ and $P(B\mid C)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>For equally likely draws, $P(X\mid Y)=n(X\cap Y)/n(Y)$.</p>
+<ul>
+  <li>$P(A\mid B)=\dfrac{28}{62}=\dfrac{14}{31}\approx\mathbf{0.452}$</li>
+  <li>$P(A\mid C)=0$: a resistor can't be both 47 Ω and 100 Ω.</li>
+  <li>$P(B\mid C)=\dfrac{24}{32}=\mathbf{0.75}$</li>
+</ul></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q1b</span> (5 marks)</span>
+<p>A submarine sinks a carrier only if two or more torpedoes hit. It fires three torpedoes, each hitting independently with probability 0.4. Find P(carrier sunk).</p>
+<details class="sol"><summary>Solution</summary>
+<p>P(exactly 2 hits) $=\binom32(0.4)^2(0.6)=3(0.16)(0.6)=0.288$.</p>
+<p>P(3 hits) $=0.4^3=0.064$.</p>
+<p>P(sunk) $=0.288+0.064=\mathbf{0.352}$. (This counting of hits is the binomial distribution from Unit 2.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q1b(ii)</span></span>
+<p>A series system of $n$ components works only if all $n$ work. The components fail independently, component $k$ with probability $p_k$. Find P(system works).</p>
+<details class="sol"><summary>Solution</summary>
+<p>P(works) $=P\big(\bigcap_k\{k\text{ works}\}\big)=\prod_{k=1}^n(1-p_k)$, by independence. (For a parallel system: $1-\prod p_k$.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q4b</span> (1 mark)</span>
+<p>A number is chosen at random from $\{1,\dots,100\}$. Given that it is divisible by 2, find P(it is divisible by 3 or 5).</p>
+<details class="sol"><summary>Solution</summary>
+<p>Given "even", the reduced space has 50 numbers. Even numbers divisible by 3 are multiples of 6: 16 of them. Even numbers divisible by 5 are multiples of 10: 10 of them. Both are multiples of 30: 3 of them.</p>
+<p>By inclusion–exclusion, $16+10-3=23$. So the probability is $\mathbf{23/50}=0.46$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2024 Q2a</span> (3 marks): geometric probability</span>
+<p>Two friends each arrive at a meeting point at a time uniformly distributed between 12 noon and 1 PM, independently. Find P(the first to arrive waits longer than 10 minutes).</p>
+<details class="sol"><summary>Solution</summary>
+<p>Let $X,Y$ be the arrival times in minutes after noon. The point $(X,Y)$ is uniform on the $60\times60$ square, so probability = area ÷ 3600. The first person waits more than 10 minutes exactly when $|X-Y|\gt10$: the two corner triangles in the figure.</p>
+<div data-plot="meet"></div>
+<p>Each triangle has legs of 50, so its area is $\frac12\cdot50^2=1250$.</p>
+$$P(|X-Y|\gt10)=\frac{2\times1250}{3600}=\frac{25}{36}\approx\mathbf{0.694}.$$
+</details></div>
+
+<h3>C. Total probability &amp; Bayes</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q1c</span> (5 marks)</span>
+<p>Basket 1 has 2 white and 1 black ball. Basket 2 has 1 white and 5 black balls. One ball is moved from basket 1 to basket 2, then one ball is drawn from basket 2. It is white. Find P(the transferred ball was black).</p>
+<details class="sol"><summary>Solution</summary>
+<p>Cases: $T_B$ (black moved) with $P=\frac13$, and $T_W$ (white moved) with $P=\frac23$.</p>
+<ul>
+  <li>If black was moved, basket 2 has 1W, 6B, so $P(W\mid T_B)=\frac17$.</li>
+  <li>If white was moved, basket 2 has 2W, 5B, so $P(W\mid T_W)=\frac27$.</li>
+</ul>
+<p>$P(W)=\frac13\cdot\frac17+\frac23\cdot\frac27=\frac1{21}+\frac4{21}=\frac5{21}$</p>
+$$P(T_B\mid W)=\frac{1/21}{5/21}=\mathbf{\frac15}.$$</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q1a</span> (5 marks)</span>
+<p>Flashlights of types 1, 2 and 3 last over 100 hours with probabilities 0.7, 0.4 and 0.3. The bin is 20% type 1, 30% type 2 and 50% type 3. (i) Find P(a random flashlight lasts over 100 h). (ii) Given that it lasted over 100 h, find P(it is type $j$) for $j=1,2,3$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $P(L)=0.2(0.7)+0.3(0.4)+0.5(0.3)=0.14+0.12+0.15=\mathbf{0.41}$.</p>
+<p>(ii) $P(1\mid L)=\frac{0.14}{0.41}=\frac{14}{41}\approx0.341$, $P(2\mid L)=\frac{12}{41}\approx0.293$, $P(3\mid L)=\frac{15}{41}\approx0.366$. Check: they sum to 1 ✓.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q1b(i)</span></span>
+<p>An inspector is 60% sure a suspect is guilty. New evidence shows the criminal has a characteristic that 20% of the population has. If the suspect has it, how sure should the inspector now be?</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(G)=0.6$. $P(C\mid G)=1$, since the criminal certainly has it. $P(C\mid G^c)=0.2$.</p>
+$$P(G\mid C)=\frac{0.6\times1}{0.6\times1+0.4\times0.2}=\frac{0.6}{0.68}=\frac{15}{17}\approx\mathbf{0.882}.$$</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q1c(i)</span></span>
+<p>An urn has two type-A coins (P(heads) = 1/4) and one type-B coin (P(heads) = 3/4). A coin is chosen at random and flipped, and it lands heads. Find P(it is type A).</p>
+<details class="sol"><summary>Solution</summary>
+$$P(A\mid H)=\frac{\frac23\cdot\frac14}{\frac23\cdot\frac14+\frac13\cdot\frac34}=\frac{1/6}{1/6+1/4}=\frac{2}{5}=\mathbf{0.4}.$$
+<p class="small muted">Part (ii) of this question (packages of 10 screws) uses the binomial distribution, so it is solved in Unit 2.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q1c</span> (5 marks)</span>
+<p>A binary channel sends 1 with probability 0.6 and 0 with probability 0.4. Each symbol is received correctly with probability 0.9 and flipped with probability 0.1. Find P(system error).</p>
+<details class="sol"><summary>Solution</summary>
+<div id="fig-channel"></div>
+<p>P(error) $=P(R_0\mid S_1)P(S_1)+P(R_1\mid S_0)P(S_0)=0.1(0.6)+0.1(0.4)=\mathbf{0.1}$.</p>
+<p class="small muted">Extension often asked: $P(S_1\mid R_1)=\frac{0.9(0.6)}{0.9(0.6)+0.1(0.4)}=\frac{0.54}{0.58}\approx0.931$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="sheet"><span class="num">14</span>Formula sheet: Unit 1</h2>
+<div class="sheet">
+  <div><h4>Axioms</h4>$P(\Omega)=1$, $P(E)\ge0$, and $P(\cup A_k)=\sum P(A_k)$ for disjoint $A_k$.</div>
+  <div><h4>Basic rules</h4>$P(\varnothing)=0$<br>$P(A^c)=1-P(A)$<br>$P(AB^c)=P(A)-P(AB)$<br>$A\subset B\Rightarrow P(A)\le P(B)$</div>
+  <div><h4>Addition</h4>$P(A\cup B)=P(A)+P(B)-P(AB)$<br>$P(A\cup B\cup C)=\sum P(A)-\sum P(AB)+P(ABC)$</div>
+  <div><h4>De Morgan</h4>$\overline{A\cup B}=\bar A\bar B$, &nbsp; $\overline{AB}=\bar A\cup\bar B$</div>
+  <div><h4>Counting</h4>$^nP_k=\frac{n!}{(n-k)!}$, &nbsp; $\binom nk=\frac{n!}{k!(n-k)!}$<br>ordered with replacement: $n^k$<br>identical objects: $\frac{n!}{n_1!\cdots n_r!}$</div>
+  <div><h4>Conditional</h4>$P(A\mid B)=\frac{P(AB)}{P(B)}$<br>$P(A_1\cdots A_n)=P(A_1)P(A_2\mid A_1)\cdots$</div>
+  <div><h4>Independence</h4>$P(AB)=P(A)P(B)$. It carries over to complements. For 3 events, all 4 product conditions must hold.</div>
+  <div><h4>Systems</h4>series: $\prod(1-p_k)$; &nbsp; parallel: $1-\prod p_k$</div>
+  <div><h4>Total probability</h4>$P(B)=\sum_i P(B\mid A_i)P(A_i)$, with $\{A_i\}$ a partition</div>
+  <div><h4>Bayes</h4>$P(A_i\mid B)=\dfrac{P(B\mid A_i)P(A_i)}{\sum_j P(B\mid A_j)P(A_j)}$</div>
+  <div><h4>Symmetric difference</h4>$P(A\triangle B)=P(A\cup B)-P(AB)=P(A)+P(B)-2P(AB)$</div>
+  <div><h4>Bounds</h4>$P(AB)\ge P(A)+P(B)-1$ (Bonferroni)<br>$P(\cup A_i)\le\sum P(A_i)$ (Boole)</div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="answers"><span class="num">15</span>Answer key</h2>
+<h4>Self-check</h4>
+<ol class="answer-key">
+  <li>No. Disjoint gives $P(AB)=0$, but independence needs $P(AB)=P(A)P(B)\gt0$.</li>
+  <li>Yes. $P(AB)=P(A)P(B)$ is symmetric in A and B.</li>
+  <li>No. The complement of $\{a\}$, which is $\{b,c\}$, is missing.</li>
+  <li>$P(A\mid B)=P(A)/P(B)\ge P(A)$.</li>
+  <li>False. It needs $P(AB\mid C)=0$.</li>
+  <li>$2^4=16$.</li>
+</ol>
+<h4>Practice problems</h4>
+<ol class="answer-key">
+  <li>$P(a)=0.4$, $P(b)=0.25$, $P(c)=0.35$.</li>
+  <li>$\frac8{12}\cdot\frac7{11}=\frac{14}{33}\approx0.424$.</li>
+  <li>$\frac{11!}{2!\,2!}=9{,}979{,}200$ (B and I each appear twice).</li>
+  <li>$\frac{\binom32\binom51}{\binom83}=\frac{15}{56}\approx0.268$.</li>
+  <li>$1-(35/36)^{10}\approx0.246$.</li>
+  <li>$\frac{2!\,2!}{4!}=\frac16$.</li>
+  <li>$P(A)=P(B)=0.4$, since the sum is 0.8 and the product is 0.16.</li>
+  <li>(a) $A^c\cap(B\cup C)$; (b) $AB^cC^c\cup A^cBC^c\cup A^cB^cC$.</li>
+  <li>$\frac{0.1(0.75)}{0.1(0.75)+0.9(0.5)}=\frac{0.075}{0.525}\approx0.143$.</li>
+  <li>$[1-(0.1)(0.2)](0.95)=0.98\times0.95=0.931$.</li>
+  <li>$P(A\mid B)=P(AB)/P(B)$ and $P(B\mid A)=P(AB)/P(A)$. A smaller denominator gives a larger value. (If $P(AB)=0$ both are 0, so the strict inequality needs $P(AB)\gt0$.)</li>
+  <li>$\frac{0.01(0.99)}{0.01(0.99)+0.99(0.02)}=\frac{0.0099}{0.0297}=\frac13$. Even with a 99% accurate test, a positive result means only a 33% chance of disease, because the disease is rare.</li>
+</ol>
+
+<p class="muted small" style="margin-top:40px">Sources: lecturer's handwritten notes (pp. 1–8), Schaum's Outline of Probability, Random Variables &amp; Random Processes (Hsu), Ch. 1. Past papers 2021–2026.</p>
+</main>
+</body>
+</html>

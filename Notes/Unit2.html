@@ -1,0 +1,1309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSP Unit 2 — Random Variables</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="assets/plot.js"></script>
+<script defer src="assets/unit2-figs.js"></script>
+<script defer src="assets/common.js"></script>
+</head>
+<body>
+<button id="tocbtn" class="tool">☰ Contents</button>
+<nav id="toc">
+  <div class="toc-title">PSP · Unit 2</div>
+  <div class="toc-sub">Random variables: CDF, PMF, PDF, expectation, Bernoulli/binomial/Poisson, uniform/exponential/Gaussian, MGF, conditional distributions, inequalities</div>
+  <div class="toc-tools"></div>
+  <ol></ol>
+</nav>
+
+<main>
+<header class="unit-head">
+  <div class="kicker">Probability &amp; Stochastic Processes · Unit 2 · full treatment</div>
+  <h1>Random Variables &amp; Their Distributions</h1>
+  <p>Random variable · CDF · PMF · PDF · mixed RVs · expectation &amp; variance · Bernoulli trials · binomial · Poisson &amp; the Poisson approximation · uniform · exponential · Gaussian &amp; Q-function · moment generating &amp; characteristic functions · conditional distributions · Markov &amp; Chebyshev inequalities</p>
+</header>
+
+<div class="box tip">
+  <span class="bt">How to use this unit</span>
+  <p>This is the most important unit of the course: everything in Units 3–5 (joint distributions, random processes, Markov chains, queues) is built from the ideas here. Read it in order. The colour code is the same as Unit 1:
+  <span class="box def" style="display:inline-block;margin:0;padding:0 8px">Definition</span>
+  <span class="box thm" style="display:inline-block;margin:0;padding:0 8px">Theorem / proof</span>
+  <span class="box key" style="display:inline-block;margin:0;padding:0 8px">Key formula / recipe</span>
+  <span class="box warn" style="display:inline-block;margin:0;padding:0 8px">Common mistake</span>
+  <span class="ex" style="display:inline-block;margin:0;padding:0 8px">Example</span>
+  levelled <span class="tag-lvl lvl-e">Easy</span><span class="tag-lvl lvl-m">Medium</span><span class="tag-lvl lvl-h">Exam</span>,
+  <span class="tag-beyond">Beyond class notes</span> for material not in the handwritten notes, and <span class="tag-pyq">PYQ</span> for past-paper questions.</p>
+  <p class="small muted">Solutions are folded. Try each one before opening it. The sidebar can open/close all solutions and switch theme.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="map"><span class="num">0</span>Unit map, notation &amp; maths warm-up</h2>
+<p>Here is the whole unit on one page. A random variable turns outcomes into numbers. Its CDF describes it completely. From the CDF we get the PMF (discrete case) or the PDF (continuous case), and from those, averages and the MGF. The named distributions are the ready-made models you will use again and again.</p>
+<figure class="diagram map-wrap"><div id="fig-map2"></div><figcaption>How the ideas in Unit 2 depend on each other</figcaption></figure>
+
+<h3 id="notation">Notation (your lecturer's, which these notes follow)</h3>
+<table>
+  <tr><th>Symbol</th><th>Meaning</th><th>Other books write</th></tr>
+  <tr><td>$X, Y, Z$ (capitals)</td><td>random variables (the <em>rule</em>)</td><td></td></tr>
+  <tr><td>$x$, $\alpha$, $\beta$ (lower-case / Greek)</td><td>a particular number the RV might take. The lecturer uses the "dummy variable" $\alpha$ a lot: $F_X(\alpha)=P(X\le\alpha)$</td><td>$x$, $u$</td></tr>
+  <tr><td>$F_X(\alpha)$</td><td>cumulative distribution function (CDF)</td><td>$F(x)$, $\mathrm{cdf}$</td></tr>
+  <tr><td>$P_X(x_k)$, $P(X=x_k)$, $p_k$</td><td>probability mass function (PMF), discrete RVs</td><td>$p_X(x)$, $p(x)$</td></tr>
+  <tr><td>$f_X(\alpha)$</td><td>probability density function (PDF)</td><td>$p_X(x)$ (some papers!)</td></tr>
+  <tr><td>$E[X]$, $m_X$, $\mu_X$, $\bar X$</td><td>expected value (mean)</td><td>$\langle X\rangle$</td></tr>
+  <tr><td>$\sigma_X^2$, $\operatorname{Var}[X]$</td><td>variance; $\sigma_X$ = standard deviation</td><td>$V(X)$</td></tr>
+  <tr><td>$M_X(s)$</td><td>moment generating function $E[e^{sX}]$</td><td>$m_X(t)$, $\phi(t)$</td></tr>
+  <tr><td>$\Phi_X(\omega)$</td><td>characteristic function $E[e^{j\omega X}]$</td><td>$\phi_X(\omega)$</td></tr>
+  <tr><td>$N(m,\sigma^2)$</td><td>Gaussian with mean $m$ and <b>variance</b> $\sigma^2$ (not std. dev.!)</td><td>$\mathcal N(\mu,\sigma^2)$</td></tr>
+  <tr><td>$Q(u)$, $\Phi(u)$</td><td>Gaussian tail $P(Z\gt u)$ and CDF $P(Z\le u)$ for $Z\sim N(0,1)$</td><td></td></tr>
+  <tr><td>$u(t)$, $\delta(t)$</td><td>unit step and Dirac delta (impulse)</td><td>$H(t)$</td></tr>
+  <tr><td>$X\sim$ Binomial$(n,p)$</td><td>"$X$ has the binomial distribution with parameters $n,p$"</td><td>$B(n,p)$</td></tr>
+  <tr><td>$F_X(\alpha^-)$, $F_X(\alpha^+)$</td><td>limit from the left / right: $\lim_{\epsilon\to0}F_X(\alpha\mp\epsilon)$</td><td></td></tr>
+</table>
+
+<h3 id="warmup">Maths warm-up: tools this unit uses</h3>
+<p>Every derivation in this unit uses one of the six tools below. Learn them once here and the proofs later become short.</p>
+
+<h4>(a) Unit step $u(t)$</h4>
+<div class="plots-row"><div data-plot="stepU"></div><div data-plot="stepU10"></div></div>
+<p>$u(t)=1$ for $t\gt0$ and $0$ for $t\lt0$ (the lecturer takes $u(0)=\tfrac12$; for CDFs we will want the value $1$ at the jump, see §2). The shifted step $u(t-a)$ switches on at $t=a$. A <b>staircase</b> is a sum of shifted steps: $\sum_k p_k\,u(t-t_k)$ has a jump of height $p_k$ at each $t_k$. That is exactly what a discrete CDF looks like.</p>
+
+<h4>(b) Dirac delta (impulse) $\delta(t)$</h4>
+<div class="plots-row"><div data-plot="delta"></div></div>
+<p>Think of a rectangle of width $\epsilon$ and height $1/\epsilon$ (area 1). Let $\epsilon\to0$: it becomes infinitely tall and thin but <b>keeps area 1</b>. That limit is $\delta(t)$. We draw it as an arrow, and the number beside the arrow is its <b>area (weight)</b>, not its height. Three facts are all we need:</p>
+<ul>
+  <li>$\displaystyle\int_{-\infty}^{\infty}\delta(t)\,dt=1$, and $\int_{-\infty}^{t}\delta(\tau)d\tau=u(t)$. So $\dfrac{d}{dt}u(t)=\delta(t)$: <b>differentiating a jump gives an impulse</b>.</li>
+  <li>Sifting: $\displaystyle\int g(t)\,\delta(t-a)\,dt=g(a)$.</li>
+  <li>$c\,\delta(t-a)$ is an impulse of area $c$ at $t=a$.</li>
+</ul>
+
+<h4>(c) Series you must recognise</h4>
+$$\sum_{k=0}^{\infty}r^k=\frac1{1-r}\ (|r|\lt1),\qquad \sum_{k=0}^{\infty}\frac{\lambda^k}{k!}=e^{\lambda},$$
+$$\sum_{k=0}^{n}\binom nk a^k b^{n-k}=(a+b)^n,\qquad e^{x}=\sum_{k=0}^{\infty}\frac{x^k}{k!}.$$
+<p>The exponential series gives every Poisson result; the binomial theorem gives every binomial result.</p>
+
+<h4>(d) The gamma integral (saves a lot of integration by parts)</h4>
+$$\int_0^\infty x^n e^{-ax}\,dx=\frac{n!}{a^{n+1}}\qquad(a\gt0,\ n=0,1,2,\dots)$$
+<p>E.g. $\int_0^\infty x\,e^{-x}dx=1$, $\int_0^\infty x^2\lambda e^{-\lambda x}dx=\lambda\cdot\frac{2}{\lambda^3}=\frac2{\lambda^2}$. More generally $\int_0^\infty x^{\nu-1}e^{-x}dx=\Gamma(\nu)$, with $\Gamma(n)=(n-1)!$ and $\Gamma(\tfrac12)=\sqrt\pi$.</p>
+
+<h4>(e) The Gaussian integral and completing the square</h4>
+$$\int_{-\infty}^{\infty}e^{-x^2/2}\,dx=\sqrt{2\pi},\qquad \int_{-\infty}^{\infty}e^{-a(x-b)^2}\,dx=\sqrt{\frac{\pi}{a}}.$$
+<p>Whenever you see $e^{\text{quadratic in }x}$, <b>complete the square</b>: $-x^2+x=-(x-\tfrac12)^2+\tfrac14$. Then shift the variable and use the formula above. (Proof of the first integral in §11.)</p>
+
+<h4>(f) Differentiating under the integral sign / term by term</h4>
+<p>$\dfrac{d}{ds}\displaystyle\int e^{sx}f(x)\,dx=\int x\,e^{sx}f(x)\,dx$. This is the whole reason the MGF produces moments (§13).</p>
+
+<!-- ============================================================ -->
+<h2 id="rv"><span class="num">1</span>What is a random variable?</h2>
+
+<div class="box why"><span class="bt">Why we need random variables</span>
+<p>In Unit 1 the outcomes were things like "HHT" or "a red ball". You cannot add, average or plot those. Engineers care about <b>numbers</b>: a voltage, the number of errors in a packet, a waiting time. A random variable is the bridge. It attaches a number to every outcome, so all of calculus becomes available.</p></div>
+
+<div class="box def"><span class="bt">Definition (lecturer)</span>
+<p>A <b>random variable</b> is a mapping (function) $X(\cdot)$ that maps every outcome $\zeta$ of $\Omega$ onto the real line: $\zeta\mapsto X(\zeta)\in\mathbb R$. The mapping must be such that</p>
+<ul>
+  <li>every outcome gets exactly one number (several outcomes may share a number, as in the figure);</li>
+  <li>probability is preserved: the probability of a set of numbers is the probability of the outcomes that map into it, $P(X\in A)=P(\{\zeta: X(\zeta)\in A\})$;</li>
+  <li>(technical) $\{X\le\alpha\}=\{\zeta: X(\zeta)\le\alpha\}$ is an event for every $\alpha$, so it has a probability.</li>
+</ul></div>
+
+<div id="fig-rvmap"></div>
+
+<p>So "$X\le1$" is not a mysterious new object. It is just the <b>event</b> $\{HH,HT,TH\}$ from Unit 1, written in number language. Every probability about $X$ is a probability of some event in $\Omega$.</p>
+
+<div class="box key"><span class="bt">Three kinds of random variable</span>
+<table>
+  <tr><th>Type</th><th>Values</th><th>Described by</th><th>Example</th></tr>
+  <tr><td><b>Discrete</b> (DRV)</td><td>finitely many or countably many isolated values</td><td>PMF; CDF is a staircase</td><td>number of tails, number of packets</td></tr>
+  <tr><td><b>Continuous</b> (CRV)</td><td>a whole interval; $P(X=x)=0$ for every single $x$</td><td>PDF; CDF is continuous</td><td>a voltage, a lifetime</td></tr>
+  <tr><td><b>Mixed</b></td><td>some isolated values with positive probability <em>plus</em> a continuous part</td><td>PDF with impulses; CDF has ramps <em>and</em> jumps</td><td>waiting time when there is a chance of no wait at all</td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2 id="cdf"><span class="num">2</span>Cumulative distribution function (CDF)</h2>
+
+<div class="box why"><span class="bt">Why the CDF comes first</span>
+<p>We want one function that works for <em>every</em> kind of random variable (discrete, continuous, mixed) and from which any probability can be computed. Intervals of the form $(-\infty,\alpha]$ are enough to build every other interval, so we record $P(X\le\alpha)$ for every $\alpha$. That function is the CDF.</p></div>
+
+<div class="box def"><span class="bt">Definition</span>
+<p>The CDF of a random variable $X$ is
+$$F_X(\alpha)=P(X\le\alpha)=P\{\zeta: X(\zeta)\le\alpha\},\qquad\forall\alpha\in\mathbb R.$$
+Read it as: "the probability that $X$ comes out at most $\alpha$", i.e. the probability <b>accumulated</b> up to $\alpha$.</p></div>
+
+<div class="plots-row"><div data-plot="cdfGeneric"></div></div>
+
+<div class="box thm"><span class="bt">Properties of the CDF (with proofs)</span>
+<ol>
+  <li>$F_X(-\infty)=P(X\le-\infty)=P(\varnothing)=0$.</li>
+  <li>$F_X(+\infty)=P(X\le\infty)=P(\Omega)=1$.</li>
+  <li>$0\le F_X(\alpha)\le1$ (it is a probability).</li>
+  <li><b>Monotone non-decreasing:</b> if $\alpha_1\gt\alpha_2$ then $F_X(\alpha_1)\ge F_X(\alpha_2)$.
+    <p><em>Proof.</em> Split the event:
+    $$\{X\le\alpha_1\}=\{X\le\alpha_2\}\cup\{\alpha_2\lt X\le\alpha_1\},$$
+    and the two pieces are disjoint. By Axiom 3,
+    $$P(X\le\alpha_1)=P(X\le\alpha_2)+P(\alpha_2\lt X\le\alpha_1)$$
+    $$\Rightarrow\ F_X(\alpha_1)=F_X(\alpha_2)+\underbrace{P(\alpha_2\lt X\le\alpha_1)}_{\ge0}\ \ge\ F_X(\alpha_2).\ ∎$$</p></li>
+  <li><b>Corollary (the most used formula):</b>
+  $$P(\alpha_2\lt X\le\alpha_1)=F_X(\alpha_1)-F_X(\alpha_2).$$</li>
+  <li><b>Right-continuous:</b> $F_X(\alpha^+)=F_X(\alpha)$. At a jump, the CDF takes the <b>upper</b> value (the filled dot in the graphs).</li>
+  <li><b>Probability of a single point = size of the jump there:</b>
+  $$P(X=\alpha)=F_X(\alpha)-F_X(\alpha^-)=\lim_{\epsilon\to0}\big[F_X(\alpha+\epsilon)-F_X(\alpha-\epsilon)\big].$$
+  If $F_X$ is continuous at $\alpha$, then $P(X=\alpha)=0$.</li>
+  <li>$P(X\gt\alpha)=1-F_X(\alpha)$.</li>
+</ol></div>
+
+<div class="box warn"><span class="bt">Note from class</span>
+<p>The graph of a CDF must <b>always be increasing or constant</b>. It can never go down, never exceed 1, and must reach 0 on the far left and 1 on the far right. If a "CDF" in an exam breaks any of these, it is not a valid CDF.</p></div>
+
+<div class="box key"><span class="bt">Strict vs non-strict inequalities</span>
+<p>Write every interval in terms of $F$ using property 7:</p>
+<table>
+  <tr><th>Probability</th><th>In terms of $F_X$</th></tr>
+  <tr><td>$P(a\lt X\le b)$</td><td>$F_X(b)-F_X(a)$</td></tr>
+  <tr><td>$P(a\le X\le b)$</td><td>$F_X(b)-F_X(a^-)$</td></tr>
+  <tr><td>$P(a\lt X\lt b)$</td><td>$F_X(b^-)-F_X(a)$</td></tr>
+  <tr><td>$P(a\le X\lt b)$</td><td>$F_X(b^-)-F_X(a^-)$</td></tr>
+  <tr><td>$P(X\lt a)$</td><td>$F_X(a^-)$</td></tr>
+</table>
+<p>For a <b>continuous</b> RV all four are equal (single points carry no probability). For a <b>discrete</b> or <b>mixed</b> RV they can differ, and examiners love this.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 2.1 (lecturer): CDF of a die</span>
+<p>$X$ = face shown when a fair die is tossed, $\Omega=\{1,\dots,6\}$. Plot $F_X(\alpha)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>For $\alpha\lt1$ no face is $\le\alpha$, so $F=0$. For $1\le\alpha\lt2$ only face 1 counts, so $F=\tfrac16$. For $2\le\alpha\lt3$, $F=P(1)+P(2)=\tfrac26$, and so on up to $F=1$ for $\alpha\ge6$. For example $F_X(2)=P(X\le2)=P(1)+P(2)=\tfrac26$, and $F_X(2.7)=\tfrac26$ as well.</p>
+<div data-plot="cdfDie"></div>
+<p>Using the unit step: $F_X(\alpha)=\frac16\sum_{k=1}^{6}u(\alpha-k)$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 2.2 (lecturer): reading a mixed CDF</span>
+<p>The CDF of $X$ is shown below. It is $0$ for $\alpha\lt-1$, rises linearly to $\tfrac13$ at $\alpha=1$, stays at $\tfrac13$ until $2$, jumps to $\tfrac23$ at $2$, and jumps to $1$ at $3$.</p>
+<div data-plot="cdfMixedLect"></div>
+<p>Find: (1) the maximum outcome of $X$; (2) the minimum outcome; (3) $P(2\lt X\le2.9)$; (4) $P(X=2)$; (5) $P(X=0)$.</p>
+<details class="sol"><summary>Solution</summary>
+<ol>
+  <li>$P(X\gt3)=1-F_X(3)=1-1=0$. So $X$ never exceeds 3: <b>max outcome = 3</b>.</li>
+  <li>$P(X\le-1)=F_X(-1)=0$, and $F$ starts rising right after $-1$: <b>min outcome = −1</b>.</li>
+  <li>$P(2\lt X\le2.9)=F_X(2.9)-F_X(2)=\tfrac23-\tfrac23=\mathbf 0$. The CDF is flat there, so no probability lives in that interval.</li>
+  <li>$P(X=2)=\lim_{\epsilon\to0}\big[F_X(2+\epsilon)-F_X(2-\epsilon)\big]=\tfrac23-\tfrac13=\mathbf{\tfrac13}$: the jump size.</li>
+  <li>$P(X=0)=F_X(0^+)-F_X(0^-)=\mathbf 0$, because $F$ is continuous at 0 (it is on the ramp).</li>
+</ol>
+<p class="small">Bonus: the ramp has slope $\frac{1/3}{2}=\frac16$, so $F_X(\alpha)=\frac{\alpha+1}{6}$ on $[-1,1)$. The ramp carries probability $\tfrac13$ spread continuously over $(-1,1)$, and the two jumps carry $\tfrac13$ each.</p></details></div>
+
+<div class="box warn"><span class="bt">Common mistakes with CDFs</span>
+<ul>
+  <li>Taking the <b>lower</b> value at a jump. $F_X$ is right-continuous: at $\alpha=2$ above, $F_X(2)=\tfrac23$, not $\tfrac13$.</li>
+  <li>Writing $P(X\lt a)=F_X(a)$ for a discrete RV. That is wrong whenever there is a jump at $a$.</li>
+  <li>Forgetting that a flat part of the CDF means <em>zero</em> probability in that range.</li>
+</ul></div>
+
+<!-- ============================================================ -->
+<h2 id="pmf"><span class="num">3</span>Probability mass function (PMF): discrete RVs</h2>
+
+<div class="box why"><span class="bt">Idea</span>
+<p>A discrete RV puts its probability in lumps ("masses") at isolated points. The PMF simply lists how much mass sits at each point. On the CDF these lumps appear as the jumps.</p></div>
+
+<div class="box def"><span class="bt">Definition</span>
+<p>If $X$ takes values $x_1,x_2,\dots$, its PMF is $P_X(x_k)=P(X=x_k)$. It must satisfy
+$$\text{(i) }0\le P_X(x_k)\le1,\qquad\text{(ii) }\sum_k P_X(x_k)=1.$$
+Then for any set $A$: $P(X\in A)=\sum_{x_k\in A}P_X(x_k)$, and in particular
+$$F_X(\alpha)=\sum_{x_k\le\alpha}P_X(x_k)=\sum_k P_X(x_k)\,u(\alpha-x_k).$$</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 3.1 (lecturer): two coins, three coins</span>
+<p>(a) Two coins are tossed; $X$ = number of tails. Find the PMF, $P(X\lt2)$, and the CDF. (b) Repeat the PMF for three coins.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) $\Omega=\{HH,TH,HT,TT\}\mapsto X=0,1,1,2$. So $P(X=0)=\tfrac14$, $P(X=1)=\tfrac24=\tfrac12$, $P(X=2)=\tfrac14$.</p>
+<p>$P(X\lt2)=P(X=0)+P(X=1)=\tfrac14+\tfrac12=\tfrac34$.</p>
+<div class="plots-row"><div data-plot="pmf2"></div><div data-plot="cdf2"></div></div>
+<p>The CDF levels are $0\to\tfrac14\to\tfrac34\to1$. Lecturer's summary: the CDF at $0$ is $P(X=0)$; at $1$ it is $P(X=0)+P(X=1)$; at $2$ it is $P(X=0)+P(X=1)+P(X=2)$.</p>
+<p>(b) Three coins give 8 outcomes, with $X=0,1,1,2,1,2,2,3$. So the PMF is $\tfrac18,\tfrac38,\tfrac38,\tfrac18$.</p>
+<div data-plot="pmf3"></div></details></div>
+
+<div class="plots-row"><div data-plot="cdfDiscGen"></div></div>
+<div class="box key"><span class="bt">Discrete RV: what to remember (lecturer's summary)</span>
+<ul>
+  <li><b>CDF</b> = staircase = a sum of $u(\alpha-\alpha_k)$ functions.</li>
+  <li><b>P(a discrete outcome)</b> = step size of the CDF at that outcome.</li>
+  <li><b>PDF/PMF</b> = a sequence of impulses; the size (area) of the impulse at an outcome = its probability (see §4).</li>
+</ul></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 3.2: PMF with an unknown constant</span>
+<p>$P(X=k)=c\,(\tfrac12)^k$ for $k=1,2,3,\dots$. Find $c$, $P(X\le3)$ and $P(X\text{ even})$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Use $\sum P=1$: $c\sum_{k\ge1}(\tfrac12)^k=c\cdot\frac{1/2}{1-1/2}=c=1$. So $c=1$.</p>
+<p>$P(X\le3)=\tfrac12+\tfrac14+\tfrac18=\tfrac78$.</p>
+<p>$P(\text{even})=\sum_{j\ge1}(\tfrac12)^{2j}=\frac{1/4}{1-1/4}=\tfrac13$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="pdf"><span class="num">4</span>Probability density function (PDF): continuous &amp; mixed RVs</h2>
+
+<div class="box why"><span class="bt">Idea: density, like mass per unit length</span>
+<p>For a continuous RV each single point has probability 0, just as a single point of a metal rod has zero mass. But the rod has a <em>density</em> (kg per metre), and mass = density × length. In the same way the PDF is <b>probability per unit length</b>, and probability = area under the PDF.</p></div>
+
+<div class="box def"><span class="bt">Definition (lecturer)</span>
+$$f_X(x)=\lim_{\delta\to0}\frac{P(x\lt X\le x+\delta)}{\delta}=\lim_{\delta\to0}\frac{F_X(x+\delta)-F_X(x)}{\delta}=\frac{dF_X(x)}{dx}.$$
+<p>So the <b>PDF is the derivative (slope) of the CDF</b>, and conversely the CDF is the area under the PDF up to $x$:
+$$F_X(x)=\int_{-\infty}^{x}f_X(u)\,du.$$</p></div>
+
+<div class="plots-row"><div data-plot="pdfStrip"></div><div data-plot="pdfArea"></div></div>
+
+<div class="box thm"><span class="bt">Properties of the PDF</span>
+<ol>
+  <li>$f_X(x)\ge0$, because $F_X$ is non-decreasing so its slope is never negative.</li>
+  <li>$\displaystyle\int_{-\infty}^{\infty}f_X(u)\,du=F_X(\infty)-F_X(-\infty)=1-0=1$ (total area 1). This is how you find unknown constants.</li>
+  <li>$\displaystyle P(x_1\lt X\le x_2)=F_X(x_2)-F_X(x_1)=\int_{x_1}^{x_2}f_X(u)\,du$.</li>
+  <li>For a continuous RV, $P(X=x_0)=\int_{x_0}^{x_0}f=0$. Hence $P(a\lt X\lt b)=P(a\le X\le b)$, etc.</li>
+  <li>$f_X(x)$ is <b>not</b> a probability and <b>can exceed 1</b> (e.g. Uniform(0, 0.5) has height 2). Only areas are probabilities.</li>
+</ol></div>
+
+<h3 id="pdf-discrete">PDF of a discrete RV: impulses</h3>
+<p>The CDF of a discrete RV is a staircase, $F_X(\alpha)=\sum_k p_k\,u(\alpha-\alpha_k)$. Differentiate it using $\frac{d}{d\alpha}u(\alpha)=\delta(\alpha)$:
+$$f_X(\alpha)=\frac{d}{d\alpha}\Big[\sum_k p_k\,u(\alpha-\alpha_k)\Big]=\sum_k p_k\,\delta(\alpha-\alpha_k).$$
+Each jump of the CDF becomes an impulse whose <b>area</b> equals the jump. This lets us treat discrete, continuous and mixed RVs with one formula, $\int f$.</p>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.1 (lecturer): PDF and CDF of a die</span>
+<div class="plots-row"><div data-plot="cdfDie"></div><div data-plot="pdfDie"></div></div>
+<p>$f_X(\alpha)=\frac16\delta(\alpha-1)+\frac16\delta(\alpha-2)+\dots+\frac16\delta(\alpha-6)$: an impulse of weight $\frac16$ at each face. Observations: (1) it is a DRV; (2) the outcomes are discrete, $\alpha_1,\dots,\alpha_6$; (3) there is no continuous outcome.</p></div>
+
+<h3 id="mixed">Mixed random variables</h3>
+<div class="box def"><span class="bt">Mixed RV (lecturer)</span>
+<p>CDF = continuous function <b>with some steps</b>. PDF = continuous function <b>+ impulses</b>. The impulse weights plus the area of the continuous part must total 1.</p></div>
+
+<table>
+  <tr><th></th><th>Discrete</th><th>Continuous</th><th>Mixed</th></tr>
+  <tr><td>CDF</td><td>staircase</td><td>continuous</td><td>continuous pieces + jumps</td></tr>
+  <tr><td>PDF</td><td>impulses only</td><td>ordinary function</td><td>function + impulses</td></tr>
+  <tr><td>$P(X=x_0)$</td><td>jump size at $x_0$</td><td>always 0</td><td>jump size (0 off the jumps)</td></tr>
+</table>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 4.2 (lecturer): a mixed PDF</span>
+<p>$$f_X(\alpha)=\frac{a}{\sqrt{2\pi}}\exp\Big\{-\frac{(\alpha-50)^2}{200}\Big\}+\frac3{16}\delta(\alpha-40)+\frac5{16}\delta(\alpha).$$
+Plot the PDF and find $a$. Then find (1) $P(30\lt X\lt40)$, (2) $P(30\lt X\le40)$, (3) $P(X=0)$.</p>
+<details class="sol"><summary>Solution</summary>
+<div data-plot="mixedPdfLect"></div>
+<p><b>Discrete outcomes:</b> $0$ (weight $\tfrac5{16}$) and $40$ (weight $\tfrac3{16}$). Together that is $\tfrac8{16}=\tfrac12$. So the continuous part must have area $\tfrac12$.</p>
+<p>The exponent $\frac{(\alpha-50)^2}{200}=\frac{(\alpha-50)^2}{2\cdot100}$ is a Gaussian shape with $m=50$, $\sigma=10$. From the Gaussian integral, $\int e^{-(\alpha-50)^2/200}d\alpha=\sqrt{2\pi}\cdot10$. Hence
+$$\int_{-\infty}^{\infty}\frac{a}{\sqrt{2\pi}}e^{-(\alpha-50)^2/200}d\alpha=\frac{a}{\sqrt{2\pi}}\cdot10\sqrt{2\pi}=10a=\frac12\ \Rightarrow\ \boxed{a=\tfrac1{20}}.$$</p>
+<p>So the continuous part is $\frac12\cdot N(50,100)$: half the probability, spread like a Gaussian with mean 50 and σ = 10.</p>
+<ol>
+  <li>$P(30\lt X\lt40)$: the open interval excludes the impulse at 40, so only the continuous part counts:
+  $$\int_{30}^{40}\frac{1}{20\sqrt{2\pi}}e^{-(\alpha-50)^2/200}d\alpha=\frac12\big[Q(-2)-Q(-1)\big]=\frac12(0.9772-0.8413)=0.0680.$$</li>
+  <li>$P(30\lt X\le40)$ now includes $\alpha=40$, so add the impulse: $0.0680+\tfrac3{16}=0.0680+0.1875=0.2555$.</li>
+  <li>$P(X=0)=\tfrac5{16}$, the weight of the impulse at 0.</li>
+</ol>
+<p class="small muted">(The Q-function values are explained in §11; the lecturer left (1) and (2) as integrals.)</p>
+<div data-plot="mixedCdfLect"></div></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.3 (lecturer): finding a constant, CDF, probability</span>
+<p>$f_X(x)=c\,e^{-x}$ for $x\ge0$, and $0$ otherwise. Find (a) $c$, (b) the CDF, (c) $P(1\lt X\lt3)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) $\int_0^\infty c\,e^{-x}dx=c\,[-e^{-x}]_0^\infty=c=1$. So $c=1$.</p>
+<p>(b) For $x\lt0$, $F_X(x)=0$. For $x\ge0$, $F_X(x)=\int_0^x e^{-u}du=1-e^{-x}$.</p>
+<p>(c) $P(1\lt X\lt3)=F(3)-F(1)=e^{-1}-e^{-3}=0.3679-0.0498=\mathbf{0.3181}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 4.4 (lecturer): $<$ versus $\le$</span>
+<p>Comment on (i) $P(X\lt a)$ versus $P(X\le a)$, and (ii) $P(a\lt X\le b)$ for continuous and discrete $X$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $\{X\le a\}=\{X\lt a\}\cup\{X=a\}$ (disjoint), so $P(X\le a)=P(X\lt a)+P(X=a)$.</p>
+<ul>
+  <li>CRV: $P(X=a)=0$, so $P(X\le a)=P(X\lt a)$.</li>
+  <li>DRV: $P(X=a)=p_a$ if $a$ is an outcome, else 0. The two differ exactly when $a$ is an outcome.</li>
+</ul>
+<p>(ii) For a CRV, $P(a\lt X\le b)=P(a\lt X\lt b)=P(a\le X\le b)$. For a DRV with an outcome at $a$ (but not at $b$), $P(a\le X\le b)=P(X=a)+P(a\lt X\le b)=P(X=a)+F_X(b)-F_X(a)$. If there is no outcome at $a$, all of these equal $F_X(b)-F_X(a)=\int_a^b f_X$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 4.5: from a CDF to a PDF</span>
+<p>$F_X(x)=0$ for $x\lt0$, $\ x^2$ for $0\le x\lt1$, $\ 1$ for $x\ge1$. Find $f_X$ and $P(0.5\lt X\le 2)$. Is $X$ continuous?</p>
+<details class="sol"><summary>Solution</summary>
+<p>$F$ has no jumps ($F(1^-)=1=F(1)$), so $X$ is continuous. Differentiating: $f_X(x)=2x$ on $(0,1)$ and $0$ elsewhere. Check: $\int_0^1 2x\,dx=1$ ✓.</p>
+<p>$P(0.5\lt X\le2)=F(2)-F(0.5)=1-0.25=\mathbf{0.75}$.</p></details></div>
+
+<div class="box warn"><span class="bt">Common mistakes with PDFs</span>
+<ul>
+  <li>Saying "$f_X(2)=0.7$, so $P(X=2)=0.7$". For a continuous RV, $P(X=2)=0$. Density is not probability.</li>
+  <li>Forgetting the impulses when integrating a mixed PDF. Integrate the continuous part, then <b>add the weights of all impulses inside the interval</b> (and check whether each endpoint is included).</li>
+  <li>Integrating over the wrong range: if $f_X$ is 0 outside $[a,b]$, every integral is cut down to $[a,b]$.</li>
+</ul></div>
+
+<div class="box tip"><span class="bt">Self-check (§1–4)</span>
+<ol class="checks">
+  <li>Can a CDF equal $0.3$ at $\alpha=2$ and $0.25$ at $\alpha=3$?</li>
+  <li>$F_X$ jumps from $0.4$ to $0.7$ at $\alpha=1$. What is $P(X=1)$? What is $P(X\lt1)$?</li>
+  <li>Can a PDF take the value 5 somewhere?</li>
+  <li>A mixed PDF has impulses of weight 0.2 and 0.3. What must the area of its continuous part be?</li>
+</ol></div>
+
+<!-- ============================================================ -->
+<h2 id="expect"><span class="num">5</span>Expectation, variance &amp; moments</h2>
+
+<div class="box why"><span class="bt">Why averages?</span>
+<p>A whole PMF or PDF is a lot of information. Often we only need two numbers: <b>where</b> the values are centred (the mean) and <b>how spread out</b> they are (the variance). If you repeat the experiment many times, the mean is what the long-run average of the outcomes settles to (relative-frequency idea from Unit 1).</p></div>
+
+<div class="box def"><span class="bt">Expected value (mean)</span>
+$$E[X]=m_X=\sum_k x_k\,P(X=x_k)\quad\text{(discrete)}$$
+$$E[X]=\int_{-\infty}^{\infty}x\,f_X(x)\,dx\quad\text{(continuous / mixed)}$$
+<p>It is a <b>weighted average</b> of the values, each weighted by its probability. Physically it is the <b>centre of mass</b> (balance point) of the PMF/PDF.</p>
+<p class="small">For a mixed RV the integral form handles everything: each impulse $p_k\delta(x-x_k)$ contributes $p_k x_k$ by the sifting property.</p></div>
+
+<div class="box thm"><span class="bt">Expectation of a function of X (LOTUS) and linearity</span>
+<p>For any function $g$:
+$$E[g(X)]=\sum_k g(x_k)P(X=x_k)\qquad\text{or}\qquad E[g(X)]=\int_{-\infty}^{\infty}g(x)f_X(x)\,dx.$$
+You do <b>not</b> need the distribution of $g(X)$ first. Just weight $g(x)$ by the probability of $x$.</p>
+<p>Consequences (all from linearity of sums/integrals):</p>
+<ul>
+  <li>$E[c]=c$, and $E[aX+b]=aE[X]+b$. <em>Proof:</em> $\int(ax+b)f\,dx=a\int xf\,dx+b\int f\,dx=aE[X]+b$.</li>
+  <li>$E[g_1(X)+g_2(X)]=E[g_1(X)]+E[g_2(X)]$.</li>
+  <li>For any RVs (even dependent): $E[X_1+X_2+\dots+X_n]=E[X_1]+E[X_2]+\dots+E[X_n]$.</li>
+</ul>
+<p class="small muted">Warning: in general $E[g(X)]\ne g(E[X])$. E.g. $E[X^2]\ne(E[X])^2$; the difference is the variance.</p></div>
+
+<div class="box def"><span class="bt">Variance: spread of data about the mean</span>
+$$\operatorname{Var}[X]=\sigma_X^2=E\big[(X-m_X)^2\big].$$
+<p>Expand the square and use linearity:
+$$E[X^2-2m_XX+m_X^2]=E[X^2]-2m_XE[X]+m_X^2=E[X^2]-2m_X^2+m_X^2,$$
+$$\boxed{\operatorname{Var}[X]=E[X^2]-m_X^2}\qquad\text{("mean of the square minus square of the mean")}.$$
+$\sigma_X=\sqrt{\operatorname{Var}[X]}$ is the <b>standard deviation</b>, in the same units as $X$.</p></div>
+
+<div class="box thm"><span class="bt">Variance rules</span>
+<ul>
+  <li>$\operatorname{Var}[X]\ge0$, with equality only if $X$ is a constant.</li>
+  <li>$\operatorname{Var}[aX+b]=a^2\operatorname{Var}[X]$. <em>Proof:</em> $Y-m_Y=aX+b-(am_X+b)=a(X-m_X)$, so $E[(Y-m_Y)^2]=a^2E[(X-m_X)^2]$. Adding a constant shifts but does not spread.</li>
+  <li>If $X_1,\dots,X_n$ are <b>independent</b>: $\operatorname{Var}[X_1+\dots+X_n]=\operatorname{Var}[X_1]+\dots+\operatorname{Var}[X_n]$. (Unit 3 proves this; it fails for dependent RVs.)</li>
+</ul></div>
+
+<div class="box key"><span class="bt">Moments and their electrical meaning (lecturer)</span>
+<table>
+  <tr><th>Quantity</th><th>Name</th><th>If $X$ is a voltage/current signal</th></tr>
+  <tr><td>$m_X=E[X]$</td><td>mean, 1st moment</td><td>DC value</td></tr>
+  <tr><td>$E[X^2]$</td><td>mean-square value, 2nd moment</td><td>total (average) power</td></tr>
+  <tr><td>$\sigma_X^2=E[X^2]-m_X^2$</td><td>variance, 2nd central moment</td><td>AC power</td></tr>
+  <tr><td>$\sigma_X$</td><td>standard deviation</td><td>RMS value of the AC part</td></tr>
+  <tr><td>$E[X^n]$</td><td>$n$th moment</td><td></td></tr>
+  <tr><td>$E[(X-m_X)^n]$</td><td>$n$th central moment</td><td></td></tr>
+  <tr><td>$E[(X-m_X)^3]/\sigma_X^3$</td><td>skewness (lop-sidedness)</td><td></td></tr>
+  <tr><td>$E[(X-m_X)^4]/\sigma_X^4$</td><td>kurtosis (peakedness / tail weight)</td><td></td></tr>
+</table>
+<p>So "total power = DC power + AC power" is just $E[X^2]=m_X^2+\sigma_X^2$.</p></div>
+
+<div class="box def"><span class="bt">Median and mode <span class="tag-beyond">Beyond class notes</span></span>
+<ul>
+  <li><b>Median</b> $x_0$: the point that splits the probability in half, $P(X\le x_0)=P(X\ge x_0)=\tfrac12$, i.e. $F_X(x_0)=\tfrac12$.</li>
+  <li><b>Mode</b> $x_m$: where the PDF (or PMF) is largest, the most likely value.</li>
+  <li>For a symmetric bell (Gaussian), mean = median = mode. For a right-skewed PDF (exponential), mode &lt; median &lt; mean.</li>
+</ul></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 5.1: a die</span>
+<p>Find the mean, mean-square value and variance of a fair die.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$E[X]=\frac{1+2+\dots+6}{6}=\frac{21}6=3.5$ (a die never shows 3.5; the mean need not be a possible value).</p>
+<p>$E[X^2]=\frac{1+4+9+16+25+36}{6}=\frac{91}{6}$.</p>
+<p>$\sigma^2=\frac{91}6-\frac{49}4=\frac{182-147}{12}=\frac{35}{12}\approx2.92$, and $\sigma\approx1.71$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 5.2: linear transformation</span>
+<p>$X$ has mean 2 and variance 3. Find the mean and variance of $Y=5-4X$, and $E[X^2]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$E[Y]=5-4(2)=-3$. $\operatorname{Var}[Y]=(-4)^2\cdot3=48$ (the sign disappears when squared, and the 5 does nothing). $E[X^2]=\sigma^2+m^2=3+4=7$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 5.3: a continuous RV</span>
+<p>$f_X(x)=2x$ on $(0,1)$. Find $E[X]$, $\operatorname{Var}[X]$ and $E[1/X]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$E[X]=\int_0^1x\cdot2x\,dx=\tfrac23$. $E[X^2]=\int_0^1 2x^3dx=\tfrac12$. So $\operatorname{Var}=\tfrac12-\tfrac49=\tfrac1{18}$.</p>
+<p>$E[1/X]=\int_0^1\frac1x\,2x\,dx=2$. Note $E[1/X]=2\ne1/E[X]=1.5$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 5.4: a mixed RV</span>
+<p>$X$ has CDF $F_X(x)=0$ for $x\lt0$, $\ \tfrac12+\tfrac x2$ for $0\le x\lt1$, $\ 1$ for $x\ge1$. Find $E[X]$ and $\operatorname{Var}[X]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>The jump at 0 has size $\tfrac12$, so $P(X=0)=\tfrac12$. On $(0,1)$ the slope is $\tfrac12$. So $f_X(x)=\tfrac12\delta(x)+\tfrac12$ on $(0,1)$. Check: $\tfrac12+\tfrac12\cdot1=1$ ✓.</p>
+<p>$E[X]=0\cdot\tfrac12+\int_0^1\tfrac x2dx=\tfrac14$. $E[X^2]=\int_0^1\tfrac{x^2}2dx=\tfrac16$. $\operatorname{Var}=\tfrac16-\tfrac1{16}=\tfrac5{48}$.</p></details></div>
+
+<div class="box warn"><span class="bt">Common mistakes</span>
+<ul>
+  <li>$\operatorname{Var}[aX+b]=a\operatorname{Var}[X]+b$ ✗. The correct rule is $a^2\operatorname{Var}[X]$.</li>
+  <li>$\operatorname{Var}[X-Y]=\operatorname{Var}[X]-\operatorname{Var}[Y]$ ✗. For independent RVs it is $\operatorname{Var}[X]+\operatorname{Var}[Y]$ (variances never subtract).</li>
+  <li>Forgetting that $E[X^2]$ needs its own sum/integral; it is not $(E[X])^2$.</li>
+</ul></div>
+
+<!-- ============================================================ -->
+<h2 id="bernoulli"><span class="num">6</span>Bernoulli trials &amp; the Bernoulli distribution</h2>
+
+<div class="box why"><span class="bt">Why</span>
+<p>Many experiments have just two results: bit received correctly or not, component works or fails, coin H or T. Call one "success" (probability $p$) and the other "failure" (probability $q=1-p$). One such experiment is a <b>Bernoulli trial</b>. Repeating independent Bernoulli trials gives the binomial, geometric and (in the limit) Poisson distributions, and later the Bernoulli and binomial random processes of Unit 4.</p></div>
+
+<div class="box def"><span class="bt">Bernoulli(p) random variable</span>
+$$P_X(x)=\begin{cases}p,& x=1\ \text{(success)}\\ 1-p=q,& x=0\ \text{(failure)}\end{cases}\qquad\text{range}=\{0,1\}.$$
+<p>It is the <b>indicator</b> of the success event: $X=1$ if success happens, $0$ otherwise.</p></div>
+<div class="plots-row"><div data-plot="bernPmf"></div><div data-plot="bernCdf"></div></div>
+
+<div class="box thm"><span class="bt">Mean and variance</span>
+$$E[X]=0\cdot(1-p)+1\cdot p=p,\qquad E[X^2]=0^2(1-p)+1^2p=p,$$
+$$\sigma^2=E[X^2]-m^2=p-p^2=p(1-p)=pq.$$
+<p>The variance is largest at $p=\tfrac12$ (most uncertain) and zero at $p=0$ or $1$ (no randomness).</p></div>
+
+<!-- ============================================================ -->
+<h2 id="binomial"><span class="num">7</span>Binomial distribution</h2>
+
+<div class="box why"><span class="bt">Idea</span>
+<p>Do $n$ independent Bernoulli trials and <b>count the successes</b>. Examples: number of bit errors in an $n$-bit packet, number of defective screws in a box of 10, number of heads in $n$ tosses.</p></div>
+
+<div class="box def"><span class="bt">Binomial(n, p)</span>
+$$P(X=k)=\binom nk p^k(1-p)^{n-k},\qquad k=0,1,\dots,n\quad(0\text{ otherwise}).$$</div>
+
+<div class="box thm"><span class="bt">Where the formula comes from</span>
+<ol>
+  <li>Any <em>particular</em> sequence with $k$ successes and $n-k$ failures, e.g. $SSF\cdots F$, has probability $p^k q^{n-k}$, because the trials are independent and probabilities multiply.</li>
+  <li>The number of such sequences is the number of ways to choose which $k$ of the $n$ positions are successes: $\binom nk$.</li>
+  <li>The sequences are mutually exclusive, so add: $\binom nk p^kq^{n-k}$.</li>
+</ol>
+<p><b>Validity:</b> $\sum_{k=0}^n\binom nk p^kq^{n-k}=(p+q)^n=1^n=1$ by the binomial theorem. ✓</p></div>
+
+<div class="plots-row"><div data-plot="bin02"></div><div data-plot="bin05"></div><div data-plot="bin08"></div></div>
+<p class="small muted">Shape: skewed right for small $p$, symmetric for $p=\tfrac12$, skewed left for large $p$. The peak (mode) is near $np$; exactly, it is at $\lfloor (n+1)p\rfloor$.</p>
+
+<div class="box thm"><span class="bt">Mean and variance: the slick way (lecturer)</span>
+<p>Write $X=X_1+X_2+\dots+X_n$, where $X_i\sim$ Bernoulli$(p)$ is the indicator of success on trial $i$. They are independent. Then
+$$E[X]=\sum E[X_i]=np,\qquad \operatorname{Var}[X]=\sum\operatorname{Var}[X_i]=npq.$$</p></div>
+
+<div class="box thm"><span class="bt">Mean and variance: direct proof (asked as "find the variance of a binomial RV", MS 2021)</span>
+<p><b>Mean.</b> Use $k\binom nk=n\binom{n-1}{k-1}$:
+$$E[X]=\sum_{k=0}^{n}k\binom nk p^kq^{n-k}=np\sum_{k=1}^{n}\binom{n-1}{k-1}p^{k-1}q^{(n-1)-(k-1)}=np\,(p+q)^{n-1}=np.$$
+<p><b>Second factorial moment.</b> Use $k(k-1)\binom nk=n(n-1)\binom{n-2}{k-2}$:
+$$E[X(X-1)]=n(n-1)p^2\sum_{k=2}^{n}\binom{n-2}{k-2}p^{k-2}q^{n-k}=n(n-1)p^2.$$
+<p>So $E[X^2]=E[X(X-1)]+E[X]=n(n-1)p^2+np$ and
+$$\sigma^2=n(n-1)p^2+np-n^2p^2=np-np^2=np(1-p)=npq.\ ∎$$</p>
+<p class="small muted">Trick worth remembering: for counting RVs, compute $E[X(X-1)]$ instead of $E[X^2]$. The $k(k-1)$ cancels nicely against $k!$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 7.1: bit errors</span>
+<p>A 6-bit word is sent; each bit is in error independently with probability 0.1. Find P(no error), P(exactly one error), P(at most one error) and the mean number of errors.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$X\sim$ Binomial$(6,0.1)$.</p>
+<ul>
+  <li>$P(0)=0.9^6=0.5314$</li>
+  <li>$P(1)=6(0.1)(0.9)^5=0.3543$</li>
+  <li>$P(\le1)=0.8857$</li>
+  <li>$E[X]=0.6$</li>
+</ul></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 7.2: "at least" questions</span>
+<p>A component works with probability 0.9. A system has 5 independent components and works if at least 4 of them work. Find P(system works).</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(X\ge4)=\binom54(0.9)^4(0.1)+0.9^5=5(0.6561)(0.1)+0.59049=0.32805+0.59049=\mathbf{0.9185}$.</p>
+<p class="small">Tip: for "at least one", always use the complement, $1-P(X=0)=1-q^n$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="poisson"><span class="num">8</span>Poisson distribution &amp; the Poisson approximation</h2>
+
+<div class="box why"><span class="bt">Idea: counting rare events</span>
+<p>How many calls arrive at an exchange in a minute? How many α-particles hit a counter in a second? How many typos are on a page? Each is a count of <b>rare, independent events</b> happening at a steady average rate. The only parameter is the average count $\lambda$. This distribution is the heart of the Poisson process (Unit 4) and of queues (Unit 5).</p></div>
+
+<div class="box def"><span class="bt">Poisson(λ)</span>
+$$P(X=k)=\frac{e^{-\lambda}\lambda^k}{k!},\qquad k=0,1,2,\dots\qquad(\lambda\gt0\text{ is the average value}).$$</div>
+
+<div class="plots-row"><div data-plot="poi1"></div><div data-plot="poi4"></div><div data-plot="poi8"></div></div>
+<div class="plots-row"><div data-plot="poiCdf"></div></div>
+
+<div class="box thm"><span class="bt">Validity, mean and variance (lecturer's derivations)</span>
+<p><b>Valid PMF:</b> $\displaystyle\sum_{k=0}^\infty\frac{e^{-\lambda}\lambda^k}{k!}=e^{-\lambda}\sum_{k=0}^\infty\frac{\lambda^k}{k!}=e^{-\lambda}e^{\lambda}=1$. ✓</p>
+<p><b>Mean:</b> the $k=0$ term is zero, and $\frac{k}{k!}=\frac1{(k-1)!}$:
+$$E[X]=\sum_{k=1}^\infty k\frac{e^{-\lambda}\lambda^k}{k!}=\lambda e^{-\lambda}\sum_{k=1}^\infty\frac{\lambda^{k-1}}{(k-1)!}=\lambda e^{-\lambda}e^{\lambda}=\lambda.$$
+<p><b>Second moment:</b> write $k^2=k(k-1)+k$:
+$$E[X^2]=\sum_k k(k-1)\frac{e^{-\lambda}\lambda^k}{k!}+\sum_k k\frac{e^{-\lambda}\lambda^k}{k!}=\lambda^2e^{-\lambda}\sum_{k=2}^\infty\frac{\lambda^{k-2}}{(k-2)!}+\lambda=\lambda^2+\lambda.$$
+$$\sigma^2=E[X^2]-m^2=\lambda^2+\lambda-\lambda^2=\lambda,\qquad\sigma=\sqrt\lambda.$$
+<p>For a Poisson RV, <b>mean = variance = λ</b>. This is a quick check for whether count data could be Poisson.</p></div>
+
+<div class="box key"><span class="bt">Handy recursion</span>
+<p>$P(X=k)=\frac{\lambda}{k}P(X=k-1)$. Start from $P(0)=e^{-\lambda}$ and multiply. E.g. for $\lambda=2$: $P(0)=0.1353$, $P(1)=0.2707$, $P(2)=0.2707$, $P(3)=0.1804$, $P(4)=0.0902$.</p></div>
+
+<h3 id="poisson-approx">Poisson approximation to the binomial</h3>
+<div class="box thm"><span class="bt">Theorem</span>
+<p>If $n\to\infty$ and $p\to0$ with $np=\lambda$ held fixed, then
+$$\binom nk p^k(1-p)^{n-k}\ \longrightarrow\ \frac{e^{-\lambda}\lambda^k}{k!}.$$
+<p><b>Proof.</b> Put $p=\lambda/n$:
+$$\binom nk\Big(\frac\lambda n\Big)^k\Big(1-\frac\lambda n\Big)^{n-k}$$ $$=\frac{\lambda^k}{k!}\cdot\underbrace{\frac{n(n-1)\cdots(n-k+1)}{n^k}}_{\to1}\cdot\underbrace{\Big(1-\frac\lambda n\Big)^{n}}_{\to e^{-\lambda}}\cdot\underbrace{\Big(1-\frac\lambda n\Big)^{-k}}_{\to1}\ \to\ \frac{\lambda^k}{k!}e^{-\lambda}.\ ∎$$
+<p>(The middle limit is the definition of $e$: $(1+x/n)^n\to e^x$.)</p></div>
+
+<div class="box key"><span class="bt">When to use it</span>
+<p>Use Poisson with $\lambda=np$ when $n$ is large (say $n\ge20$) and $p$ is small (say $p\le0.05$), so $np$ is moderate. It replaces awkward numbers like $\binom{1000}{3}(0.002)^3(0.998)^{997}$ with $e^{-2}2^3/3!$.</p></div>
+<div class="plots-row"><div data-plot="poiApprox"></div></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 8.1: calls</span>
+<p>Calls arrive at an average of 3 per minute (Poisson). Find P(no call in a minute), P(at most 2 calls) and P(at least 2 calls).</p>
+<details class="sol"><summary>Solution</summary>
+<ul>
+  <li>$P(0)=e^{-3}=0.0498$</li>
+  <li>$P(\le2)=e^{-3}(1+3+4.5)=8.5e^{-3}=0.4232$</li>
+  <li>$P(\ge2)=1-e^{-3}(1+3)=1-0.1991=0.8009$</li>
+</ul></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 8.2: Poisson approximation</span>
+<p>A chip has a 0.002 probability of being defective. In a batch of 1000, find P(exactly 3 defective) exactly and with the Poisson approximation.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Exact: $\binom{1000}{3}(0.002)^3(0.998)^{997}=0.18062$.</p>
+<p>Poisson with $\lambda=np=2$: $e^{-2}\frac{2^3}{3!}=0.18045$. The error is below 0.1%.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 8.3: Poisson with a twist</span>
+<p>The number of packets arriving in a slot is Poisson with mean 2. A buffer holds at most 3 packets; the extra packets are dropped. Find P(at least one packet dropped) and the expected number of packets <em>stored</em>.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Drop if $X\ge4$: $P=1-(0.1353+0.2707+0.2707+0.1804)=1-0.8571=\mathbf{0.1429}$.</p>
+<p>Stored $=\min(X,3)$. So $E=0(0.1353)+1(0.2707)+2(0.2707)+3(0.1429+0.1804)=0.2707+0.5413+0.9699=\mathbf{1.782}$ (by LOTUS).</p></details></div>
+
+<div class="box warn"><span class="bt">Common mistakes</span>
+<ul>
+  <li>Using the wrong λ when the time interval changes. If the rate is 3 per minute, a 2-minute window has $\lambda=6$.</li>
+  <li>Forgetting $k=0$ in "at most" sums ($0!=1$, $\lambda^0=1$).</li>
+  <li>Using the binomial "mean = np" but forgetting that the variance is $npq$, not $np$. (Only Poisson has variance = mean.)</li>
+</ul></div>
+
+<!-- ============================================================ -->
+<h2 id="uniform"><span class="num">9</span>Uniform distribution</h2>
+
+<div class="box why"><span class="bt">Idea</span>
+<p>"Pick a point at random in $[a,b]$": every sub-interval of the same length is equally likely. Examples: the phase of a sinusoid with random phase ($[0,2\pi]$), rounding (quantisation) error, a random arrival time within an hour. It is the continuous version of "equally likely outcomes".</p></div>
+
+<div class="box def"><span class="bt">Uniform(a, b)</span>
+$$f_X(x)=\begin{cases}\dfrac1{b-a},& a\le x\le b\\[2pt]0,&\text{otherwise}\end{cases}\qquad F_X(x)=\begin{cases}0,&x\lt a\\ \dfrac{x-a}{b-a},&a\le x\le b\\ 1,&x\gt b\end{cases}$$
+<p>Probability = (length of the part of the interval inside $[a,b]$) ÷ $(b-a)$.</p></div>
+<div class="plots-row"><div data-plot="uniPdf"></div><div data-plot="uniCdf"></div></div>
+
+<div class="box thm"><span class="bt">Mean and variance (lecturer's derivation; asked in ES July 2024)</span>
+$$E[X]=\int_a^b\frac{x}{b-a}dx=\frac1{b-a}\cdot\frac{b^2-a^2}{2}=\frac{a+b}{2}\quad\text{(the midpoint, as symmetry says)}.$$
+$$E[X^2]=\int_a^b\frac{x^2}{b-a}dx=\frac{b^3-a^3}{3(b-a)}=\frac{a^2+ab+b^2}{3}.$$
+$$\sigma^2=\frac{a^2+ab+b^2}{3}-\frac{(a+b)^2}{4}=\frac{4a^2+4ab+4b^2-3a^2-6ab-3b^2}{12}=\frac{(b-a)^2}{12}.$$
+<p>Higher moments: $E[X^n]=\dfrac{b^{n+1}-a^{n+1}}{(n+1)(b-a)}$. For Uniform(0,1), $E[X^n]=\frac1{n+1}$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 9.1: waiting for a bus</span>
+<p>Buses come every 15 minutes; you arrive at a uniformly random time. Find P(wait &gt; 10 min), the mean wait, and the standard deviation of the wait.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Wait $W\sim U(0,15)$. $P(W\gt10)=\frac{5}{15}=\frac13$. $E[W]=7.5$ min. $\sigma=\frac{15}{\sqrt{12}}=4.33$ min.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 9.2: random phase</span>
+<p>$\Theta\sim U(0,2\pi)$ and $Y=a\cos(\omega t+\Theta)$, with $a,\omega,t$ constants. Find $E[Y]$ and $E[Y^2]$. (This is MS 2021 Q3b, and it is the key calculation behind the random-phase sinusoid in Unit 4.)</p>
+<details class="sol"><summary>Solution</summary>
+<p>By LOTUS, $E[Y]=\int_0^{2\pi}a\cos(\omega t+\theta)\frac{d\theta}{2\pi}=\frac{a}{2\pi}\big[\sin(\omega t+\theta)\big]_0^{2\pi}=0$, since the integral of a cosine over a full period is 0.</p>
+<p>$E[Y^2]=\int_0^{2\pi}a^2\cos^2(\omega t+\theta)\frac{d\theta}{2\pi}=\frac{a^2}{2\pi}\int_0^{2\pi}\frac{1+\cos(2\omega t+2\theta)}{2}d\theta=\frac{a^2}{2\pi}\cdot\pi=\mathbf{\frac{a^2}{2}}$.</p>
+<p>Neither answer depends on $t$. That is the first sign of "stationarity" (Unit 4). And $a^2/2$ is the familiar power of a sinusoid.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="exponential"><span class="num">10</span>Exponential distribution</h2>
+
+<div class="box why"><span class="bt">Idea</span>
+<p>The exponential models <b>waiting times</b>: the lifetime of a component that does not age, the time until the next call, the service time in a queue. If events occur as a Poisson stream with rate λ, the time between them is exponential with the same λ (proved in Unit 4).</p></div>
+
+<div class="box def"><span class="bt">Exponential(λ)</span>
+$$f_X(x)=\begin{cases}\lambda e^{-\lambda x},&x\ge0\\0,&x\lt0\end{cases}\qquad F_X(x)=1-e^{-\lambda x}\ (x\ge0),\qquad P(X\gt x)=e^{-\lambda x}.$$
+<p>λ is a <b>rate</b> (events per unit time). Some books write $\frac1\lambda e^{-x/\lambda}$, using the mean as the parameter instead; the lecturer showed both. Check which one a question uses!</p></div>
+<div class="plots-row"><div data-plot="expPdf"></div><div data-plot="expCdf"></div></div>
+
+<div class="box thm"><span class="bt">Mean and variance (lecturer)</span>
+<p>Substitute $t=\lambda x$, or use the gamma integral $\int_0^\infty x^ne^{-\lambda x}dx=n!/\lambda^{n+1}$:
+$$E[X]=\int_0^\infty x\lambda e^{-\lambda x}dx=\lambda\cdot\frac{1!}{\lambda^2}=\frac1\lambda,\qquad E[X^2]=\lambda\cdot\frac{2!}{\lambda^3}=\frac{2}{\lambda^2},$$
+$$\sigma^2=\frac2{\lambda^2}-\frac1{\lambda^2}=\frac1{\lambda^2},\qquad\sigma=\frac1\lambda=\text{mean}.$$
+<p>In general $E[X^k]=\dfrac{k!}{\lambda^k}$ (also obtained from the MGF in §13).</p></div>
+
+<div class="box thm"><span class="bt">Memoryless property <span class="tag-beyond">Beyond class notes</span> (asked in MS 2024)</span>
+$$P(X\gt a+x\mid X\gt a)=\frac{P(X\gt a+x)}{P(X\gt a)}=\frac{e^{-\lambda(a+x)}}{e^{-\lambda a}}=e^{-\lambda x}=P(X\gt x).$$
+<p>In words: if the component has already survived $a$ hours, the chance it survives $x$ more is the same as for a brand-new component. It does not "remember" its age. The exponential is the <b>only</b> continuous distribution with this property (the geometric is the discrete one).</p></div>
+<div class="plots-row"><div data-plot="memoryless"></div><div data-plot="expMedian"></div></div>
+<p><b>Median and mode</b> (MS 2023): $1-e^{-\lambda x_0}=\tfrac12\Rightarrow x_0=\frac{\ln2}{\lambda}\approx\frac{0.693}{\lambda}$. The PDF is largest at $x=0$, so mode $=0$.</p>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 10.1: bulb lifetime</span>
+<p>A bulb's life is exponential with mean 1000 h. Find P(it lasts more than 1500 h), and P(it lasts another 1500 h given it has already lasted 500 h).</p>
+<details class="sol"><summary>Solution</summary>
+<p>$\lambda=\frac1{1000}$. $P(X\gt1500)=e^{-1.5}=\mathbf{0.2231}$. By memorylessness, the conditional probability is also $e^{-1.5}=0.2231$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 10.2: which is more likely?</span>
+<p>$X\sim$ Exp(λ). Find $P(X\gt E[X])$ and $P(|X-E[X]|\le\sigma)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(X\gt1/\lambda)=e^{-1}=0.368$, so only 37% of lifetimes exceed the mean.</p>
+<p>$P(|X-\tfrac1\lambda|\le\tfrac1\lambda)=P(0\le X\le\tfrac2\lambda)=1-e^{-2}=0.865$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="gaussian"><span class="num">11</span>Normal (Gaussian) distribution &amp; the Q-function</h2>
+
+<div class="box why"><span class="bt">Why the Gaussian is everywhere</span>
+<p>Thermal noise in a resistor, measurement errors, heights, the sum of many small independent effects: all of these are bell-shaped. The <b>Central Limit Theorem</b> (Unit 3) explains why: adding up many independent random contributions always tends to a Gaussian. In communication engineering the noise is almost always modelled as Gaussian, so you will compute Gaussian probabilities constantly.</p></div>
+
+<div class="box def"><span class="bt">Gaussian $N(m,\sigma^2)$</span>
+$$f_X(x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\Big\{-\frac{(x-m)^2}{2\sigma^2}\Big\},\qquad-\infty\lt x\lt\infty.$$
+<p>It has two parameters: $m$ = mean (centre of the bell) and $\sigma^2$ = variance (width). The peak height is $\frac1{\sqrt{2\pi}\sigma}$. The curve is symmetric about $m$, and its inflection points are at $m\pm\sigma$. $N(0,1)$ is the <b>standard Gaussian</b>.</p></div>
+<div class="plots-row"><div data-plot="gaussSig"></div><div data-plot="gaussMean"></div></div>
+
+<div class="box thm"><span class="bt">Proof that the area is 1 (lecturer's polar-coordinate trick)</span>
+<p>It is enough to take $m=0$ (shifting does not change the area). Let
+$$I=\int_{-\infty}^{\infty}\frac{1}{\sqrt{2\pi\sigma^2}}e^{-x^2/2\sigma^2}dx.$$
+A single integral of $e^{-x^2}$ has no elementary antiderivative, so square it and turn it into a double integral:
+$$I^2=\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}\frac{1}{2\pi\sigma^2}e^{-(x^2+y^2)/2\sigma^2}dx\,dy.$$
+<p>Change to polar coordinates: $x=r\cos\theta$, $y=r\sin\theta$, $x^2+y^2=r^2$, $dx\,dy=r\,dr\,d\theta$:
+$$I^2=\frac1{2\pi\sigma^2}\int_0^{2\pi}\!\!\int_0^\infty e^{-r^2/2\sigma^2}r\,dr\,d\theta=\frac{2\pi}{2\pi\sigma^2}\Big[-\sigma^2e^{-r^2/2\sigma^2}\Big]_0^\infty=\frac{1}{\sigma^2}\cdot\sigma^2=1.$$
+<p>Since $I\gt0$, $I=1$. ∎ &nbsp; (The extra factor $r$ is what makes the integral doable.)</p></div>
+
+<div class="box thm"><span class="bt">Mean and variance <span class="tag-beyond">Beyond class notes</span></span>
+<p>Put $z=(x-m)/\sigma$. Then $E[X]=m+\sigma\int z\,\frac{e^{-z^2/2}}{\sqrt{2\pi}}dz=m+0=m$; the integrand is odd, so the integral is 0.</p>
+<p>$\operatorname{Var}[X]=\sigma^2\int z^2\frac{e^{-z^2/2}}{\sqrt{2\pi}}dz$. Integrate by parts with $u=z$, $dv=ze^{-z^2/2}dz$: $\int z^2e^{-z^2/2}dz=\big[-ze^{-z^2/2}\big]+\int e^{-z^2/2}dz=0+\sqrt{2\pi}$. So the variance is $\sigma^2$. ✓ (Or read both off the MGF, §13.)</p></div>
+
+<h3 id="qfunc">The Q-function</h3>
+<p>The Gaussian CDF $\int_{-\infty}^{x}f_X$ has no closed form, so it is tabulated once, for the standard Gaussian, and every other Gaussian is converted to it.</p>
+<div class="box def"><span class="bt">Definition (lecturer)</span>
+$$Q(u)=\int_u^\infty N(0,1)\,d\alpha=\int_u^\infty\frac1{\sqrt{2\pi}}e^{-\alpha^2/2}d\alpha=P(Z\gt u),\qquad Z\sim N(0,1).$$
+<p>$Q(u)$ is the <b>tail probability</b>. The standard Gaussian CDF is $\Phi(u)=P(Z\le u)=1-Q(u)$.</p></div>
+<div class="plots-row"><div data-plot="qTail"></div><div data-plot="qSym"></div></div>
+
+<div class="box thm"><span class="bt">Properties of Q</span>
+<ol>
+  <li>$Q(0)=\tfrac12$, $Q(\infty)=0$, $Q(-\infty)=1$. $Q$ is decreasing.</li>
+  <li>$Q(-u)=1-Q(u)$ (symmetry of the bell). So we only ever need tables for $u\ge0$.</li>
+  <li>$F_Z(\alpha)=\int_{-\infty}^{\alpha}N(0,1)\,d\beta=1-Q(\alpha)$.</li>
+  <li>For large $u$: $Q(u)\approx\frac{1}{u\sqrt{2\pi}}e^{-u^2/2}$, and $Q(u)\le\tfrac12e^{-u^2/2}$.</li>
+  <li>Relation to the error function: $Q(u)=\tfrac12\operatorname{erfc}(u/\sqrt2)$.</li>
+</ol></div>
+
+<div class="box key"><span class="bt">The three formulas for any Gaussian $X\sim N(m_X,\sigma_X^2)$ (lecturer)</span>
+<p>Standardise: $Z=\dfrac{X-m_X}{\sigma_X}\sim N(0,1)$. In every integral substitute $\beta=\frac{\alpha-m_X}{\sigma_X}$, $d\alpha=\sigma_X\,d\beta$. Then
+$$\boxed{P(X\gt u)=Q\Big(\frac{u-m_X}{\sigma_X}\Big)}\qquad\boxed{P(X\le u)=1-Q\Big(\frac{u-m_X}{\sigma_X}\Big)}$$
+$$\boxed{P(a\lt X\le b)=Q\Big(\frac{a-m_X}{\sigma_X}\Big)-Q\Big(\frac{b-m_X}{\sigma_X}\Big)}$$
+<p>Memory aid: Q of the <b>left</b> end minus Q of the <b>right</b> end, since Q measures what lies to the right.</p>
+<p class="small">Derivation of the first: $P(X\le u)=1-\int_u^\infty\frac{1}{\sqrt{2\pi\sigma^2}}e^{-(\alpha-m)^2/2\sigma^2}d\alpha=1-\int_{(u-m)/\sigma}^\infty\frac{1}{\sqrt{2\pi}}e^{-\beta^2/2}d\beta=1-Q\big(\frac{u-m}{\sigma}\big)$.</p></div>
+
+<div class="recipe box"><span class="bt">Recipe: any Gaussian probability</span>
+<ol>
+  <li>Identify $m$ and $\sigma$. Careful: $N(3,4)$ means $\sigma^2=4$, so $\sigma=2$.</li>
+  <li>Rewrite the event as an interval of $X$, e.g. $|X-1|\le3\iff-2\le X\le4$.</li>
+  <li>Convert each endpoint to $z=(x-m)/\sigma$.</li>
+  <li>Apply the boxed formula. Use $Q(-z)=1-Q(z)$ for negative arguments, then read the table.</li>
+</ol></div>
+
+<div class="plots-row"><div data-plot="rule689"></div></div>
+<p>Useful values: $Q(1)=0.1587$, $Q(2)=0.02275$, $Q(3)=0.00135$, $Q(1.645)=0.05$, $Q(1.96)=0.025$, $Q(2.326)=0.01$.</p>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 11.1 (lecturer): $X\sim N(3,4)$</span>
+<p>Compute (a) $P(X=3)$, (b) $P(1\lt X\le9)$, (c) $P(X\gt1)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$m=3$, $\sigma=2$.</p>
+<p>(a) $P(X=3)=\lim_{\epsilon\to0}\big[Q\big(\frac{-\epsilon}{2}\big)-Q\big(\frac{\epsilon}{2}\big)\big]=Q(0)-Q(0)=\mathbf 0$. It is a continuous RV.</p>
+<p>(b) $Q\big(\frac{1-3}{2}\big)-Q\big(\frac{9-3}{2}\big)=Q(-1)-Q(3)=[1-Q(1)]-Q(3)=0.8413-0.0013=\mathbf{0.8400}$.</p>
+<p>(c) $P(X\gt1)=Q\big(\frac{1-3}2\big)=Q(-1)=1-Q(1)=\mathbf{0.8413}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 11.2 (lecturer): $Y\sim N(1,2)$, find $P(|Y-1|\le3)$</span>
+<details class="sol"><summary>Solution</summary>
+<p>$|Y-1|\le3\iff-2\le Y\le4$. Here $\sigma=\sqrt2$.</p>
+$$P=Q\Big(\frac{-2-1}{\sqrt2}\Big)-Q\Big(\frac{4-1}{\sqrt2}\Big)=Q(-2.121)-Q(2.121)$$
+$$=1-2Q(2.121)=1-2(0.01695)=\mathbf{0.9661}.$$</details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 11.3: exam scores</span>
+<p>Scores are $N(60,10^2)$. (a) What fraction score above 75? (b) What score marks the top 10%?</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) $Q\big(\frac{75-60}{10}\big)=Q(1.5)=\mathbf{0.0668}$, about 6.7%.</p>
+<p>(b) We need $Q\big(\frac{s-60}{10}\big)=0.10$. From the table, $Q(1.28)\approx0.10$, so $s=60+12.8=\mathbf{72.8}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 11.4: error probability with Gaussian noise</span>
+<p>A bit is sent as $+A$ (for 1) or $-A$ (for 0), equally likely. Noise $N\sim N(0,\sigma^2)$ is added, and the receiver decides "1" if $Y=X+N\gt0$. Find P(error) in terms of Q, and evaluate it for $A/\sigma=2$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>If 1 is sent, $Y\sim N(A,\sigma^2)$ and an error occurs if $Y\le0$: $P=1-Q\big(\frac{0-A}{\sigma}\big)=1-Q(-A/\sigma)=Q(A/\sigma)$. By symmetry the same holds when 0 is sent.</p>
+<p>Total probability: $P_e=\tfrac12Q(A/\sigma)+\tfrac12Q(A/\sigma)=Q(A/\sigma)$. For $A/\sigma=2$: $P_e=Q(2)=\mathbf{0.0228}$. This is the famous "BER = Q(√SNR)" type of result.</p></details></div>
+
+<h3 id="qtab">Table of $Q(u)$</h3>
+<p class="small muted">Row = first decimal, column = second decimal. E.g. $Q(1.28)$: row 1.2, column .08 gives 0.1003. For negative $u$ use $Q(-u)=1-Q(u)$.</p>
+<div class="qwrap" id="qtable"></div>
+
+<div class="box warn"><span class="bt">Common Gaussian mistakes</span>
+<ul>
+  <li>Dividing by $\sigma^2$ instead of $\sigma$ when standardising.</li>
+  <li>Sign errors with Q: $P(X\le u)=1-Q(\cdot)$, not $Q(\cdot)$. Draw the bell and shade the region every time.</li>
+  <li>Looking up $Q(-1)$ in the table directly. The table only has $u\ge0$; use $Q(-1)=1-Q(1)$.</li>
+</ul></div>
+
+<!-- ============================================================ -->
+<h2 id="others"><span class="num">12</span>Other distributions you should recognise <span class="tag-beyond">Beyond class notes</span></h2>
+<p>These appear in the typed notes (<em>Random Variable Section 2</em>) and in later units. Know their PDFs and their means/variances. Their derivations use exactly the techniques above.</p>
+<div class="plots-row"><div data-plot="gammaShapes"></div><div data-plot="rayleigh"></div><div data-plot="laplace"></div><div data-plot="cauchy"></div></div>
+<table>
+  <tr><th>Name</th><th>PMF / PDF</th><th>Mean</th><th>Variance</th><th>Where it appears</th></tr>
+  <tr><td>Geometric$(p)$</td><td>$P(X=k)=q^{k-1}p$, $k=1,2,\dots$</td><td>$1/p$</td><td>$q/p^2$</td><td>number of trials up to the first success; discrete memoryless</td></tr>
+  <tr><td>Erlang$(n,\lambda)$ / Gamma</td><td>$\dfrac{\lambda^n x^{n-1}e^{-\lambda x}}{(n-1)!}$, $x\ge0$</td><td>$n/\lambda$</td><td>$n/\lambda^2$</td><td>time to the $n$th Poisson arrival (sum of $n$ exponentials)</td></tr>
+  <tr><td>Rayleigh$(\sigma)$</td><td>$\dfrac{r}{\sigma^2}e^{-r^2/2\sigma^2}$, $r\ge0$</td><td>$\sigma\sqrt{\pi/2}$</td><td>$(2-\pi/2)\sigma^2$</td><td>envelope $\sqrt{X^2+Y^2}$ of two Gaussians (Unit 3), fading</td></tr>
+  <tr><td>Laplace</td><td>$\tfrac{a}{2}e^{-a|x|}$</td><td>0</td><td>$2/a^2$</td><td>speech amplitude models</td></tr>
+  <tr><td>Cauchy</td><td>$\dfrac{1}{\pi(1+x^2)}$</td><td>undefined</td><td>∞</td><td>a warning example: no mean, no MGF</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="mgf"><span class="num">13</span>Moment generating function &amp; characteristic function</h2>
+
+<div class="box why"><span class="bt">Why another function?</span>
+<p>Computing $E[X^k]$ separately for every $k$ means a new sum or integral each time. The MGF packs <b>all</b> the moments into one function, so you get each moment by differentiating, which is much easier. Its second big use: the MGF of a <b>sum of independent RVs is the product</b> of their MGFs. That makes it the natural tool for sums (binomial = sum of Bernoullis, the CLT in Unit 3).</p></div>
+
+<div class="box def"><span class="bt">Definition</span>
+$$M_X(s)=E[e^{sX}]=\begin{cases}\displaystyle\sum_k e^{sx_k}P(X=x_k)&\text{discrete}\\[6pt]\displaystyle\int_{-\infty}^{\infty}e^{sx}f_X(x)\,dx&\text{continuous}\end{cases}$$
+<p>(The lecturer calls it "the expected value of a power". Some papers write $m_X(t)=E[e^{tX}]$; same thing.) It is defined for the values of $s$ where the sum/integral converges, always including $s=0$.</p></div>
+
+<div class="box thm"><span class="bt">Why it "generates" moments</span>
+<p>Expand $e^{sX}$ in a Taylor series and take expectations term by term:
+$$e^{sX}=\sum_{k=0}^\infty\frac{(sX)^k}{k!}\ \Rightarrow\ M_X(s)=\sum_{k=0}^\infty E[X^k]\frac{s^k}{k!}=1+E[X]s+E[X^2]\frac{s^2}{2!}+E[X^3]\frac{s^3}{3!}+\cdots$$
+<p>So <b>$E[X^k]$ is the coefficient of $\dfrac{s^k}{k!}$</b> in the Taylor expansion of $M_X(s)$. Differentiating $k$ times and setting $s=0$ picks that coefficient out:
+$$\boxed{E[X^k]=\frac{d^k}{ds^k}M_X(s)\Big|_{s=0}}$$
+<p>Equivalently: differentiate under the integral, $M_X^{(k)}(s)=\int x^ke^{sx}f_X(x)dx$, and set $s=0$.</p></div>
+
+<div class="box thm"><span class="bt">Properties</span>
+<ol>
+  <li>$M_X(0)=E[e^0]=1$. Use it to check your answer.</li>
+  <li><b>Uniqueness:</b> if two RVs have the same MGF (in an interval around 0), they have identical distributions. So you can recognise a distribution from its MGF.</li>
+  <li>$Y=aX+b\ \Rightarrow\ M_Y(s)=E[e^{s(aX+b)}]=e^{bs}M_X(as)$.</li>
+  <li><b>Sums:</b> if $X_1,\dots,X_n$ are independent and $Y=X_1+\dots+X_n$, then
+  $$M_Y(s)=E\big[e^{s(X_1+\cdots+X_n)}\big]=E[e^{sX_1}]\,E[e^{sX_2}]\cdots E[e^{sX_n}]=M_{X_1}(s)M_{X_2}(s)\cdots M_{X_n}(s).$$
+  (Independence lets the expectation of a product split into a product of expectations.)</li>
+  <li>Mean and variance quickly: $m=M'(0)$ and $\sigma^2=M''(0)-[M'(0)]^2$. Alternatively, with $L(s)=\ln M(s)$: $m=L'(0)$ and $\sigma^2=L''(0)$, which is often less algebra.</li>
+</ol></div>
+
+<h3 id="mgf-derivations">The standard MGFs, derived (all from the lecturer's notes)</h3>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>(1) A small discrete RV <span class="tag-pyq">ES Nov–Dec 2024 Q2c(i)</span></span>
+<p>$P_X(1)=\tfrac13$, $P_X(2)=\tfrac23$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$M_X(s)=\tfrac13e^{s}+\tfrac23e^{2s}$. Check: $M(0)=1$ ✓. $E[X]=M'(0)=\tfrac13+\tfrac43=\tfrac53$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>(2) Uniform(0,1), and all its moments from a series <span class="tag-pyq">ES Nov–Dec 2024 Q2c(ii)</span></span>
+<details class="sol"><summary>Solution</summary>
+<p>$M_X(s)=\int_0^1e^{sx}dx=\dfrac{e^s-1}{s}$. (General $U(a,b)$: $\dfrac{e^{sb}-e^{sa}}{s(b-a)}$.)</p>
+<p>Moments without differentiating: $\dfrac{e^s-1}{s}=\dfrac1s\Big(\sum_{k\ge0}\frac{s^k}{k!}-1\Big)=\sum_{k\ge1}\frac{s^{k-1}}{k!}=\sum_{p\ge0}\frac{s^p}{(p+1)!}=\sum_{p\ge0}\frac{1}{p+1}\cdot\frac{s^p}{p!}$.</p>
+<p>The coefficient of $\frac{s^n}{n!}$ is $\frac{1}{n+1}$, so $\boxed{E[X^n]=\frac1{n+1}}$. Check: $E[X]=\tfrac12$, $E[X^2]=\tfrac13$, variance $\tfrac1{12}$ ✓.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>(3) Bernoulli and binomial</span>
+<details class="sol"><summary>Solution</summary>
+<p>Bernoulli: $M(s)=e^{s\cdot1}p+e^{s\cdot0}(1-p)=pe^s+1-p$.</p>
+<p>Binomial = sum of $n$ independent Bernoullis, so by property 4, $M_X(s)=(pe^s+1-p)^n$. (Directly: $\sum\binom nk(pe^s)^kq^{n-k}=(pe^s+q)^n$ by the binomial theorem.)</p>
+<p>Check the mean: $M'(s)=n(pe^s+q)^{n-1}pe^s$, so $M'(0)=np$ ✓.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>(4) Poisson, and sums of Poissons</span>
+<details class="sol"><summary>Solution</summary>
+$$M_X(s)=\sum_{k=0}^\infty e^{sk}\frac{e^{-\lambda}\lambda^k}{k!}=e^{-\lambda}\sum_{k=0}^\infty\frac{(\lambda e^s)^k}{k!}=e^{-\lambda}e^{\lambda e^s}=e^{\lambda(e^s-1)}.$$
+<p>$L(s)=\lambda(e^s-1)$, so $L'(0)=\lambda$ = mean and $L''(0)=\lambda$ = variance ✓.</p>
+<p>If $X_1\sim$ Poisson$(\lambda_1)$ and $X_2\sim$ Poisson$(\lambda_2)$ are independent, then $M_{X_1+X_2}=e^{(\lambda_1+\lambda_2)(e^s-1)}$, so <b>the sum is Poisson$(\lambda_1+\lambda_2)$</b> (by uniqueness).</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>(5) Exponential, and all its moments</span>
+<details class="sol"><summary>Solution</summary>
+$$M_X(s)=\int_0^\infty e^{sx}\lambda e^{-\lambda x}dx=\lambda\int_0^\infty e^{-(\lambda-s)x}dx=\frac{\lambda}{\lambda-s},\qquad s\lt\lambda.$$
+<p>(For $s\ge\lambda$ the integral diverges, so the MGF exists only for $s\lt\lambda$.)</p>
+<p>Differentiate repeatedly: $\dfrac{d}{ds}\dfrac{\lambda}{\lambda-s}=\dfrac{\lambda}{(\lambda-s)^2}$, $\dfrac{d^2}{ds^2}=\dfrac{2\lambda}{(\lambda-s)^3}$, …, $\dfrac{d^k}{ds^k}=\dfrac{k!\,\lambda}{(\lambda-s)^{k+1}}$. At $s=0$:
+$$\boxed{E[X^k]=\frac{k!}{\lambda^k}}.$$
+<p>(Series route: $\frac{1}{1-s/\lambda}=\sum(s/\lambda)^k=\sum\frac{k!}{\lambda^k}\frac{s^k}{k!}$.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>(6) Gaussian <span class="tag-pyq">MS 2021 Q5b</span></span>
+<p>Find the MGF of $X\sim N(0,1)$, then of $N(m,\sigma^2)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Complete the square in the exponent: $sx-\frac{x^2}{2}=-\frac{(x-s)^2}{2}+\frac{s^2}{2}$. So
+$$M_X(s)=\frac1{\sqrt{2\pi}}\int_{-\infty}^\infty e^{sx}e^{-x^2/2}dx=e^{s^2/2}\underbrace{\frac1{\sqrt{2\pi}}\int_{-\infty}^\infty e^{-(x-s)^2/2}dx}_{=1\text{ (area of }N(s,1))}=\boxed{e^{s^2/2}}.$$
+<p>For $Y=m+\sigma X\sim N(m,\sigma^2)$, property 3 gives $M_Y(s)=e^{ms}e^{\sigma^2s^2/2}=\boxed{e^{ms+\sigma^2s^2/2}}$.</p>
+<p>$L(s)=ms+\tfrac12\sigma^2s^2$: $L'(0)=m$ and $L''(0)=\sigma^2$ ✓. Corollary: a sum of independent Gaussians is Gaussian, with the means added and the variances added.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>(7) Sum of two binomials (lecturer)</span>
+<p>$X\sim$ Binomial$(n,p)$ and $Y\sim$ Binomial$(m,p)$ are independent, and $Z=X+Y$. Find the distribution of $Z$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$M_Z(s)=M_X(s)M_Y(s)=(pe^s-p+1)^n(pe^s-p+1)^m=(pe^s-p+1)^{n+m}$. This is the binomial MGF, so $Z\sim$ Binomial$(n+m,p)$ by uniqueness. It makes sense: $n+m$ trials in total, with the same $p$.</p></details></div>
+
+<div class="box key"><span class="bt">MGF table</span>
+<table>
+  <tr><th>Distribution</th><th>$M_X(s)$</th><th>Mean</th><th>Variance</th></tr>
+  <tr><td>Bernoulli$(p)$</td><td>$1-p+pe^s$</td><td>$p$</td><td>$pq$</td></tr>
+  <tr><td>Binomial$(n,p)$</td><td>$(1-p+pe^s)^n$</td><td>$np$</td><td>$npq$</td></tr>
+  <tr><td>Poisson$(\lambda)$</td><td>$e^{\lambda(e^s-1)}$</td><td>$\lambda$</td><td>$\lambda$</td></tr>
+  <tr><td>Geometric$(p)$</td><td>$\dfrac{pe^s}{1-qe^s}$</td><td>$1/p$</td><td>$q/p^2$</td></tr>
+  <tr><td>Uniform$(a,b)$</td><td>$\dfrac{e^{sb}-e^{sa}}{s(b-a)}$</td><td>$\frac{a+b}2$</td><td>$\frac{(b-a)^2}{12}$</td></tr>
+  <tr><td>Exponential$(\lambda)$</td><td>$\dfrac{\lambda}{\lambda-s}$</td><td>$1/\lambda$</td><td>$1/\lambda^2$</td></tr>
+  <tr><td>Erlang$(n,\lambda)$</td><td>$\Big(\dfrac{\lambda}{\lambda-s}\Big)^n$</td><td>$n/\lambda$</td><td>$n/\lambda^2$</td></tr>
+  <tr><td>Gaussian $N(m,\sigma^2)$</td><td>$e^{ms+\sigma^2s^2/2}$</td><td>$m$</td><td>$\sigma^2$</td></tr>
+</table></div>
+
+<h3 id="charfn">The characteristic function</h3>
+<p>The MGF does not always exist. Example (lecturer): the Cauchy PDF $f(x)=\frac{1}{\pi(1+x^2)}$ gives $E[e^{sx}]=\frac1\pi\int\frac{e^{sx}}{1+x^2}dx=\infty$ for every $s\ne0$, because $e^{sx}$ grows much faster than $1+x^2$. The fix is to "go to the frequency domain" and use a complex exponential, which has $|e^{j\omega x}|=1$ (it lives on the unit circle), so the integral always converges.</p>
+<div class="box def"><span class="bt">Characteristic function</span>
+$$\Phi_X(\omega)=E[e^{j\omega X}]=\int_{-\infty}^{\infty}f_X(x)e^{j\omega x}dx.$$
+<p>It always exists, since $|\Phi_X(\omega)|\le\int f_X=1$. It is the Fourier transform of the PDF (with $+j$), so the PDF can be recovered by an inverse transform. Moments: $E[X^k]=\dfrac{1}{j^k}\dfrac{d^k\Phi_X}{d\omega^k}\Big|_{\omega=0}$. When the MGF exists, $\Phi_X(\omega)=M_X(j\omega)$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 13.1 (lecturer): CF of the exponential</span>
+<details class="sol"><summary>Solution</summary>
+$$\Phi_X(\omega)=\int_0^\infty e^{j\omega x}\lambda e^{-\lambda x}dx=\lambda\int_0^\infty e^{(j\omega-\lambda)x}dx=\lambda\Big[\frac{e^{(j\omega-\lambda)x}}{j\omega-\lambda}\Big]_0^\infty=\frac{-\lambda}{j\omega-\lambda}=\frac{\lambda}{\lambda-j\omega}.$$
+<p>(The upper limit vanishes because $|e^{(j\omega-\lambda)x}|=e^{-\lambda x}\to0$.) This matches $M_X(j\omega)$ ✓. Other CFs: $N(0,1)$: $e^{-\omega^2/2}$; Cauchy: $e^{-|\omega|}$.</p></details></div>
+
+<div class="box warn"><span class="bt">Common MGF mistakes</span>
+<ul>
+  <li>Setting $s=0$ <em>before</em> differentiating. Differentiate first, then substitute.</li>
+  <li>For the variance, $M''(0)$ is $E[X^2]$, not the variance. Subtract $[M'(0)]^2$.</li>
+  <li>Multiplying MGFs of <b>dependent</b> RVs. The product rule needs independence.</li>
+</ul></div>
+
+<!-- ============================================================ -->
+<h2 id="conditional"><span class="num">14</span>Conditional distributions</h2>
+
+<div class="box why"><span class="bt">Idea</span>
+<p>This is Unit 1's conditional probability, applied to a random variable. Once we learn that some event $B$ has happened (e.g. "the component has survived 100 h", or "the measured value is between 1 and 5"), the distribution of $X$ changes. We throw away the part of the PDF that is now impossible and rescale what is left so it again has area 1.</p></div>
+
+<div class="box def"><span class="bt">Conditional CDF and PDF (lecturer)</span>
+$$F_{X|B}(\alpha)=F_X(\alpha\mid B)=P(X\le\alpha\mid B)=\frac{P(\{X\le\alpha\}\cap B)}{P(B)},\qquad P(B)\gt0,$$
+$$f_{X|B}(\alpha)=\frac{d}{d\alpha}F_{X|B}(\alpha).$$</div>
+
+<div class="box thm"><span class="bt">Properties: the same as an ordinary CDF</span>
+<ol>
+  <li>$F_{X|B}(-\infty)=\dfrac{P(\varnothing)}{P(B)}=0$.</li>
+  <li>$F_{X|B}(\infty)=\dfrac{P(\Omega\cap B)}{P(B)}=\dfrac{P(B)}{P(B)}=1$.</li>
+  <li>$P(a\lt X\le b\mid B)=F_{X|B}(b)-F_{X|B}(a)$.</li>
+  <li>$f_{X|B}\ge0$ and $\int f_{X|B}=1$: a conditional PDF is a genuine PDF.</li>
+</ol></div>
+
+<div class="box key"><span class="bt">The most important case: $B=\{a\lt X\le b\}$ (lecturer's derivation)</span>
+<p>$F_{X|B}(\alpha)=\dfrac{P(\{X\le\alpha\}\cap\{a\lt X\le b\})}{P(a\lt X\le b)}$. There are three cases:</p>
+<ul>
+  <li><b>$\alpha\gt b$:</b> the intersection is all of $B$, so $F_{X|B}=1$.</li>
+  <li><b>$a\lt\alpha\le b$:</b> the intersection is $\{a\lt X\le\alpha\}$, so $F_{X|B}=\dfrac{F_X(\alpha)-F_X(a)}{F_X(b)-F_X(a)}$.</li>
+  <li><b>$\alpha\le a$:</b> the intersection is empty, so $F_{X|B}=0$.</li>
+</ul>
+<p>Differentiating:
+$$f_{X|B}(\alpha)=\begin{cases}\dfrac{f_X(\alpha)}{F_X(b)-F_X(a)},&a\lt\alpha\le b\\[6pt]0,&\text{otherwise}\end{cases}$$
+<p>In words: <b>cut out the piece of $f_X$ over $(a,b]$ and divide by its area</b>.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 14.1 (lecturer): uniform</span>
+<p>$X\sim U[2,10]$ and $B=\{1\lt X\le5\}$. Find $f_{X|B}$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$f_X=\frac18$ on $[2,10]$. $P(B)=F_X(5)-F_X(1)=\frac{5-2}{8}-0=\frac38$ (the part from 1 to 2 carries no probability).</p>
+<p>$f_{X|B}(\alpha)=\dfrac{1/8}{3/8}=\mathbf{\tfrac13}$ for $2\le\alpha\le5$, and 0 elsewhere. So $X$ given $B$ is $U[2,5]$, as intuition says.</p>
+<div data-plot="condUni"></div></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 14.2 (lecturer): Gaussian</span>
+<p>Repeat with $X\sim N(0,1)$ and $B=\{1\lt X\le5\}$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(B)=F(5)-F(1)=\int_1^5\frac{1}{\sqrt{2\pi}}e^{-\alpha^2/2}d\alpha=Q(1)-Q(5)=0.1587-0.0000003\approx0.1587$. This is less than 1, so $f_{X|B}$ is <b>taller</b> than $f_X$ on $(1,5]$:
+$$f_{X|B}(\alpha)=\frac{e^{-\alpha^2/2}/\sqrt{2\pi}}{Q(1)-Q(5)}\approx6.30\,\frac{e^{-\alpha^2/2}}{\sqrt{2\pi}},\qquad1\lt\alpha\le5.$$</p>
+<div data-plot="condNorm"></div></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 14.3: conditional mean</span>
+<p>$X\sim$ Exp(λ). Find $E[X\mid X\gt a]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$f_{X|X\gt a}(x)=\frac{\lambda e^{-\lambda x}}{e^{-\lambda a}}=\lambda e^{-\lambda(x-a)}$ for $x\gt a$: an exponential shifted to start at $a$. So $E[X\mid X\gt a]=a+\frac1\lambda$. You have already waited $a$, and the expected remaining wait is still $1/\lambda$ (memoryless).</p>
+<p class="small">General definition: $E[X\mid B]=\int x\,f_{X|B}(x)\,dx$.</p></details></div>
+
+<div class="box thm"><span class="bt">Total probability and Bayes for densities</span>
+<p>If $A_1,\dots,A_n$ partition $\Omega$:
+$$F_X(x)=\sum_i F_{X|A_i}(x)P(A_i),\qquad f_X(x)=\sum_i f_{X|A_i}(x)P(A_i),$$
+$$P(A_i\mid X=x)=\frac{f_{X|A_i}(x)P(A_i)}{\sum_jf_{X|A_j}(x)P(A_j)}.$$
+<p>This is exactly how the received-signal PDF in a noisy channel is built (see the PYQ MS 2021 Q3a below).</p></div>
+
+<!-- ============================================================ -->
+<h2 id="inequalities"><span class="num">15</span>Markov &amp; Chebyshev inequalities</h2>
+
+<div class="box why"><span class="bt">Why bounds?</span>
+<p>Often we know only the mean (and perhaps the variance), not the full distribution. These inequalities still give a guaranteed <b>upper bound</b> on tail probabilities, valid for every distribution. They are also the tool used to prove the Law of Large Numbers (Unit 3).</p></div>
+
+<div class="box thm"><span class="bt">Markov inequality: for one-sided PDFs ($X\ge0$)</span>
+$$P(X\ge\delta)\le\frac{m_X}{\delta},\qquad\delta\gt0.$$
+<p><b>Proof (lecturer).</b> Since $f_X(\alpha)=0$ for $\alpha\lt0$,
+$$m_X=\int_0^\infty\alpha f_X(\alpha)d\alpha\ \ge\ \int_\delta^\infty\alpha f_X(\alpha)d\alpha\qquad(\text{dropped a non-negative piece}).$$
+In the remaining integral $\alpha\ge\delta$, so replacing $\alpha$ by its smallest value $\delta$ makes it smaller still:
+$$m_X\ \ge\ \delta\int_\delta^\infty f_X(\alpha)d\alpha=\delta\,P(X\ge\delta)\ \Rightarrow\ P(X\ge\delta)\le\frac{m_X}{\delta}.\ ∎$$</div>
+<div class="plots-row"><div data-plot="markov"></div></div>
+
+<div class="box thm"><span class="bt">Chebyshev inequality: for any PDF (two-sided)</span>
+$$P(|X-m_X|\ge\epsilon)\le\frac{\sigma_X^2}{\epsilon^2}\qquad\Big(\text{equivalently } P(|X-m_X|\lt\epsilon)\ge1-\frac{\sigma_X^2}{\epsilon^2}\Big).$$
+<p><b>Proof (lecturer).</b> Start from the variance and keep only the tails:
+$$\sigma_X^2=\int_{-\infty}^{\infty}(\alpha-m_X)^2f_X(\alpha)d\alpha\ \ge\ \int_{|\alpha-m_X|\ge\epsilon}(\alpha-m_X)^2f_X(\alpha)d\alpha.$$
+In the tails $(\alpha-m_X)^2\ge\epsilon^2$, so replace it by its minimum value $\epsilon^2$:
+$$\sigma_X^2\ \ge\ \epsilon^2\int_{|\alpha-m_X|\ge\epsilon}f_X(\alpha)d\alpha=\epsilon^2P(|X-m_X|\ge\epsilon)\ \Rightarrow\ P(|X-m_X|\ge\epsilon)\le\frac{\sigma_X^2}{\epsilon^2}.\ ∎$$
+<p class="small">(Slick alternative: apply Markov to the non-negative RV $(X-m_X)^2$ with $\delta=\epsilon^2$.)</p>
+<p>With $\epsilon=k\sigma$: $P(|X-m|\ge k\sigma)\le\frac1{k^2}$. So at most 25% of any distribution lies 2σ or more from the mean, and at most 11.1% lies 3σ or more away.</p></div>
+<div class="plots-row"><div data-plot="cheb"></div><div data-plot="chebCompare"></div></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 15.1</span>
+<p>The average queue length is 4. Bound P(queue ≥ 20). If also σ = 2, bound P(queue ≥ 10) with Chebyshev.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Markov: $P(X\ge20)\le\frac4{20}=0.2$.</p>
+<p>Chebyshev: $P(X\ge10)\le P(|X-4|\ge6)\le\frac{4}{36}=0.111$. (Markov alone would give only 0.4; the variance information sharpens the bound.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 15.2: bound vs truth</span>
+<p>$X\sim$ Exp(1). Compare Markov's bound on $P(X\ge3)$ and Chebyshev's bound on $P(|X-1|\ge2)$ with the exact values.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Markov: $\le\frac13=0.333$; exact $e^{-3}=0.0498$.</p>
+<p>Chebyshev: $\le\frac{1}{4}$; exact $P(X\ge3)+P(X\le-1)=e^{-3}=0.0498$.</p>
+<p>The bounds are always true but can be very loose, because they must hold for every distribution.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="mistakes"><span class="num">16</span>Mistakes to avoid &amp; self-check</h2>
+<div class="box warn"><span class="bt">Top 10 mark-losers in Unit 2</span>
+<ol>
+  <li>Treating a PDF value as a probability.</li>
+  <li>Taking the lower value of a CDF at a jump (CDFs are right-continuous).</li>
+  <li>Ignoring impulses (or endpoints) in mixed-RV probabilities.</li>
+  <li>Not checking validity: a PMF must sum to 1, a PDF must integrate to 1 and be ≥ 0, a CDF must be non-decreasing from 0 to 1.</li>
+  <li>$N(m,\sigma^2)$: the second number is the <b>variance</b>.</li>
+  <li>Q-function sign errors. Draw the bell first.</li>
+  <li>$\operatorname{Var}[aX+b]=a^2\operatorname{Var}[X]$, not $a\operatorname{Var}[X]+b$.</li>
+  <li>Poisson λ must match the time window.</li>
+  <li>Using the Poisson approximation when $p$ is not small.</li>
+  <li>MGF: differentiate first, then put $s=0$; $M''(0)=E[X^2]$, not the variance.</li>
+</ol></div>
+
+<div class="box tip"><span class="bt">Self-check (whole unit)</span>
+<ol class="checks" start="5">
+  <li>$X\sim$ Binomial(10, 0.3). What are $E[X]$ and $\operatorname{Var}[X]$?</li>
+  <li>For a Poisson RV the variance is 4. What is $P(X=0)$?</li>
+  <li>Write $P(X\lt3)$ for $X\sim N(5,4)$ in terms of Q.</li>
+  <li>$M_X(s)=e^{2(e^s-1)}$. Name the distribution of $X$.</li>
+  <li>True or false: Chebyshev gives $P(|X-m|\lt2\sigma)\ge0.75$ for every RV.</li>
+  <li>$X\sim U(0,4)$ and $B=\{X\gt1\}$. What is $f_{X|B}$?</li>
+</ol></div>
+
+<!-- ============================================================ -->
+<h2 id="practice"><span class="num">17</span>Practice problems</h2>
+<p class="muted small">Answers are in the answer key (§20). Try them all before checking.</p>
+<ol class="practice">
+  <li><span class="tag-lvl lvl-e">Easy</span>$P(X=k)=ck$ for $k=1,2,3,4$. Find $c$, the CDF, and $P(2\le X\lt4)$.</li>
+  <li><span class="tag-lvl lvl-e">Easy</span>$f_X(x)=k x(2-x)$ on $[0,2]$. Find $k$, $E[X]$ and $\operatorname{Var}[X]$.</li>
+  <li><span class="tag-lvl lvl-e">Easy</span>A fair coin is tossed 8 times. Find P(exactly 5 heads) and P(at least 1 head).</li>
+  <li><span class="tag-lvl lvl-m">Medium</span>On average 1.5 typos per page (Poisson). Find P(a page has at least 2 typos), and P(a 4-page chapter has none).</li>
+  <li><span class="tag-lvl lvl-m">Medium</span>$X\sim N(10,25)$. Find $P(X\gt15)$, $P(5\lt X\le20)$, and the value $c$ with $P(X\gt c)=0.05$.</li>
+  <li><span class="tag-lvl lvl-m">Medium</span>A CDF is $F(x)=0$ for $x\lt0$; $\ 0.2+0.3x$ for $0\le x\lt2$; $\ 1$ for $x\ge2$. Find $P(X=0)$, $P(X=2)$, $P(0\lt X\lt2)$ and $E[X]$.</li>
+  <li><span class="tag-lvl lvl-m">Medium</span>Find the MGF of $X$ with $f_X(x)=\tfrac12e^{-|x|}$ (Laplace), and use it to find $\operatorname{Var}[X]$.</li>
+  <li><span class="tag-lvl lvl-m">Medium</span>$M_X(s)=\dfrac{1}{(1-3s)^2}$. Find $E[X]$ and $\operatorname{Var}[X]$. Which distribution is this?</li>
+  <li><span class="tag-lvl lvl-h">Exam</span>2% of items are defective. Using the Poisson approximation, find the smallest box size $n$ such that P(at least one defective) ≥ 0.9.</li>
+  <li><span class="tag-lvl lvl-h">Exam</span>$X\sim$ Exp(0.5). Find $f_{X|B}$ for $B=\{1\lt X\le3\}$, and $E[X\mid B]$.</li>
+  <li><span class="tag-lvl lvl-h">Exam</span>A voltage $X$ has mean 5 V and standard deviation 0.5 V, with unknown distribution. Find a lower bound on $P(4\lt X\lt6)$. What is the exact value if $X$ is Gaussian?</li>
+  <li><span class="tag-lvl lvl-h">Exam</span>Show that for $X\sim$ Geometric$(p)$, $P(X\gt m+n\mid X\gt m)=P(X\gt n)$.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="pyq"><span class="num">18</span>Past-paper questions, fully solved</h2>
+<p class="muted small">Every Unit 2 question from the 10 papers in your folder (MS = mid-sem, ES = end-sem), grouped by topic. Questions on joint distributions, functions of RVs ($Y=g(X)$ PDFs), covariance and CLT are in Unit 3.</p>
+
+<h3>A. CDF, PMF, PDF: validity, constants, probabilities</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q1b</span> (1 mark)</span>
+<p>$X$ takes values $x_1,x_2,x_3,x_4$ with $2P(X=x_1)=3P(X=x_2)=P(X=x_3)=5P(X=x_4)$. Find the PMF and CDF of $X$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Let the common value be $k$. Then $P_1=\frac k2$, $P_2=\frac k3$, $P_3=k$, $P_4=\frac k5$, and the sum is $k\cdot\frac{15+10+30+6}{30}=\frac{61k}{30}=1$, so $k=\frac{30}{61}$.</p>
+<p>PMF: $P_1=\frac{15}{61}$, $P_2=\frac{10}{61}$, $P_3=\frac{30}{61}$, $P_4=\frac{6}{61}$.</p>
+<p>CDF (taking $x_1\lt x_2\lt x_3\lt x_4$): $F=0$ for $\alpha\lt x_1$; $\frac{15}{61}$ on $[x_1,x_2)$; $\frac{25}{61}$ on $[x_2,x_3)$; $\frac{55}{61}$ on $[x_3,x_4)$; $1$ for $\alpha\ge x_4$. In step form, $F_X(\alpha)=\sum_kP_k\,u(\alpha-x_k)$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2024 Q2b</span> (1 mark)</span>
+<p>$F_X(x)=0$ for $x\lt-3$; $0.4$ for $-3\le x\lt5$; $0.8$ for $5\le x\lt7$; $1$ for $x\ge7$. Write the PMF.</p>
+<details class="sol"><summary>Solution</summary>
+<div data-plot="cdfMS24"></div>
+<p>The PMF is the set of jump sizes: $P_X(-3)=0.4$, $P_X(5)=0.4$, $P_X(7)=0.2$, and 0 elsewhere.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q3b</span> (1 mark)</span>
+<p>Find the constant $b\gt0$ so that $f_X(\alpha)=e^{3\alpha/4}$ for $0\le\alpha\le b$ (0 elsewhere) is a valid PDF.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$\int_0^b e^{3\alpha/4}d\alpha=\frac43\big(e^{3b/4}-1\big)=1\Rightarrow e^{3b/4}=\frac74\Rightarrow b=\frac43\ln\frac74=\mathbf{0.746}$. (Also $f\ge0$ ✓.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2021 Q1a</span> <span class="tag-pyq">ES Nov–Dec 2024 Q2b(ii)</span></span>
+<p>$f(x)=\frac1{\sqrt\pi}e^{-x^2+x-a}$, $-\infty\lt x\lt\infty$. Find $a$ so that $f$ is a PDF.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Complete the square: $-x^2+x=-(x-\tfrac12)^2+\tfrac14$. So
+$$\int_{-\infty}^\infty f\,dx=\frac{e^{1/4-a}}{\sqrt\pi}\int_{-\infty}^\infty e^{-(x-1/2)^2}dx=\frac{e^{1/4-a}}{\sqrt\pi}\cdot\sqrt\pi=e^{1/4-a}.$$
+<p>Setting this to 1 gives $\mathbf{a=\tfrac14}$. (Then $f$ is the PDF of $N(\tfrac12,\tfrac12)$.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2021 Q1b</span> (2 marks)</span>
+<p>The PDF of the amplitude of a signal is $p_X(x)=0.5|x|e^{-|x|}$. Find (i) $P(X\ge1)$, (ii) $P(-1\lt X\le2)$.</p>
+<details class="sol"><summary>Solution</summary>
+<div data-plot="laplaceAbs"></div>
+<p>Use $\int_0^c xe^{-x}dx=1-(1+c)e^{-c}$ and $\int_c^\infty xe^{-x}dx=(1+c)e^{-c}$. The PDF is even.</p>
+<p>(i) $P(X\ge1)=0.5\int_1^\infty xe^{-x}dx=0.5\cdot2e^{-1}=e^{-1}=\mathbf{0.368}$.</p>
+<p>(ii) $P(-1\lt X\le2)=0.5\int_0^1xe^{-x}dx+0.5\int_0^2xe^{-x}dx=0.5(1-2e^{-1})+0.5(1-3e^{-2})=0.5(0.2642+0.5940)=\mathbf{0.429}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2025 Q2a</span> (3 marks)</span>
+<p>A target has three concentric circles of radii $1/\sqrt3$, $1$ and $\sqrt3$ feet. A shot inside the inner circle scores 4, in the next ring 3, in the third ring 2, and outside 0. The distance $R$ of a hit from the centre has PDF $f_R(r)=\dfrac{2}{\pi(1+r^2)}$, $r\gt0$. Find the probability of scoring 0, 2, 3 and 4 points.</p>
+<details class="sol"><summary>Solution</summary>
+<div data-plot="target"></div>
+<p>$P(a\lt R\le b)=\frac2\pi[\tan^{-1}b-\tan^{-1}a]$, with $\tan^{-1}\frac1{\sqrt3}=\frac\pi6$, $\tan^{-1}1=\frac\pi4$, $\tan^{-1}\sqrt3=\frac\pi3$, $\tan^{-1}\infty=\frac\pi2$.</p>
+<ul>
+  <li>4 points: $\frac2\pi\cdot\frac\pi6=\mathbf{\frac13}$</li>
+  <li>3 points: $\frac2\pi\big(\frac\pi4-\frac\pi6\big)=\mathbf{\frac16}$</li>
+  <li>2 points: $\frac2\pi\big(\frac\pi3-\frac\pi4\big)=\mathbf{\frac16}$</li>
+  <li>0 points: $\frac2\pi\big(\frac\pi2-\frac\pi3\big)=\mathbf{\frac13}$</li>
+</ul>
+<p>Check: total $=1$ ✓. (Expected score $=\frac43+\frac12+\frac13=\frac{13}{6}$.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2025 Q2b</span> (1 mark)</span>
+<p>Which are valid distribution functions? (i) $F(x)=1-e^{-x/2}$ for $x\ge0$, 0 for $x\lt0$. (ii) $F(x)=0$ for $x\lt0$; $0.5+0.5\sin\big[\frac{\pi(x-1)}{2}\big]$ for $0\le x\lt2$; $1$ for $x\ge2$. (iii) $F(x)=\frac xa[u(x-a)-u(x-2a)]$.</p>
+<details class="sol"><summary>Solution</summary>
+<div class="plots-row"><div data-plot="vc1"></div><div data-plot="vc2"></div><div data-plot="vc3"></div></div>
+<ol type="i">
+  <li><b>Valid.</b> It is 0 at $-\infty$ and tends to 1; it is non-decreasing (derivative $\frac12e^{-x/2}\gt0$) and continuous. (It is the Exp(1/2) CDF.)</li>
+  <li><b>Valid.</b> At $x=0$ it is $0.5+0.5\sin(-\frac\pi2)=0$; at $x=2$ it is $0.5+0.5\sin\frac\pi2=1$. On $[0,2]$ the angle runs from $-\frac\pi2$ to $\frac\pi2$, where sin is increasing. It is continuous with limits 0 and 1.</li>
+  <li><b>Not valid.</b> For $a\le x\lt2a$, $F=x/a\in[1,2)$, which exceeds 1. And for $x\ge2a$, $F=0$, so $F$ decreases and $F(\infty)=0\ne1$.</li>
+</ol></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2025 Q3a</span> (3 marks)</span>
+<p>$F_X(x)=\sum_{n=1}^{12}\frac{n^2}{650}u(x-n)$. Find (i) $P(-\infty\lt X\le6.5)$, (ii) $P(X\gt4)$, (iii) $P(6\lt X\le9)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>This is a staircase with a jump $\frac{n^2}{650}$ at each $n=1,\dots,12$, i.e. $P(X=n)=\frac{n^2}{650}$. Check: $\sum_{1}^{12}n^2=\frac{12\cdot13\cdot25}{6}=650$ ✓.</p>
+<ol type="i">
+  <li>$F(6.5)=\frac{1+4+9+16+25+36}{650}=\frac{91}{650}=\mathbf{0.14}$</li>
+  <li>$1-F(4)=1-\frac{30}{650}=\frac{620}{650}=\mathbf{0.954}$</li>
+  <li>$F(9)-F(6)=\frac{49+64+81}{650}=\frac{194}{650}=\mathbf{0.298}$</li>
+</ol></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q1a</span> (5 marks)</span>
+<p>$f(x)=kx$ for $0\le x\le5$, 0 elsewhere. (a) Find $k$. (b) Find $P(1\le X\le3)$. (c) Find $P(X\le3)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) $\int_0^5kx\,dx=\frac{25k}{2}=1\Rightarrow k=\mathbf{\frac2{25}}$. So $F(x)=\frac{x^2}{25}$ on $[0,5]$.</p>
+<p>(b) $F(3)-F(1)=\frac{9-1}{25}=\mathbf{\frac{8}{25}}=0.32$.</p>
+<p>(c) $F(3)=\mathbf{\frac9{25}}=0.36$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q2c</span> (5 marks)</span>
+<p>$P_X(x)=\frac cx$ for $x=2,4,8$, 0 otherwise. (i) Find $c$. (ii) Find $P(X=4)$. (iii) Find $P(X\lt4)$. (iv) Find $P(3\le X\le9)$. (v) Find the mean of $X$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $c\big(\frac12+\frac14+\frac18\big)=\frac{7c}{8}=1\Rightarrow c=\mathbf{\frac87}$. So the PMF is $\frac47,\frac27,\frac17$.</p>
+<p>(ii) $P(X=4)=\mathbf{\frac27}$. (iii) $P(X\lt4)=P(X=2)=\mathbf{\frac47}$. (iv) $P(3\le X\le9)=P(4)+P(8)=\mathbf{\frac37}$.</p>
+<p>(v) $E[X]=\sum x\cdot\frac cx=3c=\mathbf{\frac{24}{7}}\approx3.43$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q2a</span> (5 marks)</span>
+<p>$F(x)=0$ for $x\lt0$; $x+\frac12$ for $0\le x\lt\frac12$; $1$ for $x\ge\frac12$. (i) Sketch $F$ and show it has the properties of a CDF. (ii) Find $P(X\le\frac14)$, $P(0\lt X\le\frac14)$, $P(0\le X\le\frac14)$. (iii) What type is $X$?</p>
+<details class="sol"><summary>Solution</summary>
+<div data-plot="cdfES25"></div>
+<p>(i) $F(-\infty)=0$ and $F(\infty)=1$; $F$ is non-decreasing (0, then a ramp from $\frac12$ to $1$, then 1); and it is right-continuous (at 0, $F(0)=\frac12=F(0^+)$). So it is a valid CDF.</p>
+<p>(ii) $P(X\le\frac14)=F(\frac14)=\mathbf{\frac34}$. $P(0\lt X\le\frac14)=F(\frac14)-F(0)=\frac34-\frac12=\mathbf{\frac14}$. $P(0\le X\le\frac14)=F(\frac14)-F(0^-)=\frac34-0=\mathbf{\frac34}$. The difference between the last two is $P(X=0)=\frac12$.</p>
+<p>(iii) <b>Mixed</b>: a jump of $\frac12$ at 0 (discrete part) plus a uniform density 1 on $(0,\frac12)$ (continuous part). $f(x)=\frac12\delta(x)+1$ on $(0,\frac12)$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q2a</span> (5 marks)</span>
+<p>$F_X(x)=1$ for $x\ge1$; $\frac12+\frac x2$ for $0\le x\lt1$; $0$ for $x\lt0$. (a) Find the PDF. (b) Find $E[e^X]$. (c) Find $P(X=0\mid X\le0.5)$.</p>
+<details class="sol"><summary>Solution</summary>
+<div data-plot="cdfES21"></div>
+<p>(a) The jump of $\frac12$ at 0 becomes $\frac12\delta(x)$, and the slope on $(0,1)$ is $\frac12$:
+$$f_X(x)=\tfrac12\delta(x)+\tfrac12\big[u(x)-u(x-1)\big].$$</p>
+<p>(b) $E[e^X]=\frac12e^0+\int_0^1\frac12e^xdx=\frac12+\frac12(e-1)=\mathbf{\frac e2}\approx1.359$.</p>
+<p>(c) $P(X=0\mid X\le0.5)=\dfrac{P(X=0)}{F(0.5)}=\dfrac{1/2}{3/4}=\mathbf{\frac23}$. (Here $\{X=0\}\subset\{X\le0.5\}$, so the intersection is just $\{X=0\}$.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q2b</span> (5 marks)</span>
+<p>$F_U(u)=0$ for $u\lt-5$; $\frac{u+5}{8}$ for $-5\le u\lt-3$; $\frac14$ for $-3\le u\lt3$; $\frac14+\frac{3(u-3)}{8}$ for $3\le u\lt5$; $1$ for $u\ge5$. Find (i) $E[U]$, (ii) $\operatorname{Var}[U]$, (iii) $E[2^U]$.</p>
+<details class="sol"><summary>Solution</summary>
+<div class="plots-row"><div data-plot="cdfES22"></div><div data-plot="pdfES22"></div></div>
+<p>Check for jumps: at $-3$, $\frac{2}{8}=\frac14$ ✓; at 5, $\frac14+\frac68=1$ ✓. So $F$ is continuous and $f_U=\frac18$ on $(-5,-3)$, $\frac38$ on $(3,5)$, and 0 elsewhere (areas $\frac14+\frac34=1$ ✓).</p>
+<p>(i) $E[U]=\frac18\int_{-5}^{-3}u\,du+\frac38\int_3^5u\,du=\frac18(-8)+\frac38(8)=-1+3=\mathbf{2}$.</p>
+<p>(ii) $E[U^2]=\frac18\cdot\frac{-27+125}{3}+\frac38\cdot\frac{125-27}{3}=\frac{98}{24}+\frac{294}{24}=\frac{49}{3}$. So $\operatorname{Var}[U]=\frac{49}3-4=\mathbf{\frac{37}{3}}\approx12.33$.</p>
+<p>(iii) Use $\int2^udu=\frac{2^u}{\ln2}$:
+$$E[2^U]=\frac{1}{8\ln2}\big(2^{-3}-2^{-5}\big)+\frac{3}{8\ln2}\big(2^5-2^3\big)=\frac{1}{\ln2}\Big(\frac{3}{256}+9\Big)=\mathbf{13.0}.$$</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2024 Q3a</span> (3 marks)</span>
+<p>$f_X(x)=ce^{-2x}$ for $x\ge0$ ($c\gt0$), 0 for $x\lt0$. (a) Find $c$. (b) For $a,x\gt0$, find $P(X\ge x+a)$. (c) Find $P(X\ge x+a\mid X\ge a)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(a) $\int_0^\infty ce^{-2x}dx=\frac c2=1\Rightarrow c=\mathbf2$. So $X\sim$ Exp(2).</p>
+<p>(b) $P(X\ge x+a)=\int_{x+a}^\infty2e^{-2t}dt=\mathbf{e^{-2(x+a)}}$.</p>
+<p>(c) $\dfrac{P(X\ge x+a)}{P(X\ge a)}=\dfrac{e^{-2(x+a)}}{e^{-2a}}=\mathbf{e^{-2x}}=P(X\ge x)$: the memoryless property.</p></details></div>
+
+<h3>B. Expectation &amp; variance</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q1c</span> (5 marks)</span>
+<p>Find $\mu$, $\sigma^2$ and $\sigma$ for: $x_i=2,3,11$ with $f(x_i)=\frac13,\frac12,\frac16$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$\mu=2\cdot\frac13+3\cdot\frac12+11\cdot\frac16=\frac{4+9+11}{6}=\mathbf4$.</p>
+<p>$E[X^2]=\frac43+\frac92+\frac{121}6=\frac{8+27+121}{6}=26$. So $\sigma^2=26-16=\mathbf{10}$ and $\sigma=\sqrt{10}=\mathbf{3.162}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q2a(ii)</span></span>
+<p>120 students travel in 3 buses carrying 36, 40 and 44. One student is chosen at random, and $X$ = number of students on that student's bus. Find $E[X]$ to 2 decimal places.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$P(X=36)=\frac{36}{120}$, $P(X=40)=\frac{40}{120}$, $P(X=44)=\frac{44}{120}$. So
+$$E[X]=\frac{36^2+40^2+44^2}{120}=\frac{1296+1600+1936}{120}=\frac{4832}{120}=\mathbf{40.27}.$$
+<p>This is more than the average bus size of 40, because a random student is more likely to be on a fuller bus ("size-biased sampling").</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2025 Q3b</span> (1 mark)</span>
+<p>A voltage $X$ is uniformly distributed on $\{-3,\dots,3,4\}$. Find the mean and variance of $Y=-2X^2+3$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>There are 8 equally likely values. $E[X^2]=\frac{9+4+1+0+1+4+9+16}{8}=\frac{44}{8}=5.5$, so $E[Y]=-2(5.5)+3=\mathbf{-8}$.</p>
+<p>$E[X^4]=\frac{81+16+1+0+1+16+81+256}{8}=56.5$, so $\operatorname{Var}[X^2]=56.5-5.5^2=26.25$, and $\operatorname{Var}[Y]=(-2)^2\cdot26.25=\mathbf{105}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2024 Q3b</span> (1 mark)</span>
+<p>Compute $E[|X|^n]$ if $X$ is uniform with zero mean and variance 2.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Zero mean means the interval is symmetric, $(-c,c)$. The variance is $\frac{(2c)^2}{12}=\frac{c^2}{3}=2\Rightarrow c=\sqrt6$. Then
+$$E|X|^n=\frac{1}{2\sqrt6}\int_{-\sqrt6}^{\sqrt6}|x|^ndx=\frac1{\sqrt6}\cdot\frac{(\sqrt6)^{n+1}}{n+1}=\mathbf{\frac{6^{n/2}}{n+1}}.$$
+<p>Check with $n=2$: $\frac{6}{3}=2$ ✓.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2024 Q5b</span> (1 mark)</span>
+<p>$X$ has mean $m$ and variance $\sigma^2$. Compute the mean of $Y=2X^2+3X-4$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$E[Y]=2E[X^2]+3E[X]-4=\mathbf{2(\sigma^2+m^2)+3m-4}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q2a</span> (5 marks)</span>
+<p>$X$ has mean $\mu_X$ and variance $\sigma_X^2$, and $Y=\frac{1}{\sigma_X}(X-\mu_X)$. Find (i) the mean of $Y$, (ii) the variance of $Y$, (iii) the PDF of $Y$ in terms of the PDF of $X$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $E[Y]=\frac1{\sigma_X}(E[X]-\mu_X)=\mathbf0$.</p>
+<p>(ii) $\operatorname{Var}[Y]=\frac{1}{\sigma_X^2}\operatorname{Var}[X]=\mathbf1$. ("Standardised" means mean 0 and variance 1.)</p>
+<p>(iii) $F_Y(y)=P\big(\frac{X-\mu_X}{\sigma_X}\le y\big)=P(X\le\sigma_Xy+\mu_X)=F_X(\sigma_Xy+\mu_X)$, using $\sigma_X\gt0$. Differentiate with the chain rule:
+$$f_Y(y)=\sigma_X\,f_X(\sigma_Xy+\mu_X).$$
+<p>If $X$ is Gaussian, this gives exactly $N(0,1)$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q2b</span> (5 marks)</span>
+<p>$X\sim U[0,1]$ and $Y=(X-\frac12)^2$. (i) Compute $P(Y\gt\frac18)$. (ii) Find the mean and variance of $Y$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $Y\gt\frac18\iff|X-\frac12|\gt\frac1{2\sqrt2}\approx0.354$. The "good" interval $|X-\frac12|\le0.354$ has length $\frac1{\sqrt2}$, so $P(Y\gt\frac18)=1-\frac1{\sqrt2}=\mathbf{0.293}$.</p>
+<p>(ii) Let $V=X-\frac12\sim U[-\frac12,\frac12]$. Then $E[Y]=E[V^2]=\operatorname{Var}[X]=\mathbf{\frac1{12}}$. $E[Y^2]=E[V^4]=\int_{-1/2}^{1/2}v^4dv=\frac{2}{5}\cdot\frac1{32}=\frac1{80}$. So $\operatorname{Var}[Y]=\frac1{80}-\frac1{144}=\mathbf{\frac{1}{180}}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2021 Q3b</span> (2 marks)</span>
+<p>$Y=a\cos(\omega t+\theta)$ with $\theta\sim U(0,2\pi)$. Find $E[Y]$ and $E[Y^2]$.</p>
+<details class="sol"><summary>Solution</summary><p>$E[Y]=0$ and $E[Y^2]=a^2/2$. Full working in Example 9.2.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q3a</span> (4 marks)</span>
+<p>The median $x_0$ satisfies $P[X\ge x_0]=P[X\le x_0]$; the mode $x_m$ is where the PDF is maximum. Find the median and mode of (i) an exponential RV, (ii) a Gaussian RV.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $X\sim$ Exp(λ): $F(x_0)=1-e^{-\lambda x_0}=\frac12\Rightarrow x_0=\mathbf{\frac{\ln2}{\lambda}}$. The PDF $\lambda e^{-\lambda x}$ is decreasing on $[0,\infty)$, so its maximum is at $x_m=\mathbf0$.</p>
+<p>(ii) $X\sim N(m,\sigma^2)$: by symmetry about $m$, $P(X\le m)=\frac12$, so the median is $\mathbf m$. The exponent $-(x-m)^2/2\sigma^2$ is largest at $x=m$, so the mode is $\mathbf m$. (Mean = median = mode.)</p>
+<div data-plot="expMedian"></div></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q1b</span> (5 marks)</span>
+<p>Calculate the mean and variance of the uniform distribution.</p>
+<details class="sol"><summary>Solution</summary><p>$E[X]=\frac{a+b}2$ and $\sigma^2=\frac{(b-a)^2}{12}$. Full derivation in §9. Write all three integrals: $E[X]$, $E[X^2]$, and the subtraction.</p></details></div>
+
+<h3>C. Bernoulli, binomial, Poisson</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q2b</span> (1 mark)</span>
+<p>Describe the Bernoulli and Poisson random variables.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>Bernoulli$(p)$:</b> the outcome of a single trial with two results, $X=1$ (success) with probability $p$ and $X=0$ with probability $1-p$. Mean $p$, variance $p(1-p)$.</p>
+<p><b>Poisson$(\lambda)$:</b> counts the number of rare, independent events in a fixed interval when the average count is λ: $P(X=k)=e^{-\lambda}\lambda^k/k!$, $k=0,1,2,\dots$ Mean = variance = λ. It is the limit of Binomial$(n,p)$ as $n\to\infty$, $p\to0$ with $np=\lambda$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2021 Q2b</span> (2 marks) &nbsp;<span class="tag-pyq">ES June 2026 Q2c</span> (5 marks)</span>
+<p>(a) Find the variance of a binomial RV. (b) For $X\sim$ Poisson(λ), show $E[X]=\lambda$, $\operatorname{Var}[X]=\lambda$, $\sigma_X=\sqrt\lambda$.</p>
+<details class="sol"><summary>Solution</summary><p>(a) $npq$: see the direct proof in §7 (use $E[X(X-1)]$). (b) See the derivation in §8 (use $k^2=k(k-1)+k$). Either can also be done in two lines from the MGF (§13).</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q2b</span> (5 marks)</span>
+<p>A binary source emits 1 and 0 with probabilities 0.6 and 0.4. (a) Find P(two 1s and three 0s in a 5-digit sequence). (b) Find P(at least three 1s in a 5-digit sequence).</p>
+<details class="sol"><summary>Solution</summary>
+<p>The number of 1s is $X\sim$ Binomial$(5,0.6)$.</p>
+<p>(a) $P(X=2)=\binom52(0.6)^2(0.4)^3=10(0.36)(0.064)=\mathbf{0.2304}$.</p>
+<p>(b) $P(X\ge3)=\binom53(0.6)^3(0.4)^2+\binom54(0.6)^4(0.4)+0.6^5=0.3456+0.2592+0.07776=\mathbf{0.6826}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q2b</span> (5 marks)</span>
+<p>Team A wins each game with probability $\frac23$. If A plays 4 games, find P(A wins) (i) exactly 2 games, (ii) at least 1 game, (iii) more than half the games.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$X\sim$ Binomial$(4,\frac23)$.</p>
+<p>(i) $\binom42\big(\frac23\big)^2\big(\frac13\big)^2=6\cdot\frac{4}{81}=\mathbf{\frac{8}{27}}\approx0.296$.</p>
+<p>(ii) $1-\big(\frac13\big)^4=\mathbf{\frac{80}{81}}\approx0.988$.</p>
+<p>(iii) $P(X\ge3)=\binom43\big(\frac23\big)^3\frac13+\big(\frac23\big)^4=\frac{32}{81}+\frac{16}{81}=\mathbf{\frac{16}{27}}\approx0.593$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q1c(ii)</span></span>
+<p>Screws are defective independently with probability 0.01 (the scan reads ".0"; 0.01 is the standard value of this problem). They are sold in packs of 10 with a money-back guarantee that at most 1 is defective. What proportion of packs must be replaced?</p>
+<details class="sol"><summary>Solution</summary>
+<p>The number of defectives is $X\sim$ Binomial$(10,0.01)$, and a pack is replaced if $X\ge2$:
+$$P(X\ge2)=1-(0.99)^{10}-10(0.01)(0.99)^9=1-0.90438-0.09135=\mathbf{0.0043}.$$
+<p>So about 0.43% of packs (roughly 1 in 234). The Poisson check with $\lambda=0.1$ gives $1-e^{-0.1}(1.1)=0.0047$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q2a(i)</span></span>
+<p>$p(i)=c\lambda^i/i!$, $i=0,1,2,\dots$ Find $P(X=0)$ and $P(X\gt2)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$\sum_ic\frac{\lambda^i}{i!}=ce^{\lambda}=1\Rightarrow c=e^{-\lambda}$, so $X$ is Poisson(λ).</p>
+<p>$P(X=0)=\mathbf{e^{-\lambda}}$. &nbsp; $P(X\gt2)=1-P(0)-P(1)-P(2)=\mathbf{1-e^{-\lambda}\big(1+\lambda+\frac{\lambda^2}{2}\big)}$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q2b(i)</span></span>
+<p>On average 3.2 α-particles are emitted per second by a gram of radioactive material. Approximate P(no more than 2 α-particles in a second).</p>
+<details class="sol"><summary>Solution</summary>
+<p>There are many atoms, each with a tiny chance of decaying, so use Poisson with $\lambda=3.2$:
+$$P(X\le2)=e^{-3.2}\Big(1+3.2+\frac{3.2^2}{2}\Big)=e^{-3.2}(9.32)=0.04076\times9.32=\mathbf{0.380}.$$</p></details></div>
+
+<h3>D. Gaussian &amp; Q-function</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2023 Q4a</span> (4 marks)</span>
+<p>$X$ is Gaussian with $m_X=0$, $\sigma_X^2=1$. Find (i) $P(|X|\gt2)$, (ii) $P(|X|\ge2)$, (iii) $P(X^2\gt9)$, (iv) $P(|2X+3|\gt2)$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $P(X\gt2)+P(X\lt-2)=2Q(2)=2(0.02275)=\mathbf{0.0455}$.</p>
+<p>(ii) Same value, <b>0.0455</b>: a continuous RV gives $P(|X|=2)=0$.</p>
+<p>(iii) $X^2\gt9\iff|X|\gt3$, so the answer is $2Q(3)=2(0.00135)=\mathbf{0.0027}$.</p>
+<p>(iv) $|2X+3|\gt2\iff2X+3\gt2$ or $2X+3\lt-2\iff X\gt-\frac12$ or $X\lt-\frac52$. These are disjoint:
+$$Q(-0.5)+[1-Q(-2.5)]=[1-Q(0.5)]+Q(2.5)=0.6915+0.0062=\mathbf{0.6977}.$$</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q2c</span> (5 marks)</span>
+<p>$X\sim N(0,1)$ is transformed to $Y=6$ if $X\ge4$; $2$ if $0\le X\lt4$; $-2$ if $-4\le X\lt0$; $-6$ if $X\lt-4$. Find (i) the PMF of $Y$ and draw it, (ii) $P(Y\lt2)$, (iii) $E[Y]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>(i) $Q(4)=3.17\times10^{-5}$.</p>
+<ul>
+  <li>$P(Y=6)=P(X\ge4)=Q(4)\approx0.00003$</li>
+  <li>$P(Y=2)=P(0\le X\lt4)=\frac12-Q(4)\approx0.49997$</li>
+  <li>$P(Y=-2)=\frac12-Q(4)\approx0.49997$</li>
+  <li>$P(Y=-6)=Q(4)\approx0.00003$</li>
+</ul>
+<p>The graph is four stems: two of height ≈ 0.5 at ±2 and two tiny ones at ±6. (This $Y$ is a 4-level quantiser output.)</p>
+<p>(ii) $P(Y\lt2)=P(Y=-2)+P(Y=-6)=\frac12-Q(4)+Q(4)=\mathbf{\frac12}$.</p>
+<p>(iii) The PMF is symmetric about 0, so $E[Y]=6Q(4)+2(\frac12-Q(4))-2(\frac12-Q(4))-6Q(4)=\mathbf0$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">MS 2021 Q3a</span> (3 marks)</span>
+<p>A binary system sends '0' as $-v$ and '1' as $+v$, with $P(1)=p$ and $P(0)=1-p$. The received signal is $Y=X+N$, with Gaussian noise $N\sim N(0,\sigma^2)$. Find the PDF of $Y$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Condition on what was sent. Given '1', $Y=v+N\sim N(v,\sigma^2)$. Given '0', $Y\sim N(-v,\sigma^2)$. By total probability for densities (§14):
+$$f_Y(y)=p\,\frac{1}{\sqrt{2\pi}\sigma}e^{-(y-v)^2/2\sigma^2}+(1-p)\,\frac{1}{\sqrt{2\pi}\sigma}e^{-(y+v)^2/2\sigma^2}.$$</p>
+<div data-plot="mixGauss"></div></details></div>
+
+<h3>E. Moment generating function</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q1a</span> (5 marks)</span>
+<p>$m_X(t)=(1-2t)^{-1/2}$ for $t\lt\frac12$. Find the first and second moments of $X$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>$m'(t)=-\frac12(1-2t)^{-3/2}(-2)=(1-2t)^{-3/2}$, so $E[X]=m'(0)=\mathbf1$.</p>
+<p>$m''(t)=-\frac32(1-2t)^{-5/2}(-2)=3(1-2t)^{-5/2}$, so $E[X^2]=m''(0)=\mathbf3$.</p>
+<p>(Hence $\operatorname{Var}=2$. This is the MGF of $Z^2$ with $Z\sim N(0,1)$, the chi-square distribution with 1 degree of freedom.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q2c</span> <span class="tag-pyq">MS 2021 Q5b</span></span>
+<p>MGFs of (i) the PMF $\frac13,\frac23$ at $k=1,2$; (ii) Uniform(0,1); (iii) $N(0,1)$.</p>
+<details class="sol"><summary>Solution</summary><p>(i) $\frac13e^s+\frac23e^{2s}$. (ii) $\frac{e^s-1}{s}$. (iii) $e^{s^2/2}$. Full working in §13, items (1), (2), (6).</p></details></div>
+
+<h3>F. Inequalities</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q3c</span> <span class="tag-pyq">ES June 2026 Q3a</span> (5 marks each)</span>
+<p>State and prove (a) Markov's inequality, (b) Chebyshev's inequality.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Write out the proofs exactly as in §15:</p>
+<ol>
+  <li>Statement.</li>
+  <li>Start from the definition of the mean (Markov) or variance (Chebyshev).</li>
+  <li>Drop the part of the integral you do not need (it is ≥ 0).</li>
+  <li>Replace the variable by its minimum on the remaining region.</li>
+  <li>Recognise the remaining integral as the tail probability.</li>
+</ol>
+<p>Add one line of interpretation (e.g. $k=2$ gives ≤ 25%) and a sketch of the shaded tails for full marks.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="sheet"><span class="num">19</span>Formula sheet: Unit 2</h2>
+<div class="sheet">
+  <div><h4>CDF</h4>$F_X(\alpha)=P(X\le\alpha)$, non-decreasing, right-continuous<br>$F(-\infty)=0$, $F(\infty)=1$<br>$P(a\lt X\le b)=F(b)-F(a)$<br>$P(X=a)=F(a)-F(a^-)$</div>
+  <div><h4>PMF / PDF</h4>$F=\sum p_k u(\alpha-\alpha_k)$; $f=\sum p_k\delta(\alpha-\alpha_k)$<br>$f_X=\frac{dF_X}{dx}$, $F_X(x)=\int_{-\infty}^xf$<br>$f\ge0$, $\int f=1$, $P(a\lt X\le b)=\int_a^bf$</div>
+  <div><h4>Expectation</h4>$E[g(X)]=\sum g(x_k)p_k=\int g(x)f(x)dx$<br>$E[aX+b]=aE[X]+b$<br>$\sigma^2=E[X^2]-m^2$, $\operatorname{Var}[aX+b]=a^2\sigma^2$</div>
+  <div><h4>Bernoulli / Binomial</h4>$p,\ pq$<br>$\binom nk p^kq^{n-k}$: mean $np$, var $npq$<br>MGF $(q+pe^s)^n$</div>
+  <div><h4>Poisson</h4>$e^{-\lambda}\lambda^k/k!$: mean = var = λ<br>MGF $e^{\lambda(e^s-1)}$<br>Approximates Binomial with $\lambda=np$ ($n$ large, $p$ small)</div>
+  <div><h4>Uniform(a,b)</h4>$f=\frac1{b-a}$; mean $\frac{a+b}{2}$; var $\frac{(b-a)^2}{12}$<br>MGF $\frac{e^{sb}-e^{sa}}{s(b-a)}$</div>
+  <div><h4>Exponential(λ)</h4>$f=\lambda e^{-\lambda x}$, $F=1-e^{-\lambda x}$<br>mean $\frac1\lambda$, var $\frac1{\lambda^2}$, $E[X^k]=\frac{k!}{\lambda^k}$<br>MGF $\frac{\lambda}{\lambda-s}$; memoryless; median $\frac{\ln2}{\lambda}$</div>
+  <div><h4>Gaussian N(m, σ²)</h4>$f=\frac{1}{\sqrt{2\pi}\sigma}e^{-(x-m)^2/2\sigma^2}$<br>MGF $e^{ms+\sigma^2s^2/2}$<br>$P(X\gt u)=Q(\frac{u-m}\sigma)$<br>$P(a\lt X\le b)=Q(\frac{a-m}\sigma)-Q(\frac{b-m}\sigma)$<br>$Q(-u)=1-Q(u)$, $Q(0)=\frac12$</div>
+  <div><h4>MGF / CF</h4>$M_X(s)=E[e^{sX}]$, $M(0)=1$<br>$E[X^k]=M^{(k)}(0)$<br>$M_{aX+b}=e^{bs}M_X(as)$<br>independent sum: product of MGFs<br>$\Phi_X(\omega)=E[e^{j\omega X}]$</div>
+  <div><h4>Conditional</h4>$F_{X|B}(\alpha)=\frac{P(X\le\alpha,B)}{P(B)}$<br>$B=\{a\lt X\le b\}$: $f_{X|B}=\frac{f_X}{F(b)-F(a)}$ on $(a,b]$<br>$f_X=\sum f_{X|A_i}P(A_i)$</div>
+  <div><h4>Inequalities</h4>Markov ($X\ge0$): $P(X\ge\delta)\le\frac{m_X}{\delta}$<br>Chebyshev: $P(|X-m|\ge\epsilon)\le\frac{\sigma^2}{\epsilon^2}$</div>
+  <div><h4>Useful integrals</h4>$\int_0^\infty x^ne^{-ax}dx=\frac{n!}{a^{n+1}}$<br>$\int e^{-x^2/2}dx=\sqrt{2\pi}$<br>$\sum\frac{\lambda^k}{k!}=e^\lambda$</div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="answers"><span class="num">20</span>Answer key</h2>
+<h4>Self-check</h4>
+<ol class="answer-key">
+  <li>No. A CDF can never decrease.</li>
+  <li>$P(X=1)=0.3$ (the jump). $P(X\lt1)=F(1^-)=0.4$.</li>
+  <li>Yes. A density can exceed 1 (e.g. Uniform(0, 0.2) has height 5); only its area must be 1.</li>
+  <li>$1-0.2-0.3=0.5$.</li>
+  <li>$E[X]=3$, $\operatorname{Var}[X]=2.1$.</li>
+  <li>$\lambda=4$, so $P(X=0)=e^{-4}=0.0183$.</li>
+  <li>$P(X\lt3)=1-Q\big(\frac{3-5}{2}\big)=1-Q(-1)=Q(1)=0.1587$.</li>
+  <li>Poisson(2), by uniqueness of the MGF.</li>
+  <li>True: $1-\frac{1}{2^2}=0.75$.</li>
+  <li>$f_{X|B}=\frac{1/4}{3/4}=\frac13$ on $(1,4]$, i.e. $U(1,4)$.</li>
+</ol>
+<h4>Practice problems</h4>
+<ol class="answer-key">
+  <li>$c=\frac1{10}$. The CDF has levels $0.1, 0.3, 0.6, 1$ at $1,2,3,4$. $P(2\le X\lt4)=0.2+0.3=0.5$.</li>
+  <li>$k=\frac34$; $E[X]=1$ (by symmetry); $E[X^2]=\frac65$, so $\operatorname{Var}=\frac15$.</li>
+  <li>$\binom85/2^8=\frac{56}{256}=0.2188$; $1-\frac1{256}=0.9961$.</li>
+  <li>$1-2.5e^{-1.5}=0.4422$. For 4 pages, $\lambda=6$: $e^{-6}=0.00248$.</li>
+  <li>$\sigma=5$: $Q(1)=0.1587$; $Q(-1)-Q(2)=0.8413-0.0228=0.8186$; $c=10+1.645(5)=18.22$.</li>
+  <li>$P(X=0)=0.2$; $P(X=2)=1-0.8=0.2$; $P(0\lt X\lt2)=0.6$; $E[X]=\int_0^2 0.3x\,dx+2(0.2)=0.6+0.4=1$.</li>
+  <li>$M(s)=\frac12\big[\frac1{1-s}+\frac1{1+s}\big]=\frac{1}{1-s^2}$ for $|s|\lt1$. Expanding, $1+s^2+\dots$, so $E[X^2]=2$, $E[X]=0$ and $\operatorname{Var}=2$.</li>
+  <li>$L=-2\ln(1-3s)$: $E[X]=L'(0)=6$, $\operatorname{Var}=L''(0)=18$. This is Erlang/Gamma$(2,\lambda=\frac13)$ (sum of two Exp(1/3)).</li>
+  <li>$1-e^{-0.02n}\ge0.9\Rightarrow n\ge\frac{\ln10}{0.02}=115.1$, so $n=116$.</li>
+  <li>$f_{X|B}(x)=\frac{0.5e^{-0.5x}}{e^{-0.5}-e^{-1.5}}=\frac{0.5e^{-0.5x}}{0.3834}$ on $(1,3]$; $E[X\mid B]=\frac{3e^{-0.5}-5e^{-1.5}}{0.3834}=1.836$.</li>
+  <li>Chebyshev with $\epsilon=1=2\sigma$: $P\ge1-\frac{0.25}{1}=0.75$. Gaussian: $1-2Q(2)=0.9545$.</li>
+  <li>$P(X\gt n)=q^n$ (the first $n$ trials all fail). So $\frac{q^{m+n}}{q^m}=q^n$ ∎.</li>
+</ol>
+
+<p class="muted small" style="margin-top:40px">Sources: lecturer's handwritten notes (pp. 9–42) and past papers 2021–2026. Sections marked "Beyond class notes" are standard textbook material (the same topics as Schaum's Outline, Hsu, Ch. 2), written without page-by-page reference to the book.</p>
+</main>
+</body>
+</html>

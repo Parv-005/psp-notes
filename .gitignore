@@ -1,0 +1,4 @@
+# Source material stays local (copyrighted books, lecturer's notes, past papers)
+/*.pdf
+# old PDF exports of the notes (the HTML is the maintained version)
+Notes/*.pdf

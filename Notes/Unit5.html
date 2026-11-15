@@ -1,0 +1,1672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSP Unit 5 — Markov Chains &amp; Queues</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/style.css">
+<script defer src="assets/katex/katex.min.js"></script>
+<script defer src="assets/katex/contrib/auto-render.min.js"></script>
+<script defer src="assets/plot.js"></script>
+<script defer src="assets/unit5-figs.js"></script>
+<script defer src="assets/common.js"></script>
+</head>
+<body>
+<button id="tocbtn" class="tool">☰ Contents</button>
+<nav id="toc">
+  <div class="toc-title">PSP · Unit 5</div>
+  <div class="toc-sub">Markov chains: Markov property, transition matrices, Chapman–Kolmogorov, state PMFs, classification of states, stationary &amp; limiting distributions, ergodicity; continuous-time Markov chains; Poisson and birth–death processes; M/M/1 and M/M/1/N queues</div>
+  <div class="toc-tools"></div>
+  <ol></ol>
+</nav>
+
+<main>
+<header class="unit-head">
+  <div class="kicker">Probability &amp; Stochastic Processes · Unit 5 · full treatment</div>
+  <h1>Markov Chains &amp; Simple Queues</h1>
+  <p>Markov property · examples and non-examples · joint PMF of a chain · homogeneous chains · transition probability matrix &amp; state-transition diagram · n-step transitions and the Chapman–Kolmogorov equation · state probability vector, transient &amp; steady-state behaviour · the two-state chain in closed form · classification of states (communicating classes, irreducible, recurrent, transient, periodic, absorbing) · stationary and limiting distributions, ergodicity · continuous-time Markov chains, rates and the generator · Poisson process as a Markov chain · birth–death processes and their equilibrium equations · queueing notation, Little's law · M/M/1 · M/M/1/N</p>
+</header>
+
+<div class="box tip">
+  <span class="bt">How to use this unit</span>
+  <p>Unit 4 said that a random process is "a random variable for every instant of time", and that describing all those variables jointly is usually hopeless. This unit studies the most useful family of processes for which it is <b>easy</b>: processes with a <b>short memory</b>. In a Markov process, once you know where the process is <em>now</em>, its past history tells you nothing extra about its future. That one assumption turns hard probability into simple <b>matrix arithmetic</b>, and it is the basis of queueing theory (how long will I wait at the bank?), of Google's PageRank, of weather and speech models, and of much of communication-network design.</p>
+  <p>You said you are starting from zero, so this unit is written slowly. Every derivation is shown <b>one step per line</b>, with the reason in <span style="color:#8a8f99">grey</span>, and after every result there is a paragraph saying what it <em>means</em>. The exam questions in this unit are very predictable. They are almost always one of these:</p>
+  <ul>
+    <li>a <b>Markov chain numerical</b>: draw the diagram, find a path probability, P², p(n), the long-run (stationary) distribution;</li>
+    <li>"<b>is this process Markov?</b>";</li>
+    <li>"<b>explain / derive</b>" M/M/1 (L, Lq), M/M/1/N, or the birth–death equilibrium equations;</li>
+    <li>an <b>M/M/1 numerical</b> (watch-repair shop, drive-in bank, computer centre).</li>
+  </ul>
+  <p>All of them are solved in §17. Read §1–§8 carefully first, though: the queueing part (§10–§13) is just a special Markov chain, and it only makes sense after the chain machinery.</p>
+  <p>Colour code:
+  <span class="box def" style="display:inline-block;margin:0;padding:0 8px">Definition</span>
+  <span class="box thm" style="display:inline-block;margin:0;padding:0 8px">Theorem / proof</span>
+  <span class="box key" style="display:inline-block;margin:0;padding:0 8px">Key formula / recipe</span>
+  <span class="box warn" style="display:inline-block;margin:0;padding:0 8px">Common mistake</span>
+  <span class="ex" style="display:inline-block;margin:0;padding:0 8px">Example</span>,
+  levels <span class="tag-lvl lvl-e">Easy</span><span class="tag-lvl lvl-m">Medium</span><span class="tag-lvl lvl-h">Exam</span>, <span class="tag-beyond">Beyond class notes</span> for syllabus material the handwritten notes skip (the handwritten notes stop after the bulb example, so classification, stationary distributions, continuous-time chains, birth–death processes and queues all come from the textbooks), and <span class="tag-pyq">PYQ</span> for past-paper questions.</p>
+  <p class="small muted">Solutions are folded. Try each one first, even for two minutes, then open it.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="map"><span class="num">0</span>Unit map, notation &amp; maths warm-up</h2>
+<p>The unit has four blocks.</p>
+<ol>
+  <li><b>Discrete-time Markov chains: the machinery</b> (§1–§6). The Markov property; why a chain is completely described by a starting PMF plus a <b>transition matrix</b> $P$; how to go $n$ steps ahead ($P^n$, the Chapman–Kolmogorov equation); how the PMF of the state evolves, $\mathbf p(n)=\mathbf p(0)P^n$.</li>
+  <li><b>Long-run behaviour</b> (§7–§8). Which states are visited forever and which are eventually abandoned (classification of states); the <b>stationary distribution</b> π with $\pi P=\pi$; when $\mathbf p(n)\to\pi$; and <b>ergodicity</b>: π is also the long-run <em>fraction of time</em> spent in each state.</li>
+  <li><b>Continuous time</b> (§9–§10). Chains that can jump at any instant: exponential holding times, transition <b>rates</b>, the generator matrix $Q$, the balance equations $\pi Q=0$. The Poisson process and the <b>birth–death process</b> are the key examples.</li>
+  <li><b>Queues</b> (§11–§13). A queue is a birth–death process: arrivals are births, service completions are deaths. This gives the M/M/1 and M/M/1/N formulas for the mean number in the system and the mean waiting time.</li>
+</ol>
+<figure class="diagram map-wrap"><div id="fig-map5"></div><figcaption>How the ideas in Unit 5 depend on each other</figcaption></figure>
+
+<h3 id="notation">Notation</h3>
+<table>
+  <tr><th>Symbol</th><th>Meaning</th></tr>
+  <tr><td>$X_n$ or $X[n]$, $n=0,1,2,\dots$</td><td>a discrete-time process; $X_n$ is the <b>state</b> at step $n$</td></tr>
+  <tr><td>$S=\{0,1,2,\dots\}$</td><td>the <b>state space</b>: the set of values $X_n$ can take (finite or countable ⇒ "chain")</td></tr>
+  <tr><td>$p_{ij}=P[X_{n+1}=j\mid X_n=i]$</td><td>one-step <b>transition probability</b> from $i$ to $j$ (row $i$, column $j$)</td></tr>
+  <tr><td>$P=[p_{ij}]$</td><td>the one-step <b>transition probability matrix</b> (TPM)</td></tr>
+  <tr><td>$p_{ij}(n)=P[X_{m+n}=j\mid X_m=i]$</td><td>$n$-step transition probability (lecturer also writes $p_{jk}(m,n)=P[X_n=k\mid X_m=j]$)</td></tr>
+  <tr><td>$P(n)=[p_{ij}(n)]$</td><td>$n$-step transition matrix; we will show $P(n)=P^n$</td></tr>
+  <tr><td>$p_j(n)=P[X_n=j]$</td><td>PMF of the state at time $n$; $p_j(0)$ = initial PMF</td></tr>
+  <tr><td>$\mathbf p(n)=[p_0(n)\ \ p_1(n)\ \cdots]$</td><td>state probability <b>row</b> vector at time $n$ (lecturer: $\underline p_s(n)$)</td></tr>
+  <tr><td>$\pi=[\pi_0\ \ \pi_1\ \cdots]$</td><td>stationary (steady-state, equilibrium) distribution: $\pi P=\pi$, $\sum\pi_j=1$</td></tr>
+  <tr><td>$i\to j$, $i\leftrightarrow j$</td><td>$j$ is accessible from $i$; $i$ and $j$ communicate</td></tr>
+  <tr><td>$q_{ij}$, $Q$</td><td>CTMC transition <b>rate</b> from $i$ to $j$; generator (rate) matrix</td></tr>
+  <tr><td>$\lambda_n$, $\mu_n$</td><td>birth (arrival) rate and death (departure) rate in state $n$</td></tr>
+  <tr><td>$\lambda$, $\mu$, $\rho=\lambda/\mu$</td><td>arrival rate, service rate (mean service time $1/\mu$), traffic intensity</td></tr>
+  <tr><td>$L$, $L_q$, $W$, $W_q$</td><td>mean number in system, mean number in queue, mean time in system, mean time in queue</td></tr>
+</table>
+
+<h3 id="warmup">Maths warm-up</h3>
+<p>This unit needs only school algebra plus a little matrix multiplication. Make sure each of these is comfortable before §3.</p>
+
+<div class="box key"><span class="bt">W1. Row vector × matrix</span>
+<p>A row vector times a square matrix gives a row vector. Entry $j$ of the result is the row vector "dotted" with <b>column</b> $j$ of the matrix:</p>
+$$\begin{bmatrix}a&b\end{bmatrix}\begin{bmatrix}p_{00}&p_{01}\\p_{10}&p_{11}\end{bmatrix}=\begin{bmatrix}a\,p_{00}+b\,p_{10}&\ \ a\,p_{01}+b\,p_{11}\end{bmatrix}.$$
+<p><b>How to read it in this unit:</b> $a,b$ are "probability I am in state 0 / state 1 now". Entry 0 of the answer is "(be in 0 and stay in 0) + (be in 1 and move to 0)", which is the total probability of being in 0 next step. Numerical check:</p>
+$$\begin{bmatrix}0.5&0.5\end{bmatrix}\begin{bmatrix}0.9&0.1\\0.3&0.7\end{bmatrix}=\begin{bmatrix}0.45+0.15&\ \ 0.05+0.35\end{bmatrix}=\begin{bmatrix}0.6&0.4\end{bmatrix}.$$
+<p>The answer still adds up to 1, as a PMF must.</p></div>
+
+<div class="box key"><span class="bt">W2. Matrix × matrix</span>
+<p>Entry $(i,j)$ of $AB$ is <b>row $i$ of $A$</b> dotted with <b>column $j$ of $B$</b>:</p>
+$$(AB)_{ij}=\sum_k a_{ik}\,b_{kj}.$$
+<p>If you only need one entry of $P^2$ (very common in exams), compute only that row-times-column; don't compute the whole matrix. Example:</p>
+$$\begin{bmatrix}0.9&0.1\\0.3&0.7\end{bmatrix}^2_{\ (0,1)}=\underbrace{0.9}_{p_{00}}\times\underbrace{0.1}_{p_{01}}+\underbrace{0.1}_{p_{01}}\times\underbrace{0.7}_{p_{11}}=0.09+0.07=0.16.$$</div>
+
+<div class="box key"><span class="bt">W3. Solving a linear system with a normalisation condition</span>
+<p>In §8 we solve equations like $\pi=\pi P$. These equations are always <b>dependent</b> (one of them is redundant), so on their own they only fix π up to a constant multiple. The missing information comes from "probabilities add to 1". Procedure: write the equations, <b>throw one away</b>, add $\sum_j\pi_j=1$, and solve. Example: $0.1\pi_0=0.3\pi_1$ and $\pi_0+\pi_1=1$:</p>
+$$\begin{aligned}
+\pi_0&=3\pi_1 &&\why{from the first equation}\\
+3\pi_1+\pi_1&=1 &&\why{substitute into the normalisation}\\
+\pi_1&=\tfrac14,\qquad \pi_0=\tfrac34.
+\end{aligned}$$</div>
+
+<div class="box key"><span class="bt">W4. Geometric series and the derivative trick</span>
+<p>For $|\rho|\lt1$:</p>
+$$\sum_{n=0}^{\infty}\rho^n=\frac{1}{1-\rho},\qquad \sum_{n=0}^{N}\rho^n=\frac{1-\rho^{N+1}}{1-\rho}\ \ (\rho\ne1).$$
+<p>To get $\sum n\rho^n$, differentiate the first identity with respect to ρ and multiply by ρ:</p>
+$$\begin{aligned}
+\frac{d}{d\rho}\sum_{n=0}^{\infty}\rho^n&=\sum_{n=1}^{\infty}n\rho^{n-1} &&\why{differentiate term by term}\\
+\frac{d}{d\rho}\frac{1}{1-\rho}&=\frac{1}{(1-\rho)^2} &&\why{differentiate the closed form}\\
+\Rightarrow\ \sum_{n=0}^{\infty}n\rho^n&=\rho\sum_{n=1}^{\infty}n\rho^{n-1}=\frac{\rho}{(1-\rho)^2}. &&\why{multiply both by ρ}
+\end{aligned}$$
+<p>These two sums give every M/M/1 formula in §12.</p></div>
+
+<div class="box key"><span class="bt">W5. The exponential distribution (recap from Units 2 and 4)</span>
+<p>$T\sim$ Exp(λ): $f_T(t)=\lambda e^{-\lambda t}$, $t\ge0$; $P[T\gt t]=e^{-\lambda t}$; mean $1/\lambda$. Three facts we use again and again:</p>
+<ol>
+<li><b>Memoryless:</b> $P[T\gt s+t\mid T\gt s]=P[T\gt t]$. Having waited $s$ already doesn't change how much longer you wait. Proof: $\frac{e^{-\lambda(s+t)}}{e^{-\lambda s}}=e^{-\lambda t}$.</li>
+<li><b>Small intervals:</b> $P[T\le\Delta t]=1-e^{-\lambda\Delta t}=\lambda\Delta t+o(\Delta t)$. So "rate λ" means "probability ≈ λΔt of happening in the next tiny interval Δt".</li>
+<li><b>Competing clocks:</b> if $T_1\sim$ Exp($\lambda_1$) and $T_2\sim$ Exp($\lambda_2$) are independent, then $\min(T_1,T_2)\sim$ Exp($\lambda_1+\lambda_2$) and $P[T_1\lt T_2]=\frac{\lambda_1}{\lambda_1+\lambda_2}$.</li>
+</ol>
+<p>Here $o(\Delta t)$ ("little-o") means a term that is negligible compared with Δt, i.e. $o(\Delta t)/\Delta t\to0$; for example $(\Delta t)^2$.</p></div>
+
+<div class="box key"><span class="bt">W6. The recursion $x_{n+1}=c\,x_n+d$</span>
+<p>Its fixed point is $x^*=\frac{d}{1-c}$ (solve $x^*=cx^*+d$). Subtract $x^*=cx^*+d$ from the recursion:</p>
+$$\begin{aligned}
+x_{n+1}-x^*&=c\,(x_n-x^*)\\
+\Rightarrow\ x_n-x^*&=c^n\,(x_0-x^*)\\
+\Rightarrow\ x_n&=x^*+c^n\,(x_0-x^*).
+\end{aligned}$$
+<p>If $|c|\lt1$ the gap shrinks geometrically and $x_n\to x^*$. The continuous-time twin: $y'(t)=-k\,y(t)+m$ has solution $y(t)=y^*+(y(0)-y^*)e^{-kt}$ with $y^*=m/k$. These solve the two-state chain in §6 and §9.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="markov"><span class="num">1</span>The Markov property</h2>
+
+<div class="box why"><span class="bt">Why this idea matters</span>
+<p>Think of a board game played with a die. To predict where your token will be after the next roll, you need to know only <b>where it is now</b>. How it got there (which rolls, in which order) is irrelevant. Or think of the number of people in a bank queue: the chance that it is 6 a minute from now depends on how many are there <em>now</em>, not on how the queue looked an hour ago. A process with this "only the present matters" property is called a <b>Markov process</b> (after the Russian mathematician A. A. Markov).</p>
+<p>Why it is so useful: in general, to compute probabilities about a process you need the joint PMF of all its values (Unit 4, §2), which is an enormous object. For a Markov process, the joint PMF breaks into a product of simple one-step pieces (§2), so the <em>whole</em> process is described by a small table of numbers, the transition matrix.</p></div>
+
+<div class="box def"><span class="bt">Markov process / Markov chain (lecturer + Schaum)</span>
+<p>A discrete-time process $\{X_n,\ n=0,1,2,\dots\}$ is a <b>Markov process</b> if, for every $n$ and every choice of values,</p>
+$$P\big[X_{n+1}=k_{n+1}\mid X_n=k_n,\ X_{n-1}=k_{n-1},\ \dots,\ X_0=k_0\big]=P\big[X_{n+1}=k_{n+1}\mid X_n=k_n\big].$$
+<p>In words: <b>given the present, the future is independent of the past</b>. The lecturer calls this the <b>Markov property</b> or the <b>memoryless property</b>.</p>
+<p>If the state space (the set of values) is <b>discrete</b>, i.e. integer-valued, the Markov process is called a <b>Markov chain</b>. A discrete-time Markov chain is a <b>DTMC</b>.</p>
+<p>General form (continuous time, any values): $X(t)$ is Markov if for any times $t_1\lt t_2\lt\dots\lt t_k\lt t_{k+1}$,</p>
+$$P\big[X(t_{k+1})\le x_{k+1}\mid X(t_k)=x_k,\dots,X(t_1)=x_1\big]=P\big[X(t_{k+1})\le x_{k+1}\mid X(t_k)=x_k\big].$$</div>
+
+<p><b>Reading the definition carefully.</b> The left side conditions on the whole history; the right side conditions only on the latest value. Equality says "once you know $X_n$, learning $X_{n-1},\dots,X_0$ as well changes nothing". It does <em>not</em> say that $X_{n+1}$ is independent of $X_{n-1}$: the past <em>does</em> influence the future, but only <b>through</b> the present. The present is a sufficient summary of the past.</p>
+
+<h3 id="mclasses">Four kinds of Markov process</h3>
+<table>
+<tr><th></th><th>Discrete state (chain)</th><th>Continuous state</th></tr>
+<tr><td><b>Discrete time</b></td><td><b>DTMC</b>: binomial counting process, random walk, number of customers seen at departures, weather model (§1–§8)</td><td>e.g. $X_{n+1}=aX_n+W_n$ with Gaussian noise $W_n$ (an AR(1) process)</td></tr>
+<tr><td><b>Continuous time</b></td><td><b>CTMC</b>: Poisson process, birth–death process, queue length $N(t)$ (§9–§13)</td><td>Wiener process (Brownian motion)</td></tr>
+</table>
+<p>This unit is about the left column: Markov <b>chains</b>.</p>
+
+<h3 id="mexamples">Examples from the lecture</h3>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Binomial counting process (lecturer)</span>
+<p>Let $X_1,X_2,\dots$ be iid Bernoulli: $P[X_n=1]=p$, $P[X_n=0]=1-p$. Define the sum process (Unit 4, §10)</p>
+$$S_n=\sum_{k=1}^{n}X_k=S_{n-1}+X_n .$$
+<p>Is $S_n$ Markov?</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>Key observation.</b> $S_{n+1}=S_n+X_{n+1}$. The new increment $X_{n+1}$ is independent of $X_1,\dots,X_n$, and therefore independent of $S_1,\dots,S_n$ (which are built only from $X_1,\dots,X_n$).</p>
+<p>So given $S_n=k$, the next value is $k+1$ (if $X_{n+1}=1$) or $k$ (if $X_{n+1}=0$), whatever happened before:</p>
+$$\begin{aligned}
+P[S_{n+1}=k+1\mid S_n=k]&=P[X_{n+1}=1]=p,\\
+P[S_{n+1}=k\mid S_n=k]&=P[X_{n+1}=0]=1-p,\\
+P[S_{n+1}=k\mid S_n=k-m]&=0\quad\text{for }m\ge2\ \text{or}\ m\lt0 &&\why{can only go up by 0 or 1}
+\end{aligned}$$
+<p>and adding more history changes nothing:</p>
+$$\begin{aligned}
+P[S_{n+1}=k\mid S_1=i_1,\ S_2=i_2,\dots,S_n=k]&=P[X_{n+1}=0\mid S_1=i_1,\dots,S_n=k]\\
+&=P[X_{n+1}=0] &&\why{$X_{n+1}$ independent of the past}\\
+&=1-p\\
+&=P[S_{n+1}=k\mid S_n=k].
+\end{aligned}$$
+<p>So $S_n$ is a Markov chain on states $\{0,1,2,\dots\}$. Its <b>state-transition diagram</b> (lecturer) has one circle per state, an arrow $k\to k+1$ labelled $p$ and a self-loop labelled $1-p$:</p>
+<figure class="diagram"><div id="fig-binom"></div><figcaption>State-transition diagram of the binomial counting process: it can only stay or step up by one</figcaption></figure></details></div>
+
+<div class="box thm"><span class="bt">Theorem: independent increments ⇒ Markov</span>
+<p>Any process with independent increments is Markov. In particular every sum process $S_n=X_1+\dots+X_n$ of iid (or just independent) steps is Markov: the binomial counting process, the random walk, the Poisson process and the Wiener process are all Markov.</p>
+<p><b>Proof (discrete time).</b> Write $S_{n+1}=S_n+X_{n+1}$. Conditioning on the whole history $S_0,\dots,S_n$ is the same as conditioning on $X_1,\dots,X_n$. Then</p>
+$$\begin{aligned}
+P[S_{n+1}=j\mid S_n=i,\ S_{n-1},\dots,S_0]&=P[X_{n+1}=j-i\mid S_n=i,\ S_{n-1},\dots,S_0] &&\why{$S_{n+1}=j \Leftrightarrow X_{n+1}=j-i$ when $S_n=i$}\\
+&=P[X_{n+1}=j-i] &&\why{the new step is independent of the history}
+\end{aligned}$$
+<p>which depends only on the present value $i$. The same calculation without the older conditions gives the same answer, so the two conditional probabilities are equal. ∎</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Random walk: transition matrix (lecturer)</span>
+<p>The random walk $W_n=W_{n-1}+D_n$ with $D_n=\pm1$ (probabilities $p$, $1-p$) is a sum process, so it is Markov. Draw its diagram and write its transition matrix.</p>
+<details class="sol"><summary>Solution</summary>
+<p>From state $i$ the walk goes to $i+1$ with probability $p$ and to $i-1$ with probability $1-p$; it never stays put.</p>
+<figure class="diagram"><div id="fig-walk"></div><figcaption>Random walk: right with probability p, left with probability 1 − p</figcaption></figure>
+<p>The matrix is infinite; rows are the current state, columns the next state. Only the two entries next to the diagonal are non-zero:</p>
+$$P=\begin{array}{c|ccccc}
+ &\cdots&i-1&i&i+1&\cdots\\\hline
+\vdots&\ddots&&&&\\
+i&\cdots&1-p&0&p&\cdots\\
+\vdots&&&&&\ddots
+\end{array}$$
+<p>The lecturer also notes: for consecutive times the joint PMF is easy (one step), but for times far apart we need the <b>$n$-step</b> transition probabilities, which is the subject of §4.</p></details></div>
+
+<h3 id="nonmarkov">A process that is <em>not</em> Markov (lecturer)</h3>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Two-term moving average (lecturer)</span>
+<p>Let $X_n$ be iid Bernoulli($p$) and $Z_n=\frac12\,[X_n+X_{n-1}]$. Is $Z_n$ a Markov process? (Take $p=\frac12$.)</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>Idea.</b> $Z_n$ can be $0$, $\frac12$ or $1$. The value $\frac12$ is <b>ambiguous</b>: it means "one of $X_n,X_{n-1}$ is 1", without saying which. Knowing an <em>older</em> value of $Z$ can remove that ambiguity, and then the past tells us something the present does not. That breaks the Markov property. To prove it we exhibit one case where conditioning on more history changes the probability.</p>
+<p><b>Step 1: PMF of $Z_n$</b> (each $X$ is 0 or 1 with probability ½, independently):</p>
+$$\begin{aligned}
+P[Z_n=0]&=P[X_n=0,\ X_{n-1}=0]=\tfrac14,\\
+P[Z_n=1]&=P[X_n=1,\ X_{n-1}=1]=\tfrac14,\\
+P[Z_n=\tfrac12]&=1-\tfrac14-\tfrac14=\tfrac12.
+\end{aligned}$$
+<p><b>Step 2: condition on the present only.</b> "$Z_n=1$ and $Z_{n-1}=\frac12$" means $X_n=X_{n-1}=1$ (for $Z_n=1$) and then $X_{n-2}=0$ (so that $Z_{n-1}=\frac12$):</p>
+$$\begin{aligned}
+P[Z_n=1\mid Z_{n-1}=\tfrac12]&=\frac{P[Z_n=1,\ Z_{n-1}=\tfrac12]}{P[Z_{n-1}=\tfrac12]}\\
+&=\frac{P[X_n=1,\ X_{n-1}=1,\ X_{n-2}=0]}{1/2}\\
+&=\frac{(1/2)^3}{1/2}\\
+&=\frac14 .
+\end{aligned}$$
+<p><b>Step 3: condition on one more past value.</b> Add $Z_{n-2}=1$, which means $X_{n-2}=X_{n-3}=1$. Then $Z_{n-1}=\frac12$ forces $X_{n-1}=0$, and so $Z_n=\frac12[X_n+0]\le\frac12$. Therefore</p>
+$$P[Z_n=1\mid Z_{n-1}=\tfrac12,\ Z_{n-2}=1]=0 .$$
+<p><b>Step 4: compare.</b> $0\ne\frac14$. Knowing the extra past value $Z_{n-2}$ changed the conditional probability of the future, so $Z_n$ is <b>not a Markov process</b>.</p>
+<p><b>Why this happened.</b> $Z_n$ is built from two consecutive $X$'s, so $Z_{n-1}$ and $Z_n$ share $X_{n-1}$. The present value $Z_{n-1}=\frac12$ does not reveal $X_{n-1}$, but $Z_{n-2}$ partly does. Rule of thumb: if the "state" you were given <b>hides</b> information that matters for the next step, the process is not Markov. (The pair $(X_n,X_{n-1})$, on the other hand, <em>is</em> a Markov chain with 4 states: enlarging the state can restore the Markov property.)</p></details></div>
+
+<div class="box key"><span class="bt">Recipe: "Is this process Markov?"</span>
+<ol>
+<li><b>Try to write the next value as a function of the present value and fresh, independent randomness:</b> $X_{n+1}=f(X_n,\ U_{n+1})$ with $U_{n+1}$ independent of everything before. If you can, the process is Markov. (Sum processes: $f(x,u)=x+u$. Running maximum: $f(x,u)=\max(x,u)$.)</li>
+<li><b>If you can't</b> (the next value needs something the present value hides), look for a <b>counterexample</b>: find a present value $b$, a future value $c$ and a past value $a$ with
+$$P[X_{n+1}=c\mid X_n=b]\ \ne\ P[X_{n+1}=c\mid X_n=b,\ X_{n-1}=a].$$
+Compute each side as (joint probability) ÷ (probability of the condition), expressing every event in terms of the underlying independent variables. Choose $a$ so that it pins down the hidden information; often one side becomes 0.</li>
+<li>Check that the conditioning event in step 2 has positive probability (otherwise the conditional probability is undefined).</li>
+</ol></div>
+
+<div class="box warn"><span class="bt">Three things the Markov property does NOT mean</span>
+<ul>
+<li><b>Not independence.</b> $X_{n+1}$ usually depends strongly on $X_n$ (and so indirectly on $X_{n-1}$). Independence would be the special case where it doesn't even depend on $X_n$ (the iid process, §3).</li>
+<li><b>Not stationarity.</b> The binomial counting process is Markov but its mean $np$ grows. A Markov chain is stationary only if it starts in its stationary distribution (§8).</li>
+<li><b>Not "depends on one past value" in a loose sense.</b> The condition is about conditional probabilities given the <em>whole</em> history; you must check that extra history adds nothing.</li>
+</ul></div>
+
+<!-- ============================================================ -->
+<h2 id="jointpmf"><span class="num">2</span>The joint PMF of a Markov chain</h2>
+
+<div class="box why"><span class="bt">The point of this section</span>
+<p>We prove the claim from §1: a Markov chain is <b>completely</b> described by (i) the PMF of its starting value and (ii) its one-step transition probabilities. Everything else in the unit (n-step probabilities, long-run behaviour, queues) is computed from these two ingredients.</p></div>
+
+<p><b>Derivation (lecturer).</b> Start from the multiplication rule of Unit 1, $P[A\cap B]=P[A\mid B]\,P[B]$, applied with $A=\{X_n=k_n\}$ and $B=$ "all the earlier values":</p>
+$$\begin{aligned}
+&P[X_n=k_n,\ X_{n-1}=k_{n-1},\ \dots,\ X_0=k_0]\\
+&\quad=P[X_n=k_n\mid X_{n-1}=k_{n-1},\dots,X_0=k_0]\cdot P[X_{n-1}=k_{n-1},\dots,X_0=k_0] &&\why{multiplication rule}\\
+&\quad=P[X_n=k_n\mid X_{n-1}=k_{n-1}]\cdot P[X_{n-1}=k_{n-1},\dots,X_0=k_0] &&\why{Markov property}
+\end{aligned}$$
+<p>The second factor is the same kind of joint PMF, one step shorter. Repeat the same two steps on it, again and again, until only $X_0$ is left:</p>
+$$\begin{aligned}
+&P[X_n=k_n,\ \dots,\ X_0=k_0]\\
+&\quad=P[X_n=k_n\mid X_{n-1}=k_{n-1}]\cdot P[X_{n-1}=k_{n-1}\mid X_{n-2}=k_{n-2}]\cdots P[X_1=k_1\mid X_0=k_0]\cdot P[X_0=k_0].
+\end{aligned}$$
+
+<div class="box key"><span class="bt">Joint PMF of a Markov chain</span>
+$$P[X_0=k_0,\ X_1=k_1,\ \dots,\ X_n=k_n]=\underbrace{p_{k_0}(0)}_{\text{initial PMF}}\ \cdot\ \underbrace{p_{k_0k_1}\,p_{k_1k_2}\cdots p_{k_{n-1}k_n}}_{\text{one transition probability per step}}$$
+<p>The $(n+1)$th-order joint PMF needs only (i) the <b>initial state probabilities</b> $P[X_0=k_0]$ and (ii) the <b>one-step transition probabilities</b> $P[X_{m+1}=k_{m+1}\mid X_m=k_m]$.</p>
+<p><b>How to use it:</b> the probability of a particular <b>path</b> through the states is "probability of the starting state × the probability of each arrow you follow".</p></div>
+
+<div class="box def"><span class="bt">Homogeneous chain (lecturer)</span>
+<p>If the transition probabilities do not depend on the time $m$,</p>
+$$P[X_{m+1}=j\mid X_m=i]=p_{ij}\quad\text{for all }m,$$
+<p>the chain is called <b>homogeneous</b> (or "has stationary transition probabilities"). $p_{ij}$ is the probability that, if the current state is $i$, the next state will be $j$. Every chain in this unit and in the exam papers is homogeneous.</p>
+<p class="small"><b>Careful with words:</b> "stationary transition probabilities" ≠ "stationary process". A homogeneous chain's PMF $\mathbf p(n)$ usually still changes with $n$ (e.g. the binomial counting process). It is a stationary process only if it starts in its stationary distribution (§8).</p></div>
+
+<p><b>Lecturer's notation for multi-step probabilities.</b></p>
+<ol>
+<li>$P[X_0=j]=p_j(0)$: initial PMF.</li>
+<li>$P[X_n=j]=p_j(n)$: PMF of $X_n$.</li>
+<li>$P[X_n=k\mid X_m=j]=p_{jk}(m,n)$: the $(n-m)$-step transition probability ("from $j$ at time $m$ to $k$ at time $n$").</li>
+<li>For a homogeneous chain this depends only on the gap $r=n-m$: $p_{jk}(r)=P[X_{m+r}=k\mid X_m=j]$ for every $m$. The one-step case is $p_{jk}(1)=p_{jk}$.</li>
+</ol>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> A multi-step probability for the binomial counting process (lecturer)</span>
+<p>For the binomial counting process, find $p_{1,1}(2,5)=P[S_5=1\mid S_2=1]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>To go from 1 (at time 2) to 1 (at time 5) the count must not increase during steps 3, 4 and 5. Each of those steps independently "does nothing" with probability $1-p$:</p>
+$$p_{1,1}(2,5)=P[X_3=0,\ X_4=0,\ X_5=0]=(1-p)^3 .$$
+<p>It depends only on the gap $5-2=3$: the chain is homogeneous.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Probability of a path</span>
+<p>A chain on $\{0,1\}$ has $p_{00}=0.9$, $p_{01}=0.1$, $p_{10}=0.3$, $p_{11}=0.7$ and $P[X_0=0]=P[X_0=1]=0.5$. Find $P[X_0=0,\ X_1=0,\ X_2=1,\ X_3=1]$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>The path is $0\to0\to1\to1$. Multiply the starting probability by one transition probability per arrow:</p>
+$$\begin{aligned}
+P[X_0=0,X_1=0,X_2=1,X_3=1]&=p_0(0)\cdot p_{00}\cdot p_{01}\cdot p_{11}\\
+&=0.5\times0.9\times0.1\times0.7\\
+&=0.0315 .
+\end{aligned}$$
+<p>Note that the order matters: $p_{01}$ (0 then 1) is not $p_{10}$.</p></details></div>
+
+<div class="box warn"><span class="bt">Common slip</span>
+<p>When a question gives the path in "reverse" order, e.g. $P(X_3=1,\ X_2=2,\ X_1=3)$, the path in time order is $3\to2\to1$. Re-order by <b>time</b> before multiplying: $P(X_1=3)\,p_{32}\,p_{21}$. (This exact trap appears in ES 2022 Q5c.)</p></div>
+
+<!-- ============================================================ -->
+<h2 id="tpm"><span class="num">3</span>Transition probability matrix &amp; state-transition diagram</h2>
+
+<div class="box def"><span class="bt">Transition probability matrix (lecturer)</span>
+<p>For a homogeneous chain with states $0,1,\dots,m-1$, collect the one-step probabilities into an $m\times m$ matrix, <b>row = present state, column = next state</b>:</p>
+$$P=\begin{bmatrix}p_{00}&p_{01}&\cdots&p_{0,m-1}\\p_{10}&p_{11}&\cdots&p_{1,m-1}\\\vdots&&\ddots&\vdots\\p_{m-1,0}&p_{m-1,1}&\cdots&p_{m-1,m-1}\end{bmatrix},\qquad p_{ij}=P[X_{n+1}=j\mid X_n=i].$$
+<p>Its entries satisfy</p>
+<ol type="a">
+<li>$p_{ij}\ge0$ for all $i,j$ (they are probabilities);</li>
+<li>$\displaystyle\sum_j p_{ij}=\sum_jP[X_{n+1}=j\mid X_n=i]=1$: <b>every row sums to 1</b>, because from state $i$ the chain must go <em>somewhere</em> (possibly back to $i$).</li>
+</ol>
+<p>A square matrix with these two properties is called a <b>stochastic</b> (or Markov) matrix. Columns need <em>not</em> sum to 1.</p></div>
+
+<div class="box def"><span class="bt">State-transition diagram</span>
+<p>A picture of the same information: one circle (node) per state, and an arrow $i\to j$ labelled $p_{ij}$ whenever $p_{ij}\gt0$. A self-loop at $i$ carries $p_{ii}$. Arrows with probability 0 are not drawn.</p>
+<p>Check: the labels on the arrows <b>leaving</b> each node (including its self-loop) add to 1. That is the "row sums to 1" rule in picture form.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Speech activity in packets (lecturer)</span>
+<p>Let $X_n$ indicate whether the $n$th voice packet contains speech: $X_n=0$ for silence, $X_n=1$ for speech activity. Observations: if packet $n$ is silent, packet $n+1$ is silent with probability $1-\alpha$ (so becomes speech with probability α); if packet $n$ is speech, packet $n+1$ is speech with probability $1-\beta$ (so becomes silence with probability β). Draw the diagram and write $P$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Two states. Fill the rows from the story: row 0 (now silent) is $[1-\alpha,\ \alpha]$; row 1 (now speech) is $[\beta,\ 1-\beta]$.</p>
+<figure class="diagram"><div id="fig-speech"></div><figcaption>Speech/silence chain (lecturer)</figcaption></figure>
+$$P=\begin{array}{c|cc}&0&1\\\hline0&1-\alpha&\alpha\\1&\beta&1-\beta\end{array}\qquad(2\times2:\ \text{no. of states}\times\text{no. of states}).$$
+<p><b>Meaning of the parameters.</b> If α and β are small, the chain is "sticky": talk-spurts and silences last many packets. The number of packets a silence lasts is geometric with mean $1/\alpha$; a talk-spurt lasts $1/\beta$ packets on average. We will see in §8 that in the long run a fraction $\frac{\alpha}{\alpha+\beta}$ of packets carry speech.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> An iid process as a Markov chain</span>
+<p>Let $X_n$ be iid Bernoulli($p$). Write its transition matrix.</p>
+<details class="sol"><summary>Solution</summary>
+<p>The next value does not depend on the present at all, so every row is the same PMF $[1-p,\ p]$:</p>
+$$P=\begin{bmatrix}1-p&p\\1-p&p\end{bmatrix}.$$
+<figure class="diagram"><div id="fig-iid"></div><figcaption>iid Bernoulli process: the arrows into each state carry the same probability, wherever you start</figcaption></figure>
+<p><b>Identical rows ⇔ the next state is independent of the present state.</b> This is the extreme case of the Markov property (no memory at all). It is a past-paper question: see ES July 2024 Q5b in §17.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Bulb replacement (lecturer)</span>
+<p>On day 0 a house has 2 new (spare) bulbs. On any day, with probability $p$ the house needs a single new bulb, and with probability $q=1-p$ it does not. At most one bulb is replaced per day. Let $Y_n$ = number of new bulbs left in the house on day $n$. Find the initial state vector and the one-step transition matrix, and draw the diagram.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>States.</b> $Y_n\in\{0,1,2\}$. Let $X_n=1$ if a bulb is needed on day $n$ (probability $p$), else 0. Then $Y_n=Y_{n-1}-X_n$ as long as there is a spare bulb; once $Y=0$ it stays 0. So $Y_n$ is a function of $Y_{n-1}$ and fresh randomness ⇒ a 3-state DTMC.</p>
+<p><b>Initial state vector.</b> On day 0 there are certainly 2 bulbs: $P[Y_0=0]=0$, $P[Y_0=1]=0$, $P[Y_0=2]=1$:</p>
+$$\mathbf p(0)=\begin{bmatrix}0&0&1\end{bmatrix}.$$
+<p><b>Transition matrix</b> (rows = present, columns = next, order 0, 1, 2):</p>
+$$P=\begin{array}{c|ccc}&0&1&2\\\hline0&1&0&0\\1&p&q&0\\2&0&p&q\end{array}$$
+<p>Row 0: no spare bulbs left, nothing can change. Row 1: a bulb is used (→0) with probability $p$, else stay. Row 2: →1 with probability $p$, else stay. Each row sums to 1 ✓.</p>
+<figure class="diagram"><div id="fig-bulb"></div><figcaption>Bulb chain: it can only move down, one step at a time; state 0 is never left (absorbing)</figcaption></figure></details></div>
+
+<div class="box key"><span class="bt">Recipe: building P from a word problem</span>
+<ol>
+<li><b>Decide what the state is:</b> the smallest piece of information about "now" that you need to predict the next step (number of bulbs, last game won/lost, brand used this week…).</li>
+<li>List the states and fix an order (it fixes the row/column order).</li>
+<li>For each state, read off from the story where the chain can go next and with what probability. That is one row.</li>
+<li>Fill missing entries with complements so each <b>row</b> sums to 1. Exams often give only one number per row ("if he smokes filter, switches with probability 0.2"); the other entry is $1-0.2=0.8$.</li>
+<li>Draw the diagram as a check: every node's outgoing labels sum to 1.</li>
+</ol></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> A weather model</span>
+<p>Each day is Sunny (S), Cloudy (C) or Rainy (R). After a sunny day: S 0.6, C 0.3, R 0.1. After a cloudy day: S 0.3, C 0.4, R 0.3. After a rainy day: S 0.2, C 0.3, R 0.5. Write $P$.</p>
+<details class="sol"><summary>Solution</summary>
+$$P=\begin{array}{c|ccc}&S&C&R\\\hline S&0.6&0.3&0.1\\C&0.3&0.4&0.3\\R&0.2&0.3&0.5\end{array}$$
+<p>Rows sum to 1 ✓ (columns don't: 1.1, 1.0, 0.9, which is fine). We use this matrix again in §4 and §8.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="nstep"><span class="num">4</span>n-step transitions: the Chapman–Kolmogorov equation</h2>
+
+<div class="box why"><span class="bt">The question</span>
+<p>$P$ tells us what happens in <b>one</b> step. Exams ask "given the state today, what is the probability of state $j$ in 2 days? in 5 days?" The answer: <b>multiply the matrix by itself</b>. This section shows why.</p></div>
+
+<p><b>Two-step derivation (lecturer).</b> Define $p_{ij}(2)=P[X_2=j\mid X_0=i]$. At time 1 the chain must be in <em>some</em> state $k$, so split over all possible $k$ (law of total probability):</p>
+$$\begin{aligned}
+p_{ij}(2)&=P[X_2=j\mid X_0=i]\\
+&=\sum_kP[X_2=j,\ X_1=k\mid X_0=i] &&\why{split over the state $k$ at time 1}\\
+&=\sum_k\frac{P[X_2=j,\ X_1=k,\ X_0=i]}{P[X_0=i]} &&\why{definition of conditional probability}\\
+&=\sum_k\frac{P[X_2=j\mid X_1=k]\ P[X_1=k\mid X_0=i]\ P[X_0=i]}{P[X_0=i]} &&\why{joint PMF of §2 (Markov property)}\\
+&=\sum_kp_{ik}\,p_{kj}. &&\why{cancel $P[X_0=i]$}
+\end{aligned}$$
+<figure class="diagram"><div id="fig-ck"></div><figcaption>To go from i to j in two steps, pass through some intermediate state k: add up "i → k then k → j" over all k</figcaption></figure>
+<p>Now compare with W2: $\sum_kp_{ik}p_{kj}$ is exactly <b>row $i$ of $P$ times column $j$ of $P$</b>, i.e. entry $(i,j)$ of $P\cdot P$. So the two-step matrix is</p>
+$$P(2)=\begin{bmatrix}p_{00}(2)&\cdots&p_{0,m-1}(2)\\\vdots&p_{ij}(2)&\vdots\\p_{m-1,0}(2)&\cdots&p_{m-1,m-1}(2)\end{bmatrix}=P\cdot P=P^2 .$$
+
+<div class="box thm"><span class="bt">Chapman–Kolmogorov equation</span>
+<p>The same argument with "$n$ steps, then $m$ steps" (split at the intermediate time $n$) gives</p>
+$$p_{ij}(n+m)=\sum_kp_{ik}(n)\,p_{kj}(m),\qquad\text{i.e.}\qquad P(n+m)=P(n)\,P(m).$$
+<p>Applying it repeatedly with one-step pieces: $P(2)=P^2$, $P(3)=P(2)P=P^3$, and in general</p>
+$$\boxed{\,P(n)=P^n\,}\qquad p_{ij}(n)=(P^n)_{ij}.$$
+<p><b>Meaning:</b> to go from $i$ to $j$ in $n+m$ steps, you must be somewhere ($k$) after $n$ steps; by the Markov property the two legs are independent given $k$, so multiply; then add over all possible $k$. $P^n$ is again a stochastic matrix (rows sum to 1), and $P^0=I$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Weather two days ahead</span>
+<p>With the weather matrix of §3, today is sunny. What is the probability that it rains the day after tomorrow? Also find the full $P^2$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>We need $p_{SR}(2)$ = row S of $P$ times column R of $P$. Read it as "S→S→R, plus S→C→R, plus S→R→R":</p>
+$$\begin{aligned}
+p_{SR}(2)&=p_{SS}\,p_{SR}+p_{SC}\,p_{CR}+p_{SR}\,p_{RR}\\
+&=0.6(0.1)+0.3(0.3)+0.1(0.5)\\
+&=0.06+0.09+0.05\\
+&=0.20 .
+\end{aligned}$$
+<p>Doing all nine row-times-column products:</p>
+$$P^2=\begin{bmatrix}0.47&0.33&0.20\\0.36&0.34&0.30\\0.31&0.33&0.36\end{bmatrix}.$$
+<p>Check: rows sum to 1 ✓. Notice the rows of $P^2$ are already more alike than the rows of $P$: after two days the starting weather matters less. Keep multiplying and the rows become identical (§8).</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Speech chain: two steps symbolically</span>
+<p>Find $P^2$ for the speech chain of §3.</p>
+<details class="sol"><summary>Solution</summary>
+$$\begin{aligned}
+P^2&=\begin{bmatrix}1-\alpha&\alpha\\\beta&1-\beta\end{bmatrix}\begin{bmatrix}1-\alpha&\alpha\\\beta&1-\beta\end{bmatrix}\\
+&=\begin{bmatrix}(1-\alpha)^2+\alpha\beta&\ (1-\alpha)\alpha+\alpha(1-\beta)\\\beta(1-\alpha)+(1-\beta)\beta&\ \alpha\beta+(1-\beta)^2\end{bmatrix}\\
+&=\begin{bmatrix}(1-\alpha)^2+\alpha\beta&\ \alpha(2-\alpha-\beta)\\\beta(2-\alpha-\beta)&\ (1-\beta)^2+\alpha\beta\end{bmatrix}.
+\end{aligned}$$
+<p>Read entry (0,0): "silent → silent → silent" $(1-\alpha)^2$ plus "silent → speech → silent" $\alpha\beta$. Each row still sums to 1 (check row 0: $1-2\alpha+\alpha^2+\alpha\beta+2\alpha-\alpha^2-\alpha\beta=1$ ✓). A closed form for every $n$ is in §6.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span> Bulb chain: r-step matrix (lecturer, with a correction)</span>
+<p>For the bulb chain of §3 find $P^2$, and then the $r$-step transition probabilities.</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>$P^2$ by multiplication</b> (lecturer):</p>
+$$P^2=\begin{bmatrix}1&0&0\\p&q&0\\0&p&q\end{bmatrix}\begin{bmatrix}1&0&0\\p&q&0\\0&p&q\end{bmatrix}=\begin{bmatrix}1&0&0\\p+pq&q^2&0\\p^2&2pq&q^2\end{bmatrix}.$$
+<p>Entry (2,1), for example: row 2 $=[0,p,q]$ times column 1 $=[0,q,p]^T$ gives $0+pq+qp=2pq$.</p>
+<p><b>General $r$ by thinking, not multiplying.</b> Each day on which a spare bulb exists, a bulb is needed with probability $p$, independently. So:</p>
+<ul>
+<li>From 1, still at 1 after $r$ days ⇔ no bulb needed on any of the $r$ days: $p_{11}(r)=q^r$. Otherwise it reached 0: $p_{10}(r)=1-q^r$.</li>
+<li>From 2, still at 2 ⇔ no bulb needed in $r$ days: $p_{22}(r)=q^r$.</li>
+<li>From 2, at 1 after $r$ days ⇔ exactly one "need" among the $r$ days (binomial): $p_{21}(r)=\binom r1p\,q^{r-1}=rp\,q^{r-1}$.</li>
+<li>From 2, at 0 ⇔ two or more needs: $p_{20}(r)=1-q^r-rp\,q^{r-1}$.</li>
+</ul>
+$$P^r=\begin{bmatrix}1&0&0\\1-q^r&q^r&0\\1-q^r-rpq^{r-1}&\ rpq^{r-1}&q^r\end{bmatrix}.$$
+<p><b>Check with $r=2$:</b> $1-q^2=(1-q)(1+q)=p(1+q)=p+pq$ ✓; $2pq$ ✓; $1-q^2-2pq=(1-q)^2=p^2$ ✓. All match the multiplied $P^2$.</p>
+<p class="small"><b>Note on the handwritten notes.</b> The lecturer's $r$-step matrix writes $rq^{r-1}p$ for $p_{10}(r)$ and $\binom r2p^2q^{r-2}$ for $p_{20}(r)$. These are not right in general. $rq^{r-1}p$ is the probability of <em>exactly one</em> need in $r$ days, but from state 1 the chain reaches 0 after <em>at least one</em> need. Even at $r=2$ it gives $2pq$, while the multiplied $P^2$ has $p+pq$. Likewise $\binom r2p^2q^{r-2}$ (exactly two needs) is right at $r=2$ but not at $r=3$, where three needs also end in state 0. Use $1-q^r$ and $1-q^r-rpq^{r-1}$.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="statepmf"><span class="num">5</span>State probabilities: transient behaviour, $\mathbf p(n)=\mathbf p(0)P^n$</h2>
+
+<div class="box why"><span class="bt">The question</span>
+<p>The lecturer lists the typical questions asked about a chain: (1) its <b>transient</b> behaviour (the PMF at a particular time $n$), (2) its <b>long-term</b> behaviour ($n\to\infty$), (3) the PMF of $X_n$ or a joint PMF. For all of them you need (1) the PMF of $X_0$ and (2) the transition probabilities. Here is how they combine.</p></div>
+
+<p><b>Derivation (lecturer).</b> Condition on the state one step earlier (total probability):</p>
+$$\begin{aligned}
+p_j(n)&=P[X_n=j]\\
+&=\sum_iP[X_n=j\mid X_{n-1}=i]\,P[X_{n-1}=i] &&\why{total probability over the previous state}\\
+&=\sum_ip_i(n-1)\,p_{ij}.
+\end{aligned}$$
+<p>The right side is the row vector $\mathbf p(n-1)$ times <b>column $j$</b> of $P$ (W1). Doing this for every $j$ at once:</p>
+$$\underbrace{\mathbf p(n)}_{1\times m}=\underbrace{\mathbf p(n-1)}_{1\times m}\ \underbrace{P}_{m\times m}.$$
+<p>Repeat: $\mathbf p(n)=\mathbf p(n-2)P^2=\dots$</p>
+
+<div class="box key"><span class="bt">PMF of the state at time n</span>
+$$\mathbf p(n)=\mathbf p(n-1)\,P=\mathbf p(0)\,P^n .$$
+<p>The PMF of an $m$-state DTMC at time $n$ is obtained from (1) the initial PMF $\mathbf p(0)$ and (2) $P^n$, the one-step matrix to the power $n$. If the chain starts surely in state $i$, $\mathbf p(0)$ is all zeros except a 1 in position $i$, and $\mathbf p(n)$ is just <b>row $i$ of $P^n$</b>.</p>
+<p>Always multiply the <b>row vector on the left</b>. $P\,\mathbf p^T$ is a different (wrong) calculation.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Speech chain, three steps</span>
+<p>Speech chain with α = 0.1, β = 0.3. The first packet is silent: $\mathbf p(0)=[1,\ 0]$. Find $\mathbf p(1)$, $\mathbf p(2)$, $\mathbf p(3)$.</p>
+<details class="sol"><summary>Solution</summary>
+$$P=\begin{bmatrix}0.9&0.1\\0.3&0.7\end{bmatrix}.$$
+<p>Step by step, $\mathbf p(n)=\mathbf p(n-1)P$:</p>
+$$\begin{aligned}
+\mathbf p(1)&=[1,\ 0]\,P=[0.9,\ 0.1]\\
+\mathbf p(2)&=[0.9(0.9)+0.1(0.3),\ \ 0.9(0.1)+0.1(0.7)]=[0.84,\ 0.16]\\
+\mathbf p(3)&=[0.84(0.9)+0.16(0.3),\ \ 0.84(0.1)+0.16(0.7)]=[0.804,\ 0.196]
+\end{aligned}$$
+<p>The speech probability creeps up 0.1 → 0.16 → 0.196 → … towards 0.25. That limit is the stationary value $\frac{\alpha}{\alpha+\beta}=\frac{0.1}{0.4}$ (§6, §8). The values at finite $n$ are the <b>transient</b> distribution; the limit is the <b>steady-state</b> distribution.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Bulbs after two days (lecturer's chain)</span>
+<p>With $\mathbf p(0)=[0,0,1]$, find $\mathbf p(2)$ for the bulb chain.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Starting surely in state 2, $\mathbf p(2)$ = row 2 of $P^2$ (§4):</p>
+$$\mathbf p(2)=[0,0,1]\begin{bmatrix}1&0&0\\p+pq&q^2&0\\p^2&2pq&q^2\end{bmatrix}=[\,p^2,\ \ 2pq,\ \ q^2\,].$$
+<p>This is Binomial(2, $p$) in disguise: 0 spare bulbs left ⇔ bulbs needed on both days, etc.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="twostate"><span class="num">6</span>The two-state chain in closed form</h2>
+
+<div class="box why"><span class="bt">Why a whole section</span>
+<p>Two-state chains appear in almost every end-sem paper (ES 2025 Q5c asks for exactly the formulas below; ES 2026 has three of them). For two states we can find $P^n$ and $\mathbf p(n)$ for <b>every</b> $n$ with one short calculation, and see the approach to equilibrium explicitly.</p></div>
+
+<p>Take states 0, 1 with $a=p_{01}$ (leave 0) and $b=p_{10}$ (leave 1):</p>
+<figure class="diagram"><div id="fig-two"></div><figcaption>The general two-state chain</figcaption></figure>
+$$P=\begin{bmatrix}1-a&a\\b&1-b\end{bmatrix}.$$
+
+<p><b>Step 1: a recursion for $x_n=P[X_n=1]$.</b> From §5, $p_1(n+1)=p_0(n)\,p_{01}+p_1(n)\,p_{11}$, and $p_0(n)=1-x_n$:</p>
+$$\begin{aligned}
+x_{n+1}&=(1-x_n)\,a+x_n(1-b)\\
+&=a+(1-a-b)\,x_n .
+\end{aligned}$$
+<p><b>Step 2: solve it with W6</b> ($c=1-a-b$, $d=a$). The fixed point is</p>
+$$x^*=\frac{a}{1-(1-a-b)}=\frac{a}{a+b},$$
+<p>so</p>
+$$P[X_n=1]=\frac{a}{a+b}+(1-a-b)^n\Big(P[X_0=1]-\frac{a}{a+b}\Big),\qquad P[X_n=0]=1-P[X_n=1].$$
+<p><b>Step 3: the matrix $P^n$.</b> Row 0 of $P^n$ is $\mathbf p(n)$ when $X_0=0$ (put $P[X_0=1]=0$); row 1 is when $X_0=1$ (put $P[X_0=1]=1$):</p>
+$$\begin{aligned}
+p_{01}(n)&=\frac{a}{a+b}-(1-a-b)^n\frac{a}{a+b}=\frac{a}{a+b}\big[1-(1-a-b)^n\big],\\
+p_{11}(n)&=\frac{a}{a+b}+(1-a-b)^n\frac{b}{a+b}.
+\end{aligned}$$
+
+<div class="box key"><span class="bt">Two-state chain: n-step matrix</span>
+$$P^n=\frac{1}{a+b}\begin{bmatrix}b&a\\b&a\end{bmatrix}+\frac{(1-a-b)^n}{a+b}\begin{bmatrix}a&-a\\-b&b\end{bmatrix}\qquad(a+b\gt0).$$
+<p>Checks: $n=0$ gives $\frac1{a+b}\begin{bmatrix}a+b&0\\0&a+b\end{bmatrix}=I$ ✓; $n=1$ gives $P$ ✓ (entry (0,0): $\frac{b+a(1-a-b)}{a+b}=\frac{(a+b)(1-a)}{a+b}=1-a$).</p>
+<p><b>Long run:</b> if $0\lt a+b\lt2$ then $|1-a-b|\lt1$, the second term dies out, and</p>
+$$P^n\ \longrightarrow\ \begin{bmatrix}\frac{b}{a+b}&\frac{a}{a+b}\\[2pt]\frac{b}{a+b}&\frac{a}{a+b}\end{bmatrix},\qquad \pi=\Big[\frac{b}{a+b},\ \frac{a}{a+b}\Big].$$
+<p>Both rows tend to the same vector π: the chain <b>forgets where it started</b>. The speed of forgetting is the factor $|1-a-b|$ per step.</p>
+<p><b>Handy expanded form</b> (no division): with $r=1-a-b$, $1-r^n=(a+b)(1+r+\dots+r^{n-1})$, so</p>
+$$p_{01}(n)=a\,(1+r+r^2+\dots+r^{n-1}),\qquad p_{10}(n)=b\,(1+r+\dots+r^{n-1}).$$</div>
+
+<div data-plot="twoConv"></div>
+
+<p><b>Special cases worth knowing.</b></p>
+<ul>
+<li>$a+b=1$: then $r=0$ and $P^n=$ the limit already at $n=1$. Both rows of $P$ are equal: this is the <b>iid</b> process.</li>
+<li>$a=b=1$: the chain flips deterministically $0,1,0,1,\dots$; $r=-1$ and $(−1)^n$ never dies out. $\mathbf p(n)$ oscillates and has <b>no limit</b> (a <em>periodic</em> chain, §7), although $\pi=[\frac12,\frac12]$ still satisfies $\pi P=\pi$.</li>
+<li>$a=b=0$: the chain never moves; $P^n=I$; the limit depends on the start (reducible chain).</li>
+</ul>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Cascade of binary channels (Schaum 5.31)</span>
+<p>A binary digit passes through a chain of identical noisy stages. At each stage a 0 is flipped to 1 with probability $a=0.1$ and a 1 is flipped to 0 with probability $b=0.2$. The input is 0 or 1 with probability 0.5 each. Find the distribution of the digit after $n$ stages, and as $n\to\infty$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Here $a+b=0.3$, $r=1-a-b=0.7$, $\frac{a}{a+b}=\frac13$, $P[X_0=1]=0.5$. From Step 2:</p>
+$$\begin{aligned}
+P[X_n=1]&=\tfrac13+(0.7)^n\big(0.5-\tfrac13\big)\\
+&=\tfrac13+\tfrac{(0.7)^n}{6},\\
+P[X_n=0]&=\tfrac23-\tfrac{(0.7)^n}{6}.
+\end{aligned}$$
+<p>As $n\to\infty$, $(0.7)^n\to0$: $P[X_\infty=0]=\frac23$, $P[X_\infty=1]=\frac13$. After many stages the output no longer depends on the input at all; the channel cascade has destroyed the information. (This is the graph above, with the two curves for "input 0" and "input 1".)</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="classify"><span class="num">7</span>Classification of states <span class="tag-beyond">Beyond class notes</span></h2>
+
+<div class="box why"><span class="bt">Why classify?</span>
+<p>Before asking "what happens in the long run?" we must know <b>which states the chain keeps coming back to</b> and which it eventually leaves forever. In the bulb chain, states 2 and 1 are visited for a while and then abandoned; state 0 traps the chain. In the weather chain every state is visited again and again. These differences decide whether a long-run distribution exists, whether it is unique, and whether it depends on the starting state. Exams phrase this as "draw the state-transition diagram and <b>comment on the states</b>" (ES 2022 Q5c) or "classify the states".</p>
+<p>Everything in this section can be read off the <b>diagram</b>; you rarely need numbers.</p></div>
+
+<h3 id="comm">Accessibility, communication, classes</h3>
+<div class="box def"><span class="bt">Accessible, communicate, class, irreducible</span>
+<ul>
+<li>State $j$ is <b>accessible</b> from state $i$, written $i\to j$, if $p_{ij}(n)\gt0$ for some $n\ge0$. On the diagram: you can walk from $i$ to $j$ following the arrows.</li>
+<li>$i$ and $j$ <b>communicate</b>, written $i\leftrightarrow j$, if $i\to j$ and $j\to i$ (you can go there <em>and</em> come back).</li>
+<li>Communication splits the states into disjoint <b>communicating classes</b>: groups in which every state can reach every other.</li>
+<li>A class is <b>closed</b> if no arrow leaves it (once inside, the chain never gets out).</li>
+<li>The chain is <b>irreducible</b> if all states communicate (only one class). Otherwise it is <b>reducible</b>.</li>
+<li>State $i$ is <b>absorbing</b> if $p_{ii}=1$ (a closed class on its own).</li>
+</ul></div>
+<p>Why "classes" work: communication is reflexive ($i\leftrightarrow i$ with $n=0$), symmetric (by definition) and transitive. Transitivity follows from Chapman–Kolmogorov: if $p_{ij}(n)\gt0$ and $p_{jk}(m)\gt0$ then $p_{ik}(n+m)=\sum_lp_{il}(n)p_{lk}(m)\ge p_{ij}(n)\,p_{jk}(m)\gt0$.</p>
+
+<h3 id="rec">Recurrent and transient states</h3>
+<div class="box def"><span class="bt">Recurrent / transient (Schaum)</span>
+<p>Start the chain in state $j$ and let $f_{jj}=P[\text{the chain ever returns to }j\mid X_0=j]$.</p>
+<ul>
+<li>$j$ is <b>recurrent</b> if $f_{jj}=1$: return is certain. Then it returns again, and again: it is visited <b>infinitely often</b>.</li>
+<li>$j$ is <b>transient</b> if $f_{jj}\lt1$: there is a positive chance of never coming back. Then it is visited only a <b>finite</b> number of times (the number of returns is geometric with mean $\frac{f_{jj}}{1-f_{jj}}$).</li>
+<li>A recurrent state is <b>positive recurrent</b> if the mean return time $E[T_j\mid X_0=j]$ is finite, and <b>null recurrent</b> if it is infinite (only possible with infinitely many states).</li>
+</ul>
+<p class="small">Equivalent test: $j$ is recurrent ⇔ $\sum_{n=1}^{\infty}p_{jj}(n)=\infty$ (the expected number of visits is infinite).</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Computing a return probability</span>
+<p>In the bulb chain, is state 1 recurrent or transient?</p>
+<details class="sol"><summary>Solution</summary>
+<p>From 1 the chain either stays (probability $q$: it has "returned" at step 1) or moves to 0 (probability $p$), and from 0 it can never come back. So</p>
+$$f_{11}=q\lt1\quad(\text{if }p\gt0).$$
+<p>State 1 is <b>transient</b>. The same argument shows state 2 is transient ($f_{22}=q$), while state 0 is absorbing ($f_{00}=1$, recurrent).</p></details></div>
+
+<div class="box thm"><span class="bt">Facts that make classification quick</span>
+<ol>
+<li><b>Class property:</b> all states in one communicating class are of the same type: all recurrent or all transient, and they all have the same period. So you only need to examine one state per class.</li>
+<li><b>Open class ⇒ transient.</b> If an arrow leaves the class to somewhere the chain can't return from, there is a positive chance of leaving for ever.</li>
+<li><b>Finite chains:</b> a class is recurrent <b>if and only if it is closed</b>, and then it is positive recurrent. Not all states of a finite chain can be transient (the chain has to be <em>somewhere</em> forever).</li>
+<li>Hence: a <b>finite irreducible</b> chain has all states positive recurrent.</li>
+<li>Infinite chains are subtler: the simple random walk is recurrent only when $p=\frac12$ (and then null recurrent); for $p\ne\frac12$ it drifts away and every state is transient.</li>
+</ol></div>
+
+<h3 id="period">Periodicity</h3>
+<div class="box def"><span class="bt">Period, aperiodic, ergodic state</span>
+<p>The <b>period</b> of state $j$ is</p>
+$$d(j)=\gcd\{\,n\ge1:\ p_{jj}(n)\gt0\,\},$$
+<p>the greatest common divisor of all possible return times. If $d(j)=1$ the state is <b>aperiodic</b>; if $d(j)\gt1$ it is <b>periodic</b> (returns can only happen at multiples of $d$).</p>
+<ul>
+<li><b>Self-loop ⇒ aperiodic.</b> If $p_{jj}\gt0$, a return in 1 step is possible and the gcd is 1.</li>
+<li>On the diagram: list the lengths of the cycles through $j$; the period is their gcd. Cycles of lengths 2 and 3 ⇒ gcd 1 ⇒ aperiodic.</li>
+<li>A positive recurrent, aperiodic state is called <b>ergodic</b>. An irreducible chain whose states are ergodic is an <b>ergodic chain</b>.</li>
+</ul></div>
+
+<div class="box key"><span class="bt">Recipe: "Draw the diagram and comment on (classify) the states"</span>
+<ol>
+<li>Draw the diagram from $P$ (arrow $i\to j$ for every $p_{ij}\gt0$).</li>
+<li><b>Find the classes:</b> for each state, which states can it reach, and which can reach it back?</li>
+<li><b>Closed or open?</b> Any arrow leaving the class ⇒ open ⇒ transient. Closed (finite) ⇒ positive recurrent. $p_{ii}=1$ ⇒ absorbing.</li>
+<li><b>Period of each recurrent class:</b> self-loop anywhere in the class ⇒ aperiodic. Otherwise take the gcd of the cycle lengths.</li>
+<li><b>Summarise:</b> "irreducible / reducible; states … are transient, … positive recurrent, aperiodic/periodic with period d; hence the chain is (not) ergodic and a unique limiting distribution does (not) exist."</li>
+</ol></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Four chains to classify (adapted from Schaum 5.35)</span>
+<p>Classify the states of each chain.</p>
+<div class="plots-row">
+<figure class="diagram"><div id="fig-classA"></div><figcaption>(a)</figcaption></figure>
+<figure class="diagram"><div id="fig-classB"></div><figcaption>(b)</figcaption></figure>
+</div>
+<div class="plots-row">
+<figure class="diagram"><div id="fig-cls3"></div><figcaption>(c)</figcaption></figure>
+</div>
+<figure class="diagram"><div id="fig-classC"></div><figcaption>(d) shaded by type</figcaption></figure>
+<details class="sol"><summary>Solution</summary>
+<p><b>(a)</b> $P=\begin{bmatrix}0&1&0\\\frac12&0&\frac12\\1&0&0\end{bmatrix}$. 0→1→0 and 0→1→2→0, so every state reaches every other: <b>irreducible</b>, finite ⇒ all <b>positive recurrent</b>. Cycles through 0 have lengths 2 (0→1→0) and 3 (0→1→2→0); $\gcd(2,3)=1$ ⇒ <b>aperiodic</b>. So the chain is <b>ergodic</b>.</p>
+<p><b>(b)</b> 0→1→2→0 with probability 1 each. Irreducible, positive recurrent, but every return to 0 takes 3, 6, 9, … steps: <b>period 3</b>. Not ergodic; $\mathbf p(n)$ cycles for ever (unless it starts uniform).</p>
+<p><b>(c)</b> 0⇄1⇄2. Irreducible, positive recurrent. Every move changes the "parity" (0 and 2 are even, 1 is odd, and each step goes even↔odd), so returns take an even number of steps: <b>period 2</b>. Same for the random walk.</p>
+<p><b>(d)</b> $\{0,1\}$ communicate, but arrows leave to 2 and to 4 and never come back: an <b>open class ⇒ transient</b>. $\{2,3\}$ communicate and no arrow leaves: <b>closed ⇒ positive recurrent</b>; 3 has a self-loop ⇒ <b>aperiodic</b>. $\{4\}$: $p_{44}=1$, <b>absorbing</b>. The chain is <b>reducible</b>; where it ends up (class {2,3} or state 4) depends on luck and on the start.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="stationary"><span class="num">8</span>Stationary &amp; limiting distributions, ergodicity <span class="tag-beyond">Beyond class notes</span></h2>
+
+<div class="box why"><span class="bt">The long-run question</span>
+<p>"In the long run, how often does he smoke filter cigarettes?" "In the long run, how often will the gambler win?" (ES 2026). These ask for the distribution of $X_n$ as $n\to\infty$, which (for a nice chain) no longer depends on the start. That limit is the solution of a simple linear system, $\pi=\pi P$. This section explains what π is, when $\mathbf p(n)\to\pi$, and why π is also the long-run <b>fraction of time</b> in each state (ergodicity).</p></div>
+
+<div class="box def"><span class="bt">Stationary distribution</span>
+<p>A row vector $\pi=[\pi_0,\pi_1,\dots]$ is a <b>stationary distribution</b> (also: steady-state, equilibrium or invariant distribution) of the chain if</p>
+$$\pi P=\pi,\qquad \pi_j\ge0,\qquad \sum_j\pi_j=1 .$$
+<p>Component by component, $\pi P=\pi$ reads</p>
+$$\pi_j=\sum_i\pi_i\,p_{ij}\qquad\text{for every }j\qquad(\text{π times column }j\text{ of }P).$$</div>
+
+<p><b>Why "stationary".</b> If the chain starts with $\mathbf p(0)=\pi$, then $\mathbf p(1)=\pi P=\pi$, $\mathbf p(2)=\pi P=\pi$, and so on: the PMF never changes. Moreover every joint PMF $P[X_n=k_0,\dots,X_{n+r}=k_r]=\pi_{k_0}p_{k_0k_1}\cdots$ is then the same for every $n$, so the chain is a <b>strict-sense stationary</b> random process (Unit 4, §4). Started anywhere else, it is not stationary, but (for a nice chain) it becomes stationary in the limit.</p>
+
+<p><b>Balance interpretation.</b> Subtract $\pi_jp_{jj}$ from both sides of $\pi_j=\sum_i\pi_ip_{ij}$ and use $\sum_kp_{jk}=1$:</p>
+$$\underbrace{\pi_j\sum_{k\ne j}p_{jk}}_{\text{probability flow out of }j}=\underbrace{\sum_{i\ne j}\pi_i\,p_{ij}}_{\text{probability flow into }j}.$$
+<p>In equilibrium, the probability flowing out of each state per step equals the probability flowing in. For two states this is simply $\pi_0\,a=\pi_1\,b$ ("flow 0→1 = flow 1→0").</p>
+
+<div class="box thm"><span class="bt">Limit theorem (finite chains)</span>
+<p>Let the chain be finite, <b>irreducible</b> and <b>aperiodic</b> (equivalently: <b>regular</b>, meaning some power $P^m$ has all entries $\gt0$). Then</p>
+<ol>
+<li>there is exactly one stationary distribution π, and every $\pi_j\gt0$;</li>
+<li>$\displaystyle\lim_{n\to\infty}P^n=\begin{bmatrix}\pi\\\pi\\\vdots\\\pi\end{bmatrix}$ (all rows equal to π), so $\displaystyle\lim_{n\to\infty}\mathbf p(n)=\pi$ for <b>every</b> initial $\mathbf p(0)$;</li>
+<li>$\pi_j=\dfrac{1}{E[T_j\mid X_0=j]}$: the stationary probability is the reciprocal of the <b>mean return time</b> (visit $j$ every 4 steps on average ⇒ $\pi_j=\frac14$).</li>
+</ol>
+<p>π is then called the <b>limiting</b> (steady-state) distribution.</p></div>
+
+<div class="box thm"><span class="bt">Ergodic theorem for Markov chains (syllabus: "ergodicity")</span>
+<p>For a finite irreducible chain (aperiodic or not), the fraction of time spent in state $j$ along a single long sample path converges to $\pi_j$ with probability 1:</p>
+$$\frac{1}{N}\sum_{n=1}^{N}\mathbb 1\{X_n=j\}\ \xrightarrow[N\to\infty]{}\ \pi_j .$$
+<p>This is exactly the ergodicity idea of Unit 4, §7: a <b>time average</b> along one realisation equals the <b>ensemble average</b> (the probability $\pi_j$). It is why "in the long run, how <em>often</em> does he win?" is answered by π: π is both "the probability of winning a game far in the future" and "the long-run fraction of games won".</p></div>
+
+<div class="plots-row"><div data-plot="twoPath"></div><div data-plot="twoFrac"></div></div>
+
+<div class="box warn"><span class="bt">When things go wrong</span>
+<ul>
+<li><b>Periodic chain:</b> a unique π exists and the time-averages converge to it, but $\mathbf p(n)$ itself oscillates and has no limit (e.g. the flip chain $a=b=1$: $\mathbf p(n)$ alternates $[1,0],[0,1],\dots$).</li>
+<li><b>Reducible chain with two or more closed classes:</b> many stationary distributions (any mixture of the classes' own ones), and the limit depends on the start (e.g. $P=I$).</li>
+<li><b>Transient states</b> always get $\pi_j=0$: in the long run the chain is never there.</li>
+<li><b>Infinite chains</b> may have no stationary distribution at all (random walk; M/M/1 with $\rho\ge1$, §12).</li>
+</ul></div>
+
+<div class="box key"><span class="bt">Recipe: finding the stationary (long-run) distribution</span>
+<ol>
+<li>Check the chain is irreducible and aperiodic (diagram), so that π is also the limit. (Exams usually assume this.)</li>
+<li>Write one equation per state: $\pi_j=\sum_i\pi_ip_{ij}$, using <b>column $j$</b> of $P$. Simplify each to "flow out = flow in" form.</li>
+<li>Discard one of them (they are dependent) and add $\sum_j\pi_j=1$.</li>
+<li>Solve: express all π's in terms of one of them, then normalise.</li>
+<li><b>Check</b> one discarded equation, and that the π's are positive and add to 1.</li>
+</ol>
+<p><b>Two-state shortcut:</b> $P=\begin{bmatrix}1-a&a\\b&1-b\end{bmatrix}$ ⇒ $\pi=\Big[\dfrac{b}{a+b},\ \dfrac{a}{a+b}\Big]$. Memory aid: <b>the probability of a state is proportional to the rate of coming <em>into</em> it.</b></p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Speech chain in the long run</span>
+<p>What fraction of packets carry speech in the long run?</p>
+<details class="sol"><summary>Solution</summary>
+<p>Balance between the two states: flow silence→speech $=\pi_0\alpha$, flow speech→silence $=\pi_1\beta$:</p>
+$$\begin{aligned}
+\pi_0\,\alpha&=\pi_1\,\beta\\
+\pi_0+\pi_1&=1\\
+\Rightarrow\ \pi_1&=\frac{\alpha}{\alpha+\beta},\qquad\pi_0=\frac{\beta}{\alpha+\beta}.
+\end{aligned}$$
+<p>With α = 0.1, β = 0.3: $\pi_1=0.25$. One packet in four carries speech, which is why packet voice systems can multiplex about 4 calls per channel. (The simulated path above shows this: its running fraction of time in state 1 settles at 0.25.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Weather in the long run</span>
+<p>Find the long-run proportion of sunny, cloudy and rainy days for the weather chain of §3.</p>
+<details class="sol"><summary>Solution</summary>
+<p>All entries of $P$ are positive, so the chain is regular: π exists, is unique and is the limit. Equations from the columns of $P$:</p>
+$$\begin{aligned}
+\pi_S&=0.6\pi_S+0.3\pi_C+0.2\pi_R &&\why{column S}\\
+\pi_C&=0.3\pi_S+0.4\pi_C+0.3\pi_R &&\why{column C}\\
+\pi_R&=0.1\pi_S+0.3\pi_C+0.5\pi_R &&\why{column R (we will discard this one)}
+\end{aligned}$$
+<p>Simplify the first two:</p>
+$$\begin{aligned}
+0.4\pi_S&=0.3\pi_C+0.2\pi_R\ \ \Rightarrow\ \ 4\pi_S=3\pi_C+2\pi_R &&(1)\\
+0.6\pi_C&=0.3\pi_S+0.3\pi_R\ \ \Rightarrow\ \ 2\pi_C=\pi_S+\pi_R &&(2)
+\end{aligned}$$
+<p>Use the normalisation $\pi_S+\pi_C+\pi_R=1$ together with (2):</p>
+$$\begin{aligned}
+\pi_S+\pi_R&=2\pi_C &&\why{(2)}\\
+2\pi_C+\pi_C&=1 &&\why{substitute into the normalisation}\\
+\pi_C&=\tfrac13,\qquad \pi_S+\pi_R=\tfrac23 .
+\end{aligned}$$
+<p>Now (1) with $\pi_R=\frac23-\pi_S$:</p>
+$$\begin{aligned}
+4\pi_S&=3\cdot\tfrac13+2\big(\tfrac23-\pi_S\big)\\
+4\pi_S&=1+\tfrac43-2\pi_S\\
+6\pi_S&=\tfrac73\\
+\pi_S&=\tfrac{7}{18},\qquad \pi_R=\tfrac23-\tfrac7{18}=\tfrac{5}{18}.
+\end{aligned}$$
+$$\pi=\Big[\tfrac7{18},\ \tfrac13,\ \tfrac5{18}\Big]\approx[0.389,\ 0.333,\ 0.278].$$
+<p><b>Check</b> the discarded equation: $0.1\cdot\frac7{18}+0.3\cdot\frac6{18}+0.5\cdot\frac5{18}=\frac{0.7+1.8+2.5}{18}=\frac5{18}=\pi_R$ ✓. Compare with the rows of $P^2$ in §4 (row S was $[0.47,0.33,0.20]$): they are drifting towards π. Mean time between rainy days: $1/\pi_R=3.6$ days.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Absorption: how long do the bulbs last? (first-step analysis)</span>
+<p>For the bulb chain, find the expected number of days until no spare bulbs are left, starting from 2.</p>
+<details class="sol"><summary>Solution</summary>
+<p>The bulb chain is not irreducible: it is eventually absorbed in 0, so its stationary distribution is just $[1,0,0]$. The interesting question is <em>how long</em> absorption takes. <b>First-step analysis</b>: let $m_i$ = expected days to reach 0 from state $i$. Condition on what happens on the first day:</p>
+$$\begin{aligned}
+m_0&=0\\
+m_1&=1+q\,m_1+p\,m_0 &&\why{one day passes; then stay at 1 or move to 0}\\
+\Rightarrow\ m_1(1-q)&=1\ \ \Rightarrow\ \ m_1=\tfrac1p\\
+m_2&=1+q\,m_2+p\,m_1\\
+\Rightarrow\ p\,m_2&=1+p\cdot\tfrac1p=2\ \ \Rightarrow\ \ m_2=\tfrac2p .
+\end{aligned}$$
+<p>Sensible: each bulb lasts a geometric number of days with mean $1/p$, and there are two of them. The same "condition on the first step" idea gives absorption probabilities (e.g. gambler's ruin, Schaum 5.38).</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="ctmc"><span class="num">9</span>Continuous-time Markov chains <span class="tag-beyond">Beyond class notes</span></h2>
+
+<div class="box why"><span class="bt">From steps to clocks</span>
+<p>Customers don't arrive at a bank on the tick of a clock; they arrive at any instant. The number of customers $N(t)$ is a process in <b>continuous time</b> that jumps up or down at random instants. If its future depends only on its present value, it is a <b>continuous-time Markov chain</b> (CTMC). Instead of "probability of moving per step" we now speak of "<b>rate</b> of moving per unit time", and the matrix $P$ is replaced by a <b>rate matrix</b> $Q$. The Poisson process (Unit 4) and every queue in §11–§13 are CTMCs.</p></div>
+
+<div class="box def"><span class="bt">CTMC</span>
+<p>$\{X(t),\ t\ge0\}$ with a discrete state space is a (homogeneous) CTMC if for all $s,t\ge0$</p>
+$$P\big[X(t+s)=j\mid X(s)=i,\ X(u)\text{ for }u\lt s\big]=P\big[X(t+s)=j\mid X(s)=i\big]=p_{ij}(t),$$
+<p>a function of the elapsed time $t$ only. The matrix $P(t)=[p_{ij}(t)]$ satisfies $P(0)=I$ and the Chapman–Kolmogorov equation $P(t+s)=P(t)P(s)$ (same proof as §4, splitting at the intermediate time).</p></div>
+
+<h3 id="holding">How a CTMC moves: exponential holding times and rates</h3>
+<p><b>Claim:</b> the time a CTMC stays in a state before jumping (the <b>holding time</b>) must be <b>exponential</b>.</p>
+<p><b>Why.</b> Let $T_i$ be the holding time in state $i$. Suppose the chain has already been in $i$ for $s$ time units. By the Markov property only the present state matters, not how long it has been there, so the remaining time has the same distribution as a fresh holding time:</p>
+$$P[T_i\gt s+t\mid T_i\gt s]=P[T_i\gt t].$$
+<p>That is the memoryless property, and the exponential is the only continuous distribution that has it (W5). So $T_i\sim$ Exp($\nu_i$) for some rate $\nu_i$.</p>
+
+<div class="box key"><span class="bt">The structure of a CTMC</span>
+<ol>
+<li>In state $i$, wait an Exp($\nu_i$) time (mean $1/\nu_i$).</li>
+<li>Then jump to $j\ne i$ with probability $\tilde p_{ij}$ (the <b>embedded</b> jump chain, a DTMC with $\tilde p_{ii}=0$).</li>
+</ol>
+<p>Equivalently, there is an independent exponential "alarm clock" with rate $q_{ij}=\nu_i\tilde p_{ij}$ for each possible move $i\to j$; the first clock to ring decides the move (competing clocks, W5). The <b>transition rates</b> $q_{ij}$ are what we put on the diagram. For a small interval Δt:</p>
+$$\begin{aligned}
+p_{ij}(\Delta t)&=q_{ij}\,\Delta t+o(\Delta t)\qquad(j\ne i)\\
+p_{ii}(\Delta t)&=1-\nu_i\,\Delta t+o(\Delta t),\qquad \nu_i=\sum_{j\ne i}q_{ij}.
+\end{aligned}$$
+<p><b>Generator (rate) matrix</b> $Q$: off-diagonal entries $q_{ij}$, diagonal entries $q_{ii}=-\nu_i$, so <b>every row of $Q$ sums to 0</b> (compare: every row of $P$ sums to 1).</p></div>
+
+<div class="box thm"><span class="bt">Kolmogorov forward equations (transient distribution)</span>
+<p>Let $p_j(t)=P[X(t)=j]$. To be in $j$ at time $t+\Delta t$, either be in $j$ at $t$ and not leave, or be in some $i\ne j$ and jump to $j$:</p>
+$$\begin{aligned}
+p_j(t+\Delta t)&=p_j(t)\,(1-\nu_j\Delta t)+\sum_{i\ne j}p_i(t)\,q_{ij}\Delta t+o(\Delta t)\\
+\frac{p_j(t+\Delta t)-p_j(t)}{\Delta t}&=-\nu_j\,p_j(t)+\sum_{i\ne j}p_i(t)\,q_{ij}+\frac{o(\Delta t)}{\Delta t}\\
+p_j'(t)&=-\nu_j\,p_j(t)+\sum_{i\ne j}p_i(t)\,q_{ij}. &&\why{let Δt → 0}
+\end{aligned}$$
+<p>In matrix form: $\boxed{\mathbf p'(t)=\mathbf p(t)\,Q}$. Its solution for given $\mathbf p(0)$ is the <b>transient distribution</b>.</p>
+<p><b>Steady state:</b> if $\mathbf p(t)\to\pi$ then $\mathbf p'(t)\to0$, so</p>
+$$\pi\,Q=0,\quad\sum_j\pi_j=1\qquad\Longleftrightarrow\qquad\underbrace{\pi_j\,\nu_j}_{\text{rate out of }j}=\underbrace{\sum_{i\ne j}\pi_i\,q_{ij}}_{\text{rate into }j}\ \ \text{for every }j .$$
+<p>These are the <b>global balance equations</b>: in equilibrium, the long-run rate of leaving each state equals the rate of entering it. For an irreducible finite CTMC there is no periodicity problem: $\mathbf p(t)\to\pi$ always, and π is also the long-run fraction of <em>time</em> spent in each state.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Two-state CTMC: full transient solution</span>
+<p>A machine is up (state 0) or down (state 1). It fails at rate α and is repaired at rate β. Find $P[X(t)=0]$ for all $t$ and its limit.</p>
+<details class="sol"><summary>Solution</summary>
+<figure class="diagram"><div id="fig-ctmc2"></div><figcaption>Arrows of a CTMC carry rates, not probabilities; there are no self-loops</figcaption></figure>
+$$Q=\begin{bmatrix}-\alpha&\alpha\\\beta&-\beta\end{bmatrix}.$$
+<p><b>Forward equation for state 0</b> (leave at rate α, enter from 1 at rate β):</p>
+$$\begin{aligned}
+p_0'(t)&=-\alpha\,p_0(t)+\beta\,p_1(t)\\
+&=-\alpha\,p_0(t)+\beta\,(1-p_0(t)) &&\why{$p_1=1-p_0$}\\
+&=-(\alpha+\beta)\,p_0(t)+\beta .
+\end{aligned}$$
+<p>This is $y'=-ky+m$ with $k=\alpha+\beta$, $m=\beta$ (W6), so $y^*=\frac{\beta}{\alpha+\beta}$ and</p>
+$$P[X(t)=0]=\frac{\beta}{\alpha+\beta}+\Big(p_0(0)-\frac{\beta}{\alpha+\beta}\Big)e^{-(\alpha+\beta)t}.$$
+<p>Starting up ($p_0(0)=1$): $p_{00}(t)=\frac{\beta}{\alpha+\beta}+\frac{\alpha}{\alpha+\beta}e^{-(\alpha+\beta)t}$.</p>
+<p><b>Steady state</b> (check with balance: rate 0→1 = rate 1→0): $\pi_0\alpha=\pi_1\beta$ ⇒ $\pi_0=\frac{\beta}{\alpha+\beta}$, the long-run <b>availability</b> of the machine.</p>
+<p><b>Numbers:</b> failure rate α = 0.05 per hour (mean up-time 20 h), repair rate β = 0.5 per hour (mean repair 2 h). Availability $=\frac{0.5}{0.55}=\frac{10}{11}=0.909$. If it is up now, the probability it is up 2 hours later is $\frac{10}{11}+\frac1{11}e^{-1.1}=0.909+0.091(0.333)=0.939$.</p>
+<div data-plot="ctmc2"></div>
+<p>Compare with the discrete two-state chain (§6): there the gap shrank like $(1-a-b)^n$; here it shrinks like $e^{-(\alpha+\beta)t}$. Same picture, continuous clock.</p></details></div>
+
+<h3 id="poisctmc">The Poisson process as a Markov chain</h3>
+<p>The Poisson counting process $N(t)$ (Unit 4, §12) has independent increments, so it is Markov. It only ever jumps up by 1, at rate λ, from every state: a <b>pure-birth</b> CTMC.</p>
+<figure class="diagram"><div id="fig-pois"></div><figcaption>Poisson process: a pure-birth chain with constant rate λ</figcaption></figure>
+<p><b>Deriving the Poisson PMF from the forward equations.</b> Here $\nu_n=\lambda$ and $q_{n-1,n}=\lambda$, with $N(0)=0$:</p>
+$$\begin{aligned}
+p_0'(t)&=-\lambda\,p_0(t)\\
+p_n'(t)&=-\lambda\,p_n(t)+\lambda\,p_{n-1}(t),\qquad n\ge1 .
+\end{aligned}$$
+<p>First, $p_0(t)=e^{-\lambda t}$ (since $p_0(0)=1$). For $n\ge1$ use the integrating factor $e^{\lambda t}$:</p>
+$$\begin{aligned}
+e^{\lambda t}p_n'(t)+\lambda e^{\lambda t}p_n(t)&=\lambda e^{\lambda t}p_{n-1}(t)\\
+\frac{d}{dt}\big[e^{\lambda t}p_n(t)\big]&=\lambda e^{\lambda t}p_{n-1}(t). &&\why{product rule, read backwards}
+\end{aligned}$$
+<p>For $n=1$: the right side is $\lambda e^{\lambda t}e^{-\lambda t}=\lambda$, so $e^{\lambda t}p_1(t)=\lambda t$ (using $p_1(0)=0$), i.e. $p_1(t)=\lambda t\,e^{-\lambda t}$. Inductively, if $p_{n-1}(t)=\frac{(\lambda t)^{n-1}}{(n-1)!}e^{-\lambda t}$:</p>
+$$\begin{aligned}
+\frac{d}{dt}\big[e^{\lambda t}p_n(t)\big]&=\lambda\frac{(\lambda t)^{n-1}}{(n-1)!}\\
+e^{\lambda t}p_n(t)&=\frac{(\lambda t)^n}{n!} &&\why{integrate from 0, $p_n(0)=0$}\\
+p_n(t)&=\frac{(\lambda t)^n}{n!}e^{-\lambda t}. &&\why{Poisson(λt) ✓}
+\end{aligned}$$
+<p>This is the "Definition 3" route promised in Unit 4: rare independent events at rate λ ⇒ Poisson counts. A pure-birth chain has no stationary distribution (it runs off to infinity), so here only the <b>transient</b> distribution is meaningful.</p>
+
+<table>
+<tr><th></th><th>DTMC</th><th>CTMC</th></tr>
+<tr><td>moves</td><td>at steps $n=1,2,\dots$</td><td>at any time; exponential holding times</td></tr>
+<tr><td>described by</td><td>$P$, rows sum to 1</td><td>$Q$, rows sum to 0</td></tr>
+<tr><td>diagram labels</td><td>probabilities (self-loops allowed)</td><td>rates (no self-loops)</td></tr>
+<tr><td>transient</td><td>$\mathbf p(n)=\mathbf p(0)P^n$</td><td>$\mathbf p'(t)=\mathbf p(t)Q$</td></tr>
+<tr><td>steady state</td><td>$\pi P=\pi$</td><td>$\pi Q=0$</td></tr>
+<tr><td>balance</td><td>prob. flow out = in, per step</td><td>rate out = rate in</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="bd"><span class="num">10</span>Birth–death processes <span class="tag-beyond">Beyond class notes</span></h2>
+
+<div class="box why"><span class="bt">What it models</span>
+<p>Many systems change by <b>one unit at a time</b>: a customer arrives (+1) or one leaves (−1); a cell divides or dies; a call starts or ends. A CTMC that only moves to neighbouring states is a <b>birth–death process</b>. Its steady state can be found in closed form, and that solution <em>is</em> queueing theory.</p></div>
+
+<div class="box def"><span class="bt">Birth–death process (Schaum §9.3)</span>
+<p>$N(t)\in\{0,1,2,\dots\}$ (think: number of customers in the system) is a birth–death process if it is a CTMC such that</p>
+<ol>
+<li>from state $n$ it can move only to $n+1$ or $n-1$ (from 0, only to 1);</li>
+<li>in state $n$, the probability of a transition to $n+1$ (a <b>birth</b>, an arrival) in $(t,t+\Delta t)$ is $\lambda_n\Delta t+o(\Delta t)$; $\lambda_n$ is the <b>birth (arrival) rate</b>;</li>
+<li>in state $n$, the probability of a transition to $n-1$ (a <b>death</b>, a departure) in $(t,t+\Delta t)$ is $\mu_n\Delta t+o(\Delta t)$; $\mu_n$ is the <b>death (departure) rate</b>, with $\mu_0=0$;</li>
+<li>the probability of two or more transitions in Δt is $o(\Delta t)$.</li>
+</ol></div>
+<figure class="diagram"><div id="fig-bd"></div><figcaption>State-transition diagram of a birth–death process: up-arrows carry birth rates λₙ, down-arrows death rates μₙ</figcaption></figure>
+
+<h3 id="bdeqs">The differential equations (Schaum 9.2)</h3>
+<p>Let $p_n(t)=P[N(t)=n]$. At time $t+\Delta t$ the system is in state $n$ in one of three ways (anything else needs two transitions, probability $o(\Delta t)$):</p>
+<ol>
+<li>it was in $n$ at $t$ and nothing happened: probability $(1-\lambda_n\Delta t)(1-\mu_n\Delta t)=1-(\lambda_n+\mu_n)\Delta t+o(\Delta t)$;</li>
+<li>it was in $n-1$ and a birth happened: probability $\lambda_{n-1}\Delta t$;</li>
+<li>it was in $n+1$ and a death happened: probability $\mu_{n+1}\Delta t$.</li>
+</ol>
+<p>By the Markov property and total probability:</p>
+$$\begin{aligned}
+p_n(t+\Delta t)&=p_n(t)\big[1-(\lambda_n+\mu_n)\Delta t\big]+p_{n-1}(t)\,\lambda_{n-1}\Delta t+p_{n+1}(t)\,\mu_{n+1}\Delta t+o(\Delta t)\\
+\frac{p_n(t+\Delta t)-p_n(t)}{\Delta t}&=-(\lambda_n+\mu_n)p_n(t)+\lambda_{n-1}p_{n-1}(t)+\mu_{n+1}p_{n+1}(t)+\frac{o(\Delta t)}{\Delta t}.
+\end{aligned}$$
+<p>Letting Δt → 0:</p>
+<div class="box key"><span class="bt">Birth–death (Kolmogorov) equations</span>
+$$\begin{aligned}
+p_n'(t)&=-(\lambda_n+\mu_n)\,p_n(t)+\lambda_{n-1}\,p_{n-1}(t)+\mu_{n+1}\,p_{n+1}(t),\qquad n\ge1,\\
+p_0'(t)&=-\lambda_0\,p_0(t)+\mu_1\,p_1(t).
+\end{aligned}$$</div>
+
+<h3 id="bdss">Steady state: the equilibrium equations and their solution</h3>
+<p>In steady state $p_n(t)\to p_n$ and $p_n'(t)\to0$. Setting the derivatives to zero gives the <b>steady-state equilibrium (balance) equations</b>:</p>
+<div class="box key"><span class="bt">Equilibrium equations</span>
+$$\begin{aligned}
+(\lambda_n+\mu_n)\,p_n&=\lambda_{n-1}\,p_{n-1}+\mu_{n+1}\,p_{n+1},\qquad n\ge1,\\
+\lambda_0\,p_0&=\mu_1\,p_1 .
+\end{aligned}$$
+<p>Left: rate of leaving state $n$ (up or down). Right: rate of entering $n$ (from below by a birth, from above by a death). "Rate out = rate in", state by state.</p></div>
+
+<p><b>Solving them: the cut equations.</b> Define $g_n=\lambda_np_n-\mu_{n+1}p_{n+1}$ (net flow upward across the gap between $n$ and $n+1$). Rearranging the equation for state $n$:</p>
+$$\begin{aligned}
+\lambda_np_n-\mu_{n+1}p_{n+1}&=\lambda_{n-1}p_{n-1}-\mu_np_n\\
+\text{i.e. }\ g_n&=g_{n-1}.
+\end{aligned}$$
+<p>And the equation for state 0 says $g_0=\lambda_0p_0-\mu_1p_1=0$. So $g_n=g_{n-1}=\dots=g_0=0$ for every $n$:</p>
+$$\lambda_n\,p_n=\mu_{n+1}\,p_{n+1}\qquad n=0,1,2,\dots$$
+<figure class="diagram"><div id="fig-cut"></div><figcaption>Cut between n and n+1: in equilibrium the flow up across the cut (λₙpₙ) equals the flow down (μₙ₊₁pₙ₊₁)</figcaption></figure>
+<p>Meaning: the chain can only cross the cut by single steps, and in the long run it crosses up exactly as often as down. Now apply it repeatedly:</p>
+$$\begin{aligned}
+p_1&=\frac{\lambda_0}{\mu_1}p_0,\\
+p_2&=\frac{\lambda_1}{\mu_2}p_1=\frac{\lambda_0\lambda_1}{\mu_1\mu_2}p_0,\\
+&\ \,\vdots\\
+p_n&=\frac{\lambda_0\lambda_1\cdots\lambda_{n-1}}{\mu_1\mu_2\cdots\mu_n}\,p_0 .
+\end{aligned}$$
+
+<div class="box key"><span class="bt">Birth–death steady-state solution</span>
+$$p_n=p_0\prod_{k=0}^{n-1}\frac{\lambda_k}{\mu_{k+1}},\qquad p_0=\Bigg[1+\sum_{n=1}^{\infty}\prod_{k=0}^{n-1}\frac{\lambda_k}{\mu_{k+1}}\Bigg]^{-1}$$
+<p>(the second from $\sum_np_n=1$). A steady state exists only if the sum in the bracket is <b>finite</b>.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Discouraged arrivals</span>
+<p>Customers arrive at rate λ, but a customer who sees $n$ people already present joins only with probability $\frac1{n+1}$, so $\lambda_n=\frac{\lambda}{n+1}$. Service is at rate μ ($\mu_n=\mu$, $n\ge1$). Find the steady-state distribution and $L$, the mean number present.</p>
+<details class="sol"><summary>Solution</summary>
+<p>With $\rho=\lambda/\mu$, the product is</p>
+$$\begin{aligned}
+\prod_{k=0}^{n-1}\frac{\lambda_k}{\mu_{k+1}}&=\frac{\lambda}{\mu}\cdot\frac{\lambda/2}{\mu}\cdot\frac{\lambda/3}{\mu}\cdots\frac{\lambda/n}{\mu}\\
+&=\frac{\rho^n}{n!}.
+\end{aligned}$$
+<p>Normalise: $\sum_{n\ge0}\frac{\rho^n}{n!}=e^{\rho}$, so $p_0=e^{-\rho}$ and</p>
+$$p_n=\frac{\rho^n}{n!}e^{-\rho}:\quad\text{Poisson}(\rho),\qquad L=\rho .$$
+<p>A steady state exists for <b>every</b> ρ (the sum always converges): discouragement keeps the queue in check even if λ > μ.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="queue"><span class="num">11</span>Queueing systems: notation, quantities, Little's law <span class="tag-beyond">Beyond class notes</span></h2>
+
+<figure class="diagram"><div id="fig-queue"></div><figcaption>A single-server queueing system</figcaption></figure>
+
+<p>Customers arrive at random at average rate λ. If the server is free they are served at once; otherwise they wait in the queue. After service they leave. We want the average number of customers present and the average time they spend. Three things specify a queue: (1) the <b>arrival process</b>, (2) the <b>service mechanism</b> (number of servers, service-time distribution), (3) the <b>queue discipline</b> (we assume first-come first-served).</p>
+
+<div class="box def"><span class="bt">Kendall notation A/B/s/K</span>
+<ul>
+<li><b>A</b> = arrival process: <b>M</b> (Markov) means Poisson arrivals, i.e. iid exponential inter-arrival times;</li>
+<li><b>B</b> = service-time distribution: <b>M</b> means exponential service times; D = deterministic; G = general;</li>
+<li><b>s</b> = number of servers;</li>
+<li><b>K</b> = capacity of the system (maximum number present, <em>including</em> the one in service). Omitted ⇒ unlimited.</li>
+</ul>
+<p>So M/M/1 = Poisson arrivals, exponential service, one server, unlimited room. M/M/1/N (also written M/M/1/K or M/M/1/M) = the same with room for at most N customers; arrivals that find the system full are turned away (lost). Examples of limited capacity: a telephone exchange with a fixed number of trunks, a hospital emergency room with limited beds, a parking lot, a router buffer.</p></div>
+
+<div class="box def"><span class="bt">Performance measures</span>
+<table>
+<tr><td>$L$</td><td>mean number of customers in the <b>system</b> (waiting + in service)</td></tr>
+<tr><td>$L_q$</td><td>mean number waiting in the <b>queue</b></td></tr>
+<tr><td>$W$</td><td>mean time a customer spends in the system (waiting + service)</td></tr>
+<tr><td>$W_q$</td><td>mean time a customer spends waiting in the queue</td></tr>
+<tr><td>$\rho=\lambda/\mu$</td><td><b>traffic intensity</b> (utilisation) = mean service time ÷ mean inter-arrival time</td></tr>
+</table>
+<p>Always: $W=W_q+\frac1\mu$ (time in system = wait + own service, mean service time $1/\mu$).</p></div>
+
+<div class="box thm"><span class="bt">Little's law</span>
+$$L=\lambda_a\,W,\qquad L_q=\lambda_a\,W_q,\qquad L_s=\lambda_a\,W_s$$
+<p>where $\lambda_a$ is the average rate at which customers actually <b>enter</b> the system ($\lambda_a=\lambda$ unless arrivals are turned away) and $L_s$, $W_s=\frac1\mu$ refer to the server alone.</p>
+<p><b>Why it's true (Schaum's "fee" argument).</b> Suppose each customer pays 1 rupee per minute while in the system. The system collects money at an average rate of $L$ rupees per minute (that's how many are paying at any moment). On the other hand, customers enter at rate $\lambda_a$ per minute and each pays $W$ rupees on average. Two ways of counting the same income: $L=\lambda_aW$. Charging only while in the queue gives $L_q=\lambda_aW_q$.</p>
+<p><b>Why it's useful:</b> it holds for almost any queue (any arrival process, any service distribution, any number of servers). Find $L$ from the state probabilities, then $W=L/\lambda_a$ for free.</p></div>
+
+<!-- ============================================================ -->
+<h2 id="mm1"><span class="num">12</span>The M/M/1 queue <span class="tag-beyond">Beyond class notes</span></h2>
+
+<div class="box def"><span class="bt">Model</span>
+<p>Arrivals form a Poisson process with rate λ (mean arrival rate). Service times are iid exponential with parameter μ (mean service <b>rate</b>; mean service <b>time</b> $1/\mu$). One server, unlimited waiting room, first-come first-served. Let $N(t)$ = number of customers in the system at time $t$.</p></div>
+
+<p><b>Step 1: $N(t)$ is a birth–death process.</b> Arrivals happen at rate λ whatever the state (Poisson: probability λΔt in Δt). If $n\ge1$ the server is busy and, by the memoryless property, the customer in service finishes in the next Δt with probability μΔt, however long they have been in service. So</p>
+$$\lambda_n=\lambda\ \ (n\ge0),\qquad \mu_n=\mu\ \ (n\ge1).$$
+<figure class="diagram"><div id="fig-mm1"></div><figcaption>M/M/1: the same birth rate λ and death rate μ in every state</figcaption></figure>
+<div data-plot="mm1Path"></div>
+
+<p><b>Step 2: steady-state probabilities.</b> Put the rates into the birth–death solution:</p>
+$$\begin{aligned}
+p_n&=p_0\prod_{k=0}^{n-1}\frac{\lambda}{\mu}=p_0\Big(\frac\lambda\mu\Big)^n=p_0\,\rho^n .
+\end{aligned}$$
+<p>Normalise using the geometric series (W4), which converges only if $\rho\lt1$:</p>
+$$\begin{aligned}
+1=\sum_{n=0}^{\infty}p_n&=p_0\sum_{n=0}^{\infty}\rho^n=\frac{p_0}{1-\rho}\\
+\Rightarrow\ p_0&=1-\rho .
+\end{aligned}$$
+
+<div class="box key"><span class="bt">M/M/1 steady state ($\rho=\lambda/\mu\lt1$)</span>
+$$p_n=P[N=n]=(1-\rho)\,\rho^n,\qquad n=0,1,2,\dots\quad(\text{geometric})$$
+<ul>
+<li>$p_0=1-\rho$ = probability the server is idle; $1-p_0=\rho$ = probability it is busy (<b>utilisation</b>). An arriving customer has to wait with probability ρ.</li>
+<li>Tail: $P[N\ge k]=\sum_{n\ge k}(1-\rho)\rho^n=(1-\rho)\frac{\rho^k}{1-\rho}=\rho^k$.</li>
+<li>If $\rho\ge1$ (customers arrive at least as fast as they can be served) there is <b>no steady state</b>: the queue grows without bound.</li>
+</ul></div>
+<div class="plots-row"><div data-plot="mm1pmf5"></div><div data-plot="mm1pmf8"></div></div>
+
+<p><b>Step 3: the mean number in the system, $L$.</b></p>
+$$\begin{aligned}
+L=E[N]&=\sum_{n=0}^{\infty}n\,p_n\\
+&=(1-\rho)\sum_{n=0}^{\infty}n\rho^n\\
+&=(1-\rho)\cdot\frac{\rho}{(1-\rho)^2} &&\why{derivative trick, W4}\\
+&=\frac{\rho}{1-\rho}=\frac{\lambda}{\mu-\lambda}.
+\end{aligned}$$
+
+<p><b>Step 4: the mean number in the queue, $L_q$.</b> With $n\ge1$ customers present, one is in service and $n-1$ wait; with $n=0$ nobody waits:</p>
+$$\begin{aligned}
+L_q&=\sum_{n=1}^{\infty}(n-1)\,p_n\\
+&=\sum_{n=1}^{\infty}n\,p_n-\sum_{n=1}^{\infty}p_n\\
+&=L-(1-p_0) &&\why{the second sum is $P[N\ge1]$}\\
+&=\frac{\rho}{1-\rho}-\rho\\
+&=\frac{\rho-\rho(1-\rho)}{1-\rho}=\frac{\rho^2}{1-\rho}=\frac{\lambda^2}{\mu(\mu-\lambda)}.
+\end{aligned}$$
+<p>($L-L_q=\rho$ is the mean number <em>in service</em>, which is the probability the server is busy.)</p>
+
+<p><b>Step 5: mean times, by Little's law</b> ($\lambda_a=\lambda$, nobody is turned away):</p>
+$$\begin{aligned}
+W&=\frac{L}{\lambda}=\frac{1}{\lambda}\cdot\frac{\lambda}{\mu-\lambda}=\frac{1}{\mu-\lambda},\\
+W_q&=\frac{L_q}{\lambda}=\frac{\lambda}{\mu(\mu-\lambda)}=\frac{\rho}{\mu-\lambda}=W-\frac1\mu .
+\end{aligned}$$
+
+<div class="box key"><span class="bt">M/M/1 formula card</span>
+$$\rho=\frac\lambda\mu,\quad L=\frac{\rho}{1-\rho}=\frac{\lambda}{\mu-\lambda},\quad L_q=\frac{\rho^2}{1-\rho},\quad W=\frac{1}{\mu-\lambda},\quad W_q=\frac{\rho}{\mu-\lambda},\quad P[N\ge k]=\rho^k$$
+<p class="small"><span class="tag-beyond">Extra</span> The time a customer spends in the system is itself exponential with rate $\mu-\lambda$ (Schaum 9.6): $P[T\gt t]=e^{-(\mu-\lambda)t}$. Also $\Var(N)=\frac{\rho}{(1-\rho)^2}$.</p></div>
+<div data-plot="mm1L"></div>
+<p><b>The most important lesson of queueing theory:</b> $L$ and $W$ blow up as ρ → 1. A server that is busy 90% of the time has $L=9$; at 80% it has $L=4$. Running a system close to full capacity produces enormous queues, even though on average there is enough capacity.</p>
+
+<div class="box key"><span class="bt">Recipe: M/M/1 numericals</span>
+<ol>
+<li><b>Get both rates in the same time unit.</b> "One customer every 10 minutes" ⇒ λ = 1/10 per min. "Mean service time 8 minutes" ⇒ μ = 1/8 per min (rate = 1/mean time!).</li>
+<li>Compute $\rho=\lambda/\mu$ and check $\rho\lt1$.</li>
+<li>Use the formula card. Give times in sensible units.</li>
+<li>Sanity checks: $W-W_q=1/\mu$; $L=\lambda W$; $L-L_q=\rho$.</li>
+</ol></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> A ticket counter</span>
+<p>Customers arrive at 3 per hour (Poisson); service takes on average 15 minutes (exponential). Find all the measures, $P[N\ge4]$, and the probability a customer spends more than 2 hours in the system.</p>
+<details class="sol"><summary>Solution</summary>
+<p>λ = 3/hr, μ = 4/hr (15 min mean ⇒ 4 per hour), ρ = 0.75 &lt; 1 ✓.</p>
+$$\begin{aligned}
+p_0&=1-\rho=0.25 &&\why{idle a quarter of the time}\\
+L&=\frac{0.75}{0.25}=3\\
+L_q&=\frac{0.75^2}{0.25}=2.25\\
+W&=\frac{1}{4-3}=1\ \text{hr}\\
+W_q&=\frac{0.75}{1}=0.75\ \text{hr}=45\ \text{min}\\
+P[N\ge4]&=0.75^4=0.316\\
+P[T\gt2]&=e^{-(4-3)\cdot2}=e^{-2}=0.135
+\end{aligned}$$
+<p>Checks: $W-W_q=0.25$ hr = 15 min = $1/\mu$ ✓; $L=\lambda W=3\times1$ ✓.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> Telephone booth (Schaum 9.9)</span>
+<p>People arrive at a phone booth at 12 per hour; calls last on average 2 minutes (exponential). (a) Probability that an arriving person finds the booth occupied? (b) The company adds a booth if people wait on average 3 minutes or more. What arrival rate justifies a second booth?</p>
+<details class="sol"><summary>Solution</summary>
+<p>Work in minutes: λ = 12/60 = 0.2 per min, μ = 1/2 = 0.5 per min, ρ = 0.4.</p>
+<p><b>(a)</b> Poisson arrivals see the time-average state, so $P[\text{occupied}]=P[N\ge1]=\rho=0.4$.</p>
+<p><b>(b)</b> Require $W_q=\frac{\lambda}{\mu(\mu-\lambda)}\ge3$ with μ = 0.5:</p>
+$$\begin{aligned}
+\frac{\lambda}{0.5(0.5-\lambda)}&\ge3\\
+\lambda&\ge1.5(0.5-\lambda)=0.75-1.5\lambda\\
+2.5\lambda&\ge0.75\\
+\lambda&\ge0.3\ \text{per min}=18\ \text{per hour}.
+\end{aligned}$$
+<p>So a second booth is justified once arrivals reach 18 per hour (ρ = 0.6).</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="mm1n"><span class="num">13</span>The M/M/1/N queue (finite capacity) <span class="tag-beyond">Beyond class notes</span></h2>
+
+<figure class="diagram"><div id="fig-queueN"></div><figcaption>M/M/1/N: room for N customers in total (1 in service + N − 1 waiting); arrivals finding N present are lost</figcaption></figure>
+
+<div class="box def"><span class="bt">Model</span>
+<p>As M/M/1, but the system can hold at most $N$ customers. An arrival that finds $N$ present is turned away (blocked, lost). The number in the system is a birth–death process on $\{0,1,\dots,N\}$ with</p>
+$$\lambda_n=\begin{cases}\lambda,&0\le n\lt N\\0,&n\ge N\end{cases}\qquad\qquad\mu_n=\mu,\quad1\le n\le N .$$</div>
+<figure class="diagram"><div id="fig-mm1n"></div><figcaption>M/M/1/N: the chain is cut off at N</figcaption></figure>
+
+<p><b>Steady state.</b> Exactly as for M/M/1, $p_n=\rho^np_0$, but now only for $n=0,1,\dots,N$. Normalise with the <em>finite</em> geometric sum (W4):</p>
+$$\begin{aligned}
+1=\sum_{n=0}^{N}p_n&=p_0\sum_{n=0}^{N}\rho^n=p_0\,\frac{1-\rho^{N+1}}{1-\rho}\qquad(\rho\ne1)\\
+\Rightarrow\ p_0&=\frac{1-\rho}{1-\rho^{N+1}} .
+\end{aligned}$$
+<p>If ρ = 1 every term is 1, the sum is $N+1$, and $p_0=\frac1{N+1}$.</p>
+
+<div class="box key"><span class="bt">M/M/1/N steady state</span>
+$$p_n=\frac{(1-\rho)\,\rho^n}{1-\rho^{N+1}}\ \ (\rho\ne1),\qquad p_n=\frac1{N+1}\ \ (\rho=1),\qquad n=0,1,\dots,N.$$
+<ul>
+<li><b>No condition ρ &lt; 1 is needed</b>: the sum is finite, so a steady state always exists. Excess customers are simply turned away.</li>
+<li><b>Blocking probability</b> (fraction of arrivals lost): $P_B=p_N$ (Poisson arrivals see the time-average state).</li>
+<li><b>Effective arrival rate</b> (customers who actually enter): $\lambda_a=\lambda(1-p_N)$. Equivalently, in steady state "rate in = rate out": $\lambda(1-p_N)=\mu(1-p_0)$, since the server completes jobs at rate μ whenever it is busy.</li>
+</ul></div>
+<div class="plots-row"><div data-plot="mm1n05"></div><div data-plot="mm1n1"></div><div data-plot="mm1n2"></div></div>
+
+<p><b>Mean number in the system.</b> Let $S(\rho)=\sum_{n=0}^{N}\rho^n=\frac{1-\rho^{N+1}}{1-\rho}$. Then $\sum_{n=0}^{N}n\rho^n=\rho\,S'(\rho)$ (derivative trick), and $L=p_0\,\rho\,S'(\rho)=\rho\,S'(\rho)/S(\rho)$:</p>
+$$\begin{aligned}
+S'(\rho)&=\frac{-(N+1)\rho^N(1-\rho)+(1-\rho^{N+1})}{(1-\rho)^2} &&\why{quotient rule}\\
+L=\frac{\rho\,S'(\rho)}{S(\rho)}&=\frac{\rho\big[(1-\rho^{N+1})-(N+1)\rho^N(1-\rho)\big]}{(1-\rho)^2}\cdot\frac{1-\rho}{1-\rho^{N+1}}\\
+&=\frac{\rho}{1-\rho}-\frac{(N+1)\rho^{N+1}}{1-\rho^{N+1}}\qquad(\rho\ne1).
+\end{aligned}$$
+<p>For ρ = 1: $L=\sum_{n=0}^{N}\frac{n}{N+1}=\frac N2$. Note the first term is the M/M/1 value; the second is the reduction caused by turning customers away. As $N\to\infty$ with ρ &lt; 1 the second term vanishes and we recover M/M/1.</p>
+
+<div class="box key"><span class="bt">M/M/1/N formula card</span>
+$$L=\frac{\rho}{1-\rho}-\frac{(N+1)\rho^{N+1}}{1-\rho^{N+1}},\qquad L_q=L-(1-p_0),\qquad \lambda_a=\lambda(1-p_N),\qquad W=\frac{L}{\lambda_a},\qquad W_q=\frac{L_q}{\lambda_a}.$$
+<p><b>Use $\lambda_a$, not λ, in Little's law</b>: blocked customers never enter, so they contribute nothing to $L$.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span> A barber shop with two waiting chairs</span>
+<p>A one-barber shop has 2 waiting chairs; customers who find both chairs taken leave. Arrivals are Poisson at 3 per hour; haircuts take on average 15 minutes (exponential). Find the steady-state probabilities, the fraction of customers lost, $L$, $L_q$, $W$, $W_q$.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Capacity N = 3 (1 in the chair + 2 waiting). λ = 3, μ = 4 per hour, ρ = 0.75.</p>
+$$\begin{aligned}
+p_0&=\frac{1-0.75}{1-0.75^4}=\frac{0.25}{0.68359}=0.3657\\
+p_1&=0.75\,p_0=0.2743\\
+p_2&=0.75^2p_0=0.2057\\
+p_3&=0.75^3p_0=0.1543
+\end{aligned}$$
+<p>(Sum = 1.0000 ✓.) <b>Fraction lost</b> $=p_3=15.4\%$. Effective arrival rate:</p>
+$$\lambda_a=3(1-0.1543)=2.537\ \text{per hr}\quad(\text{check: }\mu(1-p_0)=4(0.6343)=2.537\ ✓).$$
+<p>Mean numbers:</p>
+$$\begin{aligned}
+L&=0(p_0)+1(0.2743)+2(0.2057)+3(0.1543)=1.1486\\
+&\quad\text{(formula: }3-\tfrac{4(0.3164)}{0.6836}=3-1.8514=1.1486\ ✓)\\
+L_q&=L-(1-p_0)=1.1486-0.6343=0.5143 .
+\end{aligned}$$
+<p>Mean times (Little with $\lambda_a$):</p>
+$$\begin{aligned}
+W&=\frac{1.1486}{2.537}=0.4527\ \text{hr}=27.2\ \text{min},\\
+W_q&=\frac{0.5143}{2.537}=0.2027\ \text{hr}=12.2\ \text{min}.
+\end{aligned}$$
+<p>Check: $W-W_q=15$ min $=1/\mu$ ✓. Compare with the unlimited M/M/1 at the same rates (§12): $L=3$, $W=60$ min. Turning away 15% of customers cuts the average time in the shop by more than half.</p></details></div>
+
+<table>
+<tr><th></th><th>M/M/1</th><th>M/M/1/N</th></tr>
+<tr><td>states</td><td>0, 1, 2, … (infinite)</td><td>0, 1, …, N</td></tr>
+<tr><td>birth rates</td><td>λ in every state</td><td>λ for n &lt; N, 0 at N</td></tr>
+<tr><td>steady state exists</td><td>only if ρ &lt; 1</td><td>always</td></tr>
+<tr><td>$p_n$</td><td>$(1-\rho)\rho^n$</td><td>$\frac{(1-\rho)\rho^n}{1-\rho^{N+1}}$</td></tr>
+<tr><td>$L$</td><td>$\frac{\rho}{1-\rho}$</td><td>$\frac{\rho}{1-\rho}-\frac{(N+1)\rho^{N+1}}{1-\rho^{N+1}}$</td></tr>
+<tr><td>customers lost</td><td>none</td><td>fraction $p_N$</td></tr>
+<tr><td>Little's law uses</td><td>λ</td><td>$\lambda_a=\lambda(1-p_N)$</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="summary"><span class="num">14</span>Summary: which tool for which question</h2>
+<table>
+<tr><th>The question asks…</th><th>Use</th><th>Section</th></tr>
+<tr><td>"Is $Y_n$ a Markov process?"</td><td>write $Y_{n+1}=f(Y_n,\text{fresh noise})$, or find a counterexample with extra history</td><td>§1</td></tr>
+<tr><td>probability of a specific path $X_0=a,X_1=b,\dots$</td><td>$p_a(0)\,p_{ab}\,p_{bc}\cdots$ (time order!)</td><td>§2</td></tr>
+<tr><td>"draw the state-transition diagram" / "write P"</td><td>row = now, column = next; rows sum to 1</td><td>§3</td></tr>
+<tr><td>$P(X_{n+k}=j\mid X_n=i)$</td><td>$(P^k)_{ij}$: row $i$ times column $j$, repeated</td><td>§4</td></tr>
+<tr><td>PMF at time $n$</td><td>$\mathbf p(n)=\mathbf p(0)P^n$, step by step</td><td>§5</td></tr>
+<tr><td>two-state chain, general $n$</td><td>$P[X_n=1]=\frac a{a+b}+(1-a-b)^n\big(P[X_0=1]-\frac a{a+b}\big)$</td><td>§6</td></tr>
+<tr><td>"comment on / classify the states"</td><td>classes; closed ⇒ recurrent, open ⇒ transient; period via cycles</td><td>§7</td></tr>
+<tr><td>"in the long run, how often…"</td><td>$\pi P=\pi$, $\sum\pi=1$; two states: $\pi=[\frac b{a+b},\frac a{a+b}]$</td><td>§8</td></tr>
+<tr><td>continuous-time chain, rates</td><td>$\mathbf p'=\mathbf pQ$; steady state: rate out = rate in</td><td>§9</td></tr>
+<tr><td>"define birth–death process, diagram, equilibrium equations"</td><td>$(\lambda_n+\mu_n)p_n=\lambda_{n-1}p_{n-1}+\mu_{n+1}p_{n+1}$; $p_n=p_0\prod\frac{\lambda_k}{\mu_{k+1}}$</td><td>§10</td></tr>
+<tr><td>"explain / derive M/M/1", any M/M/1 numerical</td><td>$p_n=(1-\rho)\rho^n$, $L=\frac{\rho}{1-\rho}$, $L_q=\frac{\rho^2}{1-\rho}$, $W=\frac1{\mu-\lambda}$, Little</td><td>§11–§12</td></tr>
+<tr><td>finite waiting room</td><td>M/M/1/N; Little with $\lambda_a=\lambda(1-p_N)$</td><td>§13</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="mistakes"><span class="num">15</span>Mistakes to avoid &amp; self-check</h2>
+<div class="box warn"><span class="bt">The classic mistakes</span>
+<ol>
+<li><b>Rows vs columns.</b> In $P$ the <b>rows</b> sum to 1. In $\pi P=\pi$ the equation for $\pi_j$ uses <b>column</b> $j$. Writing $\pi_j=\sum_kp_{jk}\pi_k$ (row $j$) is wrong.</li>
+<li><b>Multiplying on the wrong side.</b> $\mathbf p(n)=\mathbf p(0)P^n$ with $\mathbf p$ a row vector on the <em>left</em>.</li>
+<li><b>Reading a path backwards.</b> $P(X_3=1,X_2=2,X_1=3)$ is the path 3 → 2 → 1 in time.</li>
+<li><b>Squaring entries instead of the matrix.</b> $p_{ij}(2)\ne(p_{ij})^2$; it is a sum over intermediate states.</li>
+<li><b>Using all the balance equations and forgetting $\sum\pi=1$.</b> The balance equations alone are dependent and only give ratios.</li>
+<li><b>Rate vs mean time.</b> "Mean service time 8 min" means μ = 1/8 per min, not 8.</li>
+<li><b>Mixing time units</b> (λ per hour with μ per minute).</li>
+<li><b>Forgetting ρ &lt; 1</b> for M/M/1; or wrongly demanding it for M/M/1/N.</li>
+<li><b>Using λ instead of $\lambda_a$</b> in Little's law for M/M/1/N.</li>
+<li><b>Confusing $L$ with $L_q$</b> (and $W$ with $W_q$): "waiting for service" means in the queue; "spends in the shop" means in the system.</li>
+<li><b>Thinking Markov means independent</b>, or that a homogeneous chain is a stationary process.</li>
+</ol></div>
+
+<h3 id="selfcheck" data-toc="skip">Self-check (answers in §19)</h3>
+<ol>
+<li>State the Markov property in one sentence.</li>
+<li>Can a matrix with rows $[0.5,0.6]$ and $[0.3,0.7]$ be a transition matrix?</li>
+<li>For $P=\begin{bmatrix}0.5&0.5\\0.2&0.8\end{bmatrix}$, what is $p_{01}(2)$?</li>
+<li>For the same $P$, find π.</li>
+<li>All rows of $P$ are equal. What does that tell you about the process?</li>
+<li>State 3 has $p_{33}=0.4$ and belongs to a closed finite class. Recurrent or transient? Periodic?</li>
+<li>A finite irreducible chain has period 2. Does $\lim\mathbf p(n)$ exist? Does π exist?</li>
+<li>A CTMC's generator row reads $[-3,\ 1,\ 2]$. What is the mean holding time in that state, and the probability that the next jump goes to the third state?</li>
+<li>For M/M/1 with λ = 4/hr and μ = 5/hr, find $L$, $W$ and $P[N\ge2]$.</li>
+<li>Why doesn't M/M/1/N need ρ &lt; 1?</li>
+<li>In Little's law, which arrival rate do you use for a queue that turns customers away?</li>
+<li>Write the equilibrium equation of a birth–death process for state 0 and for state $n\ge1$.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="practice"><span class="num">16</span>Practice problems</h2>
+<p class="small muted">Answers in §19. Levels go easy → exam.</p>
+<ol>
+<li><span class="tag-lvl lvl-e">Easy</span> A fair die is rolled repeatedly; $X_n$ = the largest number seen in the first $n$ rolls. Show that $X_n$ is a Markov chain and write its transition matrix.</li>
+<li><span class="tag-lvl lvl-m">Medium</span> $X_n$ iid Bernoulli(½); $Z_n=X_n-X_{n-1}$. Is $Z_n$ Markov? (Hint: compare $P[Z_n=1\mid Z_{n-1}=0]$ with $P[Z_n=1\mid Z_{n-1}=0,Z_{n-2}=1]$.)</li>
+<li><span class="tag-lvl lvl-e">Easy</span> $P=\begin{bmatrix}0.6&0.4\\0.2&0.8\end{bmatrix}$, $X_0=0$. Find $\mathbf p(2)$, $P(X_3=1\mid X_1=0)$, $P(X_0=0,X_1=1,X_2=1)$ and π.</li>
+<li><span class="tag-lvl lvl-m">Medium</span> $P=\begin{bmatrix}0.5&0.5&0\\0.25&0.5&0.25\\0&0.5&0.5\end{bmatrix}$ (states 0, 1, 2). Find row 0 of $P^2$, the stationary distribution, and the mean return time to each state.</li>
+<li><span class="tag-lvl lvl-m">Medium</span> Classify the states of $P=\begin{bmatrix}0.5&0.5&0&0\\0.5&0.5&0&0\\0.25&0.25&0.25&0.25\\0&0&0&1\end{bmatrix}$.</li>
+<li><span class="tag-lvl lvl-m">Medium</span> Find the period of the chain with $p_{01}=p_{12}=p_{23}=1$, $p_{30}=p_{32}=\frac12$.</li>
+<li><span class="tag-lvl lvl-m">Medium</span> For the speech chain with α = 0.2, β = 0.4, find $P[X_5=1\mid X_0=0]$ using the closed form of §6, and the long-run fraction of speech packets.</li>
+<li><span class="tag-lvl lvl-m">Medium</span> A machine fails at rate 0.2 per day and is repaired at rate 1 per day (CTMC). Find its long-run availability and $P[\text{up at }t\mid\text{up at }0]$.</li>
+<li><span class="tag-lvl lvl-h">Exam</span> A birth–death process has $\lambda_n=\lambda$ for all $n$ and $\mu_n=n\mu$ (infinitely many servers, M/M/∞). Find the steady-state distribution and $L$.</li>
+<li><span class="tag-lvl lvl-e">Easy</span> M/M/1 with λ = 12/hr, mean service time 4 min. Find ρ, $L$, $L_q$, $W$, $W_q$, $P[N\ge3]$, and $P[\text{time in system}\gt20\text{ min}]$.</li>
+<li><span class="tag-lvl lvl-m">Medium</span> An M/M/1 server has μ = 0.5 per min. What is the largest arrival rate for which the mean wait in the queue is at most 5 minutes?</li>
+<li><span class="tag-lvl lvl-m">Medium</span> M/M/1/4 with λ = μ = 1 per min: find $p_n$, $L$, the blocking probability, $\lambda_a$, $W$, $L_q$, $W_q$.</li>
+<li><span class="tag-lvl lvl-h">Exam</span> M/M/1/2 with λ = 2/hr, μ = 3/hr: find $p_0,p_1,p_2$, the fraction of customers lost, $L$, $W$, $L_q$, $W_q$.</li>
+<li><span class="tag-lvl lvl-e">Easy</span> A shop has on average 10 customers inside, and 40 customers enter per hour. How long does a customer stay on average?</li>
+<li><span class="tag-lvl lvl-m">Medium</span> Show directly from $\pi P=\pi$ that the stationary distribution of $P=\begin{bmatrix}1-a&a\\b&1-b\end{bmatrix}$ is $\big[\frac{b}{a+b},\frac{a}{a+b}\big]$.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="pyq"><span class="num">17</span>Past-paper questions, fully solved</h2>
+<p>Every Unit 5 question from the end-semester papers 2021–2026, grouped by type. (The mid-semester papers have no Unit 5 questions.) Each solution starts with <b>What to notice</b> (the idea that unlocks it), then works through one step per line, and ends with checks and what the answer means. For the "explain / derive" questions the solution is a <b>model answer</b> sized for 5 marks.</p>
+<p class="small">Two questions appear twice (the watch-repair shop: ES 2021 Q5b and ES Nov–Dec 2024 Q5c; M/M/1 and M/M/1/N theory: ES 2022 Q5a and ES July 2024 Q5a), which tells you how likely they are to come again.</p>
+
+<!-- ---------------- A ---------------- -->
+<h3 id="pyqA">A. The Markov property</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q5b</span> (5 marks) Define and explain Markov process. Consider the moving average of a Bernoulli sequence: $Y_n=\frac13(X_n+X_{n-1}+X_{n-2})$, where the $X_i$ are independent Bernoulli random variables with $p=\frac12$. Is $Y_n$ a Markov process?</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>Part 1: definition (model answer).</b> A random process $X_n$ is a <b>Markov process</b> if, given its present value, its future is independent of its past:</p>
+$$P[X_{n+1}=x_{n+1}\mid X_n=x_n,\ X_{n-1}=x_{n-1},\dots,X_0=x_0]=P[X_{n+1}=x_{n+1}\mid X_n=x_n]$$
+<p>for all $n$ and all values (in continuous time: $P[X(t_{k+1})\le x\mid X(t_k)=x_k,\dots,X(t_1)=x_1]=P[X(t_{k+1})\le x\mid X(t_k)=x_k]$ for any $t_1\lt\dots\lt t_{k+1}$). The present state summarises all of the past that is relevant for predicting the future ("memoryless" property). If the state space is discrete it is a Markov <b>chain</b>. Consequence: the joint PMF factorises as $P[X_0=k_0,\dots,X_n=k_n]=P[X_0=k_0]\prod_{m=1}^np_{k_{m-1}k_m}$, so the process is fully described by its initial PMF and one-step transition probabilities. Examples: random walk, binomial counting process, Poisson process (all have independent increments). A Markov process need not be independent or stationary.</p>
+
+<p><b>Part 2: what to notice.</b> $Y_n$ and $Y_{n-1}$ share two of the $X$'s ($X_{n-1}$ and $X_{n-2}$). The present value $Y_{n-1}$ tells us only the <em>sum</em> $X_{n-1}+X_{n-2}+X_{n-3}$, not which of them were 1. But <em>which</em> ones were 1 matters for $Y_n$, because $X_{n-3}$ drops out of the window and $X_{n-1},X_{n-2}$ stay. An older value $Y_{n-2}$ can reveal that hidden information. So we expect "not Markov", and we prove it with one counterexample (recipe in §1).</p>
+
+<p><b>Step 1: possible values and PMF of $Y_n$.</b> The sum $X_n+X_{n-1}+X_{n-2}$ is Binomial(3, ½), so</p>
+$$Y_n\in\Big\{0,\ \tfrac13,\ \tfrac23,\ 1\Big\}\quad\text{with probabilities}\quad\tfrac18,\ \tfrac38,\ \tfrac38,\ \tfrac18 .$$
+
+<p><b>Step 2: condition on the present only.</b> Compute $P\big[Y_n=1\mid Y_{n-1}=\tfrac23\big]$.</p>
+<ul>
+<li>$Y_n=1$ ⇔ $X_n=X_{n-1}=X_{n-2}=1$.</li>
+<li>Given that, $Y_{n-1}=\frac13(X_{n-1}+X_{n-2}+X_{n-3})=\frac13(2+X_{n-3})$, which equals $\frac23$ ⇔ $X_{n-3}=0$.</li>
+</ul>
+$$\begin{aligned}
+P\big[Y_n=1,\ Y_{n-1}=\tfrac23\big]&=P[X_n=1,\ X_{n-1}=1,\ X_{n-2}=1,\ X_{n-3}=0]\\
+&=\big(\tfrac12\big)^4=\tfrac1{16} &&\why{four independent X's}\\[4pt]
+P\big[Y_n=1\mid Y_{n-1}=\tfrac23\big]&=\frac{P[Y_n=1,\ Y_{n-1}=\frac23]}{P[Y_{n-1}=\frac23]}\\
+&=\frac{1/16}{3/8}\\
+&=\frac16 .
+\end{aligned}$$
+
+<p><b>Step 3: add one past value.</b> Now also condition on $Y_{n-2}=1$.</p>
+<ul>
+<li>$Y_{n-2}=1$ ⇔ $X_{n-2}=X_{n-3}=X_{n-4}=1$.</li>
+<li>Then $Y_{n-1}=\frac13(X_{n-1}+1+1)=\frac23$ ⇔ $X_{n-1}=0$.</li>
+<li>So $Y_n=\frac13(X_n+X_{n-1}+X_{n-2})=\frac13(X_n+0+1)\le\frac23$. The value 1 is impossible.</li>
+</ul>
+$$P\big[Y_n=1\mid Y_{n-1}=\tfrac23,\ Y_{n-2}=1\big]=0 .$$
+<p>(The conditioning event has positive probability: $P[Y_{n-1}=\frac23,Y_{n-2}=1]=P[X_{n-1}=0,X_{n-2}=X_{n-3}=X_{n-4}=1]=\frac1{16}\gt0$, so this conditional probability is well defined.)</p>
+
+<p><b>Step 4: conclusion.</b></p>
+$$P\big[Y_n=1\mid Y_{n-1}=\tfrac23,\ Y_{n-2}=1\big]=0\ \ne\ \tfrac16=P\big[Y_n=1\mid Y_{n-1}=\tfrac23\big].$$
+<p>Knowing the extra past value $Y_{n-2}$ changes the conditional distribution of $Y_n$, so the Markov property fails: <b>$Y_n$ is not a Markov process.</b></p>
+
+<p><b>Interpretation.</b> "$Y_{n-1}=\frac23$" means two of the three bits in the window are 1. Alone, it leaves open which bit is 0. "$Y_{n-2}=1$" tells us the old bits $X_{n-2},X_{n-3}$ were 1, so the 0 must be the newest bit $X_{n-1}$, which stays in the window and blocks $Y_n=1$. This is the three-term version of the lecturer's two-term example (§1). A moving average of iid variables is never Markov for this reason. (The triple $(X_n,X_{n-1},X_{n-2})$, an 8-state chain, <em>is</em> Markov.)</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q5b</span> (5 marks) Let $X_n$ be an iid random process. Show that $X_n$ is a Markov process and give its one-step transition probability matrix.</span>
+<details class="sol"><summary>Solution</summary>
+<p class="small">(The printed paper says "id-valued"; it means iid, independent and identically distributed.)</p>
+<p><b>What to notice.</b> Independence is a much stronger property than the Markov property. If the next value is independent of <em>everything</em> before it, then in particular conditioning on the whole past or on the present alone gives the same answer: both equal the unconditional probability.</p>
+<p><b>Setting.</b> Let $X_n$ take values in $\{0,1,2,\dots\}$ with common PMF $P[X_n=j]=a_j$ for every $n$ (identically distributed), and let $X_0,X_1,\dots$ be independent.</p>
+<p><b>Step 1: condition on the whole past.</b></p>
+$$\begin{aligned}
+P[X_{n+1}=j\mid X_n=i,\ X_{n-1}=i_{n-1},\dots,X_0=i_0]&=\frac{P[X_{n+1}=j,\ X_n=i,\dots,X_0=i_0]}{P[X_n=i,\dots,X_0=i_0]}\\
+&=\frac{P[X_{n+1}=j]\ P[X_n=i]\cdots P[X_0=i_0]}{P[X_n=i]\cdots P[X_0=i_0]} &&\why{independence: joint PMF = product}\\
+&=P[X_{n+1}=j]=a_j .
+\end{aligned}$$
+<p><b>Step 2: condition on the present only.</b></p>
+$$\begin{aligned}
+P[X_{n+1}=j\mid X_n=i]&=\frac{P[X_{n+1}=j]\,P[X_n=i]}{P[X_n=i]} &&\why{independence}\\
+&=a_j .
+\end{aligned}$$
+<p><b>Step 3: compare.</b> Both equal $a_j$, so</p>
+$$P[X_{n+1}=j\mid X_n=i,\ X_{n-1},\dots,X_0]=P[X_{n+1}=j\mid X_n=i]$$
+<p>and $X_n$ is a Markov process (in fact a homogeneous Markov chain, since $a_j$ doesn't depend on $n$). ∎</p>
+<p><b>Step 4: transition matrix.</b> $p_{ij}=a_j$ for every $i$: the entry depends only on the column, so <b>all rows are identical and equal to the PMF</b>:</p>
+$$P=\begin{bmatrix}a_0&a_1&a_2&\cdots\\a_0&a_1&a_2&\cdots\\a_0&a_1&a_2&\cdots\\\vdots&&&\ddots\end{bmatrix}.$$
+<p>Example: iid Bernoulli($p$) gives $P=\begin{bmatrix}1-p&p\\1-p&p\end{bmatrix}$ (diagram in §3). Each row sums to $\sum_ja_j=1$ ✓.</p>
+<p><b>Remarks worth adding.</b> (i) Since all rows equal $\mathbf a=[a_0,a_1,\dots]$, $P^n=P$ for every $n\ge1$ (row $i$ of $P^2$ is $\sum_ka_k\,\mathbf a=\mathbf a$). (ii) $\mathbf aP=\mathbf a$, so the PMF itself is the stationary distribution, and the chain is stationary from the start. (iii) The converse is false: Markov does not imply independent (e.g. a random walk).</p></details></div>
+
+<!-- ---------------- B ---------------- -->
+<h3 id="pyqB">B. Discrete-time Markov chain numericals</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q5c</span> (5 marks) Consider the DTMC with 3 states $\{1,2,3\}$ and transition matrix $P=\begin{bmatrix}1/2&1/4&1/4\\1/3&0&2/3\\1/2&1/2&0\end{bmatrix}$. (i) Compute $P(X_3=1,X_2=2,X_1=3)$ if $P(X_1=1)=P(X_1=2)=\frac14$. (ii) Draw the state-transition diagram and comment on the states.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> (i) is a <b>path probability</b>. In time order the path is $X_1=3\to X_2=2\to X_3=1$. The chain starts (for this question) at time 1, so we need $P(X_1=3)$, which we get from the fact that the initial PMF sums to 1. Then multiply one transition probability per step (§2). (ii) is classification (§7).</p>
+<p><b>(i) Step 1: the missing initial probability.</b></p>
+$$P(X_1=3)=1-P(X_1=1)-P(X_1=2)=1-\tfrac14-\tfrac14=\tfrac12 .$$
+<p><b>Step 2: factorise using the Markov property.</b></p>
+$$\begin{aligned}
+P(X_1=3,X_2=2,X_3=1)&=P(X_1=3)\cdot P(X_2=2\mid X_1=3)\cdot P(X_3=1\mid X_2=2,X_1=3)\\
+&=P(X_1=3)\cdot P(X_2=2\mid X_1=3)\cdot P(X_3=1\mid X_2=2) &&\why{Markov property}\\
+&=P(X_1=3)\cdot p_{32}\cdot p_{21}.
+\end{aligned}$$
+<p><b>Step 3: read the entries.</b> $p_{32}$ = row 3, column 2 = $\frac12$. $p_{21}$ = row 2, column 1 = $\frac13$.</p>
+$$P(X_3=1,X_2=2,X_1=3)=\frac12\cdot\frac12\cdot\frac13=\frac1{12}\approx\mathbf{0.0833}.$$
+<p><b>Check you didn't reverse it.</b> The reversed path 1 → 2 → 3 would give $\frac14\cdot p_{12}\cdot p_{23}=\frac14\cdot\frac14\cdot\frac23=\frac1{24}$, a different number. Always order by time.</p>
+
+<p><b>(ii) Diagram.</b> Arrows for every non-zero entry: 1→1 (½), 1→2 (¼), 1→3 (¼); 2→1 (⅓), 2→3 (⅔); 3→1 (½), 3→2 (½). There are no self-loops at 2 and 3 because $p_{22}=p_{33}=0$.</p>
+<figure class="diagram"><div id="fig-es22"></div><figcaption>ES 2022 Q5c: outgoing labels from each state sum to 1</figcaption></figure>
+<p><b>Comments on the states.</b></p>
+<ul>
+<li><b>Communication:</b> 1→2 and 2→1 directly; 1→3 and 3→1 directly; so every pair communicates. One class $\{1,2,3\}$: the chain is <b>irreducible</b>.</li>
+<li><b>Recurrence:</b> a finite irreducible chain is closed, so all states are <b>positive recurrent</b> (no state is transient; none is absorbing, since no $p_{ii}=1$).</li>
+<li><b>Period:</b> state 1 has a self-loop ($p_{11}=\frac12\gt0$), so it is aperiodic; period is a class property, so all states are <b>aperiodic</b>. (Directly for state 2: 2→1→2 has length 2, 2→3→2 length 2, 2→1→1→2 length 3; gcd = 1.)</li>
+<li>Hence every state is <b>ergodic</b>, the chain is ergodic, and a unique limiting distribution exists, independent of the start.</li>
+</ul>
+<p><b>Bonus (strengthens the "comment"): the long-run distribution.</b> $\pi=\pi P$ column by column:</p>
+$$\begin{aligned}
+\pi_1&=\tfrac12\pi_1+\tfrac13\pi_2+\tfrac12\pi_3\\
+\pi_2&=\tfrac14\pi_1+\tfrac12\pi_3 &&(b)\\
+\pi_3&=\tfrac14\pi_1+\tfrac23\pi_2 &&(c)
+\end{aligned}$$
+<p>From (b): $\pi_1=4\pi_2-2\pi_3$. Substitute in (c)×12, i.e. $12\pi_3=3\pi_1+8\pi_2$:</p>
+$$\begin{aligned}
+12\pi_3&=3(4\pi_2-2\pi_3)+8\pi_2\\
+18\pi_3&=20\pi_2\ \Rightarrow\ \pi_3=\tfrac{10}{9}\pi_2\\
+\pi_1&=4\pi_2-\tfrac{20}{9}\pi_2=\tfrac{16}{9}\pi_2\\
+\pi_2\big(\tfrac{16}{9}+1+\tfrac{10}{9}\big)&=1\ \Rightarrow\ \pi_2=\tfrac{9}{35}
+\end{aligned}$$
+$$\pi=\Big[\tfrac{16}{35},\ \tfrac{9}{35},\ \tfrac{10}{35}\Big]\approx[0.457,\ 0.257,\ 0.286].$$
+<p>Check the first equation: $\frac12\cdot\frac{16}{35}+\frac13\cdot\frac9{35}+\frac12\cdot\frac{10}{35}=\frac{8+3+5}{35}=\frac{16}{35}$ ✓. In the long run the chain spends about 46% of its time in state 1.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q5a</span> (5 marks) Consider the Markov chain shown below (1→1: ¼, 1→2: ½, 1→3: ¼; 2→1: ⅓, 2→3: ⅔; 3→1: ½, 3→3: ½). (i) Find $P(X_4=3\mid X_3=2)$. (ii) Find $P(X_3=1\mid X_2=1)$. (iii) If $P(X_0=1)=\frac13$, find $P(X_0=1,X_1=2)$. (iv) If $P(X_0=1)=\frac13$, find $P(X_0=1,X_1=2,X_2=3)$.</span>
+<details class="sol"><summary>Solution</summary>
+<figure class="diagram"><div id="fig-nd24"></div><figcaption>ES Nov–Dec 2024 Q5a (redrawn)</figcaption></figure>
+<p><b>What to notice.</b> Everything is a <b>one-step</b> transition probability or a short path. For a homogeneous chain $P(X_{n+1}=j\mid X_n=i)=p_{ij}$ for every $n$: the time indices 3, 4 or 2, 3 are irrelevant. First turn the diagram into a matrix (rows = from, columns = to):</p>
+$$P=\begin{bmatrix}\frac14&\frac12&\frac14\\[2pt]\frac13&0&\frac23\\[2pt]\frac12&0&\frac12\end{bmatrix}.$$
+<p>Check rows: $\frac14+\frac12+\frac14=1$, $\frac13+\frac23=1$, $\frac12+\frac12=1$ ✓.</p>
+<p><b>(i)</b> One step from 2 to 3:</p>
+$$P(X_4=3\mid X_3=2)=p_{23}=\mathbf{\tfrac23}.$$
+<p><b>(ii)</b> One step from 1 to 1 (the self-loop):</p>
+$$P(X_3=1\mid X_2=1)=p_{11}=\mathbf{\tfrac14}.$$
+<p><b>(iii)</b> Multiplication rule:</p>
+$$\begin{aligned}
+P(X_0=1,X_1=2)&=P(X_0=1)\,P(X_1=2\mid X_0=1)\\
+&=\tfrac13\cdot p_{12}=\tfrac13\cdot\tfrac12=\mathbf{\tfrac16}.
+\end{aligned}$$
+<p><b>(iv)</b> Path 1 → 2 → 3, using the Markov property to drop $X_0$ from the last condition:</p>
+$$\begin{aligned}
+P(X_0=1,X_1=2,X_2=3)&=P(X_0=1)\,P(X_1=2\mid X_0=1)\,P(X_2=3\mid X_1=2,X_0=1)\\
+&=P(X_0=1)\,p_{12}\,p_{23} &&\why{Markov property}\\
+&=\tfrac13\cdot\tfrac12\cdot\tfrac23=\mathbf{\tfrac19}.
+\end{aligned}$$
+<p><b>Why we never needed $P(X_0=2)$ or $P(X_0=3)$:</b> every event here fixes $X_0=1$. If a question asked for $P(X_1=2)$ alone, we would need the full initial PMF: $P(X_1=2)=\sum_iP(X_0=i)p_{i2}$.</p>
+<p class="small"><b>Extra for revision:</b> this chain is irreducible (1→2→3→1) and aperiodic (self-loops at 1 and 3), with stationary distribution $\pi=\big[\frac38,\frac3{16},\frac7{16}\big]$ (check column 2: $\frac12\pi_1=\frac3{16}=\pi_2$ ✓).</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2025 Q5c</span> (5 marks) A 2-state homogeneous DTMC $X_n$ has transition matrix $P=\begin{bmatrix}1-p&p\\q&1-q\end{bmatrix}$. (i) Find the PMF of the DTMC at time 3 if the initial PMF vector is $[p_0\ \ p_1]$. (ii) Given that the DTMC is in state 0 at time 5, what is the probability that it will be in state 1 at time 8?</span>
+<details class="sol"><summary>Solution</summary>
+<figure class="diagram"><div id="fig-es25"></div><figcaption>ES 2025 Q5c: the general two-state chain</figcaption></figure>
+<p><b>What to notice.</b> This is the general two-state chain of §6 with $a=p$, $b=q$. (i) asks for $\mathbf p(3)=\mathbf p(0)P^3$; (ii) asks for a 3-step transition probability $p_{01}(3)$ (from time 5 to time 8, homogeneous ⇒ only the gap 3 matters). Rather than cubing a symbolic matrix blindly, derive the recursion; it gives a clean answer. To avoid a clash of letters, write the initial PMF as $[p_0,\ p_1]$ with $p_0+p_1=1$, and put $r=1-p-q$.</p>
+
+<p><b>(i) Step 1: one-step recursion</b> for $x_n=P[X_n=1]$ (total probability over the previous state):</p>
+$$\begin{aligned}
+x_{n+1}&=P[X_n=0]\,p_{01}+P[X_n=1]\,p_{11}\\
+&=(1-x_n)\,p+x_n(1-q)\\
+&=p+(1-p-q)\,x_n=p+r\,x_n .
+\end{aligned}$$
+<p><b>Step 2: solve</b> (W6). The fixed point is $x^*=\frac{p}{1-r}=\frac{p}{p+q}$, and</p>
+$$x_n=\frac{p}{p+q}+r^n\Big(x_0-\frac{p}{p+q}\Big).$$
+<p><b>Step 3: put $n=3$, $x_0=p_1$.</b></p>
+$$\begin{aligned}
+P[X_3=1]&=\frac{p}{p+q}+(1-p-q)^3\Big(p_1-\frac{p}{p+q}\Big)\\
+&=\frac{p+(1-p-q)^3\,(q\,p_1-p\,p_0)}{p+q} &&\why{$p_1(p+q)-p=qp_1-p(1-p_1)=qp_1-pp_0$}\\[4pt]
+P[X_3=0]&=1-P[X_3=1]=\frac{q-(1-p-q)^3\,(q\,p_1-p\,p_0)}{p+q}.
+\end{aligned}$$
+<div class="box key" style="margin:8px 0"><span class="bt">Answer (i)</span>
+$$\mathbf p(3)=\Bigg[\ \frac{q+(1-p-q)^3(p\,p_0-q\,p_1)}{p+q}\ ,\ \ \frac{p-(1-p-q)^3(p\,p_0-q\,p_1)}{p+q}\ \Bigg]\qquad(p+q\gt0).$$</div>
+<p><b>Same thing as $\mathbf p(0)P^3$</b>, if your examiner wants to see the matrix. From §6 with $a=p$, $b=q$:</p>
+$$P^3=\frac1{p+q}\begin{bmatrix}q+p\,r^3&\ p-p\,r^3\\q-q\,r^3&\ p+q\,r^3\end{bmatrix},\qquad r=1-p-q,$$
+<p>and</p>
+$$\begin{aligned}
+\mathbf p(3)&=[p_0\ \ p_1]\,P^3\\
+&=\frac1{p+q}\Big[\,p_0(q+pr^3)+p_1(q-qr^3)\ ,\ \ p_0(p-pr^3)+p_1(p+qr^3)\,\Big]\\
+&=\frac1{p+q}\Big[\,q+r^3(pp_0-qp_1)\ ,\ \ p-r^3(pp_0-qp_1)\,\Big] &&\why{use $p_0+p_1=1$}
+\end{aligned}$$
+<p>which matches. <b>Numerical check</b> with $p=0.2$, $q=0.3$ ($r=0.5$), starting in 0 ($p_0=1$): $P[X_3=1]=\frac{0.2-0.125(0.2)}{0.5}=0.35$. Direct: $\mathbf p(1)=[0.8,0.2]$, $\mathbf p(2)=[0.8(0.8)+0.2(0.3),\ 0.8(0.2)+0.2(0.7)]=[0.70,0.30]$, $\mathbf p(3)=[0.7(0.8)+0.3(0.3),\ 0.7(0.2)+0.3(0.7)]=[0.65,0.35]$ ✓.</p>
+
+<p><b>(ii)</b> Homogeneity: $P(X_8=1\mid X_5=0)=P(X_3=1\mid X_0=0)=p_{01}(3)$. That is $P[X_3=1]$ from part (i) with $p_0=1$, $p_1=0$:</p>
+$$\begin{aligned}
+P(X_8=1\mid X_5=0)&=\frac{p-(1-p-q)^3\,p}{p+q}\\
+&=\frac{p}{p+q}\Big[1-(1-p-q)^3\Big].
+\end{aligned}$$
+<p>A division-free form: since $1-r^3=(1-r)(1+r+r^2)=(p+q)(1+r+r^2)$,</p>
+$$P(X_8=1\mid X_5=0)=p\,\big[1+(1-p-q)+(1-p-q)^2\big].$$
+<p><b>Check by paths</b> ($n=3$, from 0 to 1): the expanded form says "leave 0 at some step and end in 1". With $p=0.2$, $q=0.3$: $0.2(1+0.5+0.25)=0.35$ ✓ (same as above).</p>
+<p><b>Interpretation.</b> As the gap grows, $(1-p-q)^n\to0$ (if $0\lt p+q\lt2$) and $p_{01}(n)\to\frac{p}{p+q}=\pi_1$: three steps after time 5 the chain has already partly forgotten that it was in state 0.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q5a</span> (5 marks) A man's smoking habits are as follows. If he smokes filter cigarettes one week, he switches to nonfilter cigarettes the next week with probability 0.2. On the other hand, if he smokes nonfilter cigarettes one week, there is a probability of 0.7 that he will smoke nonfilter cigarettes the next week as well. In the long run, how often does he smoke filter cigarettes?</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> The state is "what he smokes this week": F (filter) or N (nonfilter). Each row of $P$ is given by one number; the other entry is the complement. "In the long run, how often" = the stationary probability $\pi_F$ (by ergodicity it is both the long-run probability and the long-run fraction of weeks, §8).</p>
+<p><b>Step 1: transition matrix</b> (order F, N):</p>
+<ul>
+<li>From F: switch to N with 0.2, so stay with F with $1-0.2=0.8$.</li>
+<li>From N: stay with N with 0.7, so switch to F with $1-0.7=0.3$.</li>
+</ul>
+$$P=\begin{array}{c|cc}&F&N\\\hline F&0.8&0.2\\N&0.3&0.7\end{array}$$
+<figure class="diagram"><div id="fig-smoke"></div><figcaption>Smoking chain</figcaption></figure>
+<p><b>Step 2: the chain is regular</b> (all entries positive), so a unique stationary distribution exists and is the long-run limit.</p>
+<p><b>Step 3: solve $\pi P=\pi$, $\pi_F+\pi_N=1$.</b> Column F gives</p>
+$$\begin{aligned}
+\pi_F&=0.8\,\pi_F+0.3\,\pi_N\\
+0.2\,\pi_F&=0.3\,\pi_N &&\why{flow F→N = flow N→F}\\
+\pi_F&=1.5\,\pi_N .
+\end{aligned}$$
+<p>Normalise:</p>
+$$\begin{aligned}
+1.5\,\pi_N+\pi_N&=1\\
+\pi_N&=0.4,\qquad \pi_F=0.6 .
+\end{aligned}$$
+<p>(Shortcut: $\pi_F=\frac{b}{a+b}=\frac{0.3}{0.2+0.3}=0.6$.)</p>
+<p><b>Check</b> column N: $0.2(0.6)+0.7(0.4)=0.12+0.28=0.40=\pi_N$ ✓.</p>
+<p><b>Answer:</b> in the long run he smokes filter cigarettes <b>60% of the weeks</b> ($\frac35$ of the time).</p>
+<p><b>Interpretation.</b> Although he leaves filter less readily (0.2) than he leaves nonfilter (0.3), both habits are sticky; the ratio of the leaving probabilities decides the split: $\pi_F/\pi_N=0.3/0.2$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q5b</span> (5 marks) A gambler's luck follows a pattern. If he wins a game, the probability of winning the next game is 0.6. However, if he loses a game, the probability of losing the next game is 0.7. There is an even chance that the gambler wins the first game. (i) What is the probability that he wins the second game? (ii) What is the probability that he wins the third game? (iii) In the long run, how often will he win?</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> State = result of the current game: W or L. "Even chance he wins the first game" is the initial PMF, attached to game 1. Games 2 and 3 are one and two steps later: $\mathbf p(2)=\mathbf p(1)P$, $\mathbf p(3)=\mathbf p(2)P$. "Long run" = stationary distribution.</p>
+<p><b>Transition matrix</b> (order W, L): from W, win 0.6, lose 0.4; from L, lose 0.7, win 0.3.</p>
+$$P=\begin{array}{c|cc}&W&L\\\hline W&0.6&0.4\\L&0.3&0.7\end{array},\qquad \mathbf p(1)=[0.5,\ 0.5].$$
+<figure class="diagram"><div id="fig-gamble"></div><figcaption>Gambler's chain</figcaption></figure>
+<p><b>(i)</b> Condition on the first game (total probability), i.e. $\mathbf p(1)$ times column W:</p>
+$$\begin{aligned}
+P(\text{win game 2})&=P(W_1)\,p_{WW}+P(L_1)\,p_{LW}\\
+&=0.5(0.6)+0.5(0.3)\\
+&=0.30+0.15=\mathbf{0.45}.
+\end{aligned}$$
+<p>So $\mathbf p(2)=[0.45,\ 0.55]$.</p>
+<p><b>(ii)</b> One more step:</p>
+$$\begin{aligned}
+P(\text{win game 3})&=P(W_2)\,p_{WW}+P(L_2)\,p_{LW}\\
+&=0.45(0.6)+0.55(0.3)\\
+&=0.270+0.165=\mathbf{0.435}.
+\end{aligned}$$
+<p>Alternative route (same answer): $P^2_{WW}=0.6^2+0.4(0.3)=0.48$, $P^2_{LW}=0.3(0.6)+0.7(0.3)=0.39$, so $P(\text{win 3})=0.5(0.48)+0.5(0.39)=0.435$ ✓. Note that (ii) is <em>not</em> $0.45\times0.6$: he might lose game 2 and still win game 3.</p>
+<p><b>(iii)</b> Balance between W and L:</p>
+$$\begin{aligned}
+\pi_W\,(0.4)&=\pi_L\,(0.3) &&\why{flow W→L = flow L→W}\\
+\pi_W+\pi_L&=1\\
+\Rightarrow\ \pi_W&=\frac{0.3}{0.4+0.3}=\frac37\approx\mathbf{0.4286}.
+\end{aligned}$$
+<p>Check column W: $0.6\cdot\frac37+0.3\cdot\frac47=\frac{1.8+1.2}{7}=\frac37$ ✓.</p>
+<div data-plot="gambler"></div>
+<p><b>Interpretation.</b> In the long run he wins 3 games out of 7 (about 43%). The sequence 0.5, 0.45, 0.435, … approaches 3/7, the gap shrinking by the factor $1-0.4-0.3=0.3$ each game (§6): $0.5-\frac37=0.0714$, then $0.0214$, then $0.0064$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES June 2026 Q5c</span> (5 marks) For a Markov chain, the transition matrix is $P=\begin{pmatrix}1/2&1/2\\3/4&1/4\end{pmatrix}$ with initial probability distribution $p^{(0)}=\big(\frac14,\frac34\big)$. Find (i) $P^{(2)}_{21}$, $P^{(2)}_{12}$ and (ii) $p^{(2)}$.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> The states are labelled 1 and 2 (row 1 = state 1). $P^{(2)}_{ij}$ is entry $(i,j)$ of $P^2$ (Chapman–Kolmogorov, §4): row $i$ of $P$ times column $j$ of $P$. $p^{(2)}=p^{(0)}P^2$ (§5).</p>
+<figure class="diagram"><div id="fig-es26"></div><figcaption>ES June 2026 Q5c</figcaption></figure>
+<p><b>Step 1: $P^2$, entry by entry.</b></p>
+$$\begin{aligned}
+P^{(2)}_{11}&=\tfrac12\cdot\tfrac12+\tfrac12\cdot\tfrac34=\tfrac14+\tfrac38=\tfrac58\\
+P^{(2)}_{12}&=\tfrac12\cdot\tfrac12+\tfrac12\cdot\tfrac14=\tfrac14+\tfrac18=\tfrac38\\
+P^{(2)}_{21}&=\tfrac34\cdot\tfrac12+\tfrac14\cdot\tfrac34=\tfrac38+\tfrac3{16}=\tfrac9{16}\\
+P^{(2)}_{22}&=\tfrac34\cdot\tfrac12+\tfrac14\cdot\tfrac14=\tfrac38+\tfrac1{16}=\tfrac7{16}
+\end{aligned}$$
+$$P^2=\begin{bmatrix}5/8&3/8\\9/16&7/16\end{bmatrix}\qquad(\text{rows sum to 1 ✓}).$$
+<p><b>(i)</b> $P^{(2)}_{21}=\dfrac9{16}=\mathbf{0.5625}$ and $P^{(2)}_{12}=\dfrac38=\mathbf{0.375}$.</p>
+<p>Reading them as paths: $P^{(2)}_{21}$ = "2→1→1" ($\frac34\cdot\frac12$) + "2→2→1" ($\frac14\cdot\frac34$).</p>
+<p><b>(ii)</b></p>
+$$\begin{aligned}
+p^{(2)}&=p^{(0)}P^2=\Big[\tfrac14,\ \tfrac34\Big]\begin{bmatrix}5/8&3/8\\9/16&7/16\end{bmatrix}\\
+&=\Big[\tfrac14\cdot\tfrac58+\tfrac34\cdot\tfrac9{16},\ \ \tfrac14\cdot\tfrac38+\tfrac34\cdot\tfrac7{16}\Big]\\
+&=\Big[\tfrac5{32}+\tfrac{27}{64},\ \ \tfrac3{32}+\tfrac{21}{64}\Big]\\
+&=\Big[\tfrac{37}{64},\ \tfrac{27}{64}\Big]\approx[\mathbf{0.578},\ \mathbf{0.422}].
+\end{aligned}$$
+<p><b>Check</b> by going one step at a time: $p^{(1)}=[\frac14\cdot\frac12+\frac34\cdot\frac34,\ \frac14\cdot\frac12+\frac34\cdot\frac14]=[\frac{11}{16},\frac5{16}]$; then $p^{(2)}=[\frac{11}{16}\cdot\frac12+\frac5{16}\cdot\frac34,\ \frac{11}{16}\cdot\frac12+\frac5{16}\cdot\frac14]=[\frac{22+15}{64},\frac{22+5}{64}]=[\frac{37}{64},\frac{27}{64}]$ ✓.</p>
+<p><b>Context:</b> the stationary distribution is $\pi=\big[\frac{3/4}{1/2+3/4},\frac{1/2}{5/4}\big]=[0.6,0.4]$; $p^{(2)}=[0.578,0.422]$ is already close to it.</p></details></div>
+
+<!-- ---------------- C ---------------- -->
+<h3 id="pyqC">C. Birth–death processes</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q4b(ii)</span> Define Birth–Death process with state transition diagram and equilibrium equations.</span>
+<details class="sol"><summary>Solution (model answer)</summary>
+<p><b>Definition.</b> A birth–death process is a continuous-time Markov chain $N(t)$ on the states $\{0,1,2,\dots\}$ (e.g. the number of customers in a system) such that:</p>
+<ol>
+<li>from state $n$ the only possible transitions are to $n+1$ (a <b>birth</b>/arrival) or to $n-1$ (a <b>death</b>/departure); from 0 only to 1;</li>
+<li>$P[\text{transition }n\to n+1\text{ in }(t,t+\Delta t)]=\lambda_n\Delta t+o(\Delta t)$, where $\lambda_n$ is the <b>birth rate</b> in state $n$;</li>
+<li>$P[\text{transition }n\to n-1\text{ in }(t,t+\Delta t)]=\mu_n\Delta t+o(\Delta t)$, where $\mu_n$ is the <b>death rate</b> ($\mu_0=0$);</li>
+<li>the probability of more than one transition in Δt is $o(\Delta t)$.</li>
+</ol>
+<p><b>State-transition diagram:</b></p>
+<figure class="diagram"><div data-dup="fig-bd"></div><figcaption>Draw this in the exam: circles 0, 1, 2, …, arrows right labelled λ₀, λ₁, …, arrows left labelled μ₁, μ₂, …</figcaption></figure>
+<p><b>Time-dependent equations.</b> With $p_n(t)=P[N(t)=n]$, considering the three ways to be in $n$ at $t+\Delta t$ (stay; birth from $n-1$; death from $n+1$) and letting Δt → 0:</p>
+$$\begin{aligned}
+p_n'(t)&=-(\lambda_n+\mu_n)p_n(t)+\lambda_{n-1}p_{n-1}(t)+\mu_{n+1}p_{n+1}(t),\quad n\ge1\\
+p_0'(t)&=-\lambda_0p_0(t)+\mu_1p_1(t).
+\end{aligned}$$
+<p><b>Equilibrium (steady-state) equations.</b> In steady state $p_n'(t)=0$ and $p_n(t)=p_n$:</p>
+$$\boxed{\ (\lambda_n+\mu_n)\,p_n=\lambda_{n-1}\,p_{n-1}+\mu_{n+1}\,p_{n+1}\ \ (n\ge1),\qquad \lambda_0\,p_0=\mu_1\,p_1\ }$$
+<p>Interpretation: for every state, rate of leaving = rate of entering.</p>
+<p><b>Solution.</b> These reduce (by induction from the $n=0$ equation) to the cut equations $\lambda_np_n=\mu_{n+1}p_{n+1}$, so</p>
+$$p_n=\frac{\lambda_0\lambda_1\cdots\lambda_{n-1}}{\mu_1\mu_2\cdots\mu_n}\,p_0,\qquad p_0=\Big[1+\sum_{n=1}^{\infty}\frac{\lambda_0\cdots\lambda_{n-1}}{\mu_1\cdots\mu_n}\Big]^{-1},$$
+<p>provided the series converges. <b>Example:</b> M/M/1 has $\lambda_n=\lambda$, $\mu_n=\mu$, giving $p_n=(1-\rho)\rho^n$ with $\rho=\lambda/\mu\lt1$. The Poisson process is the pure-birth case ($\lambda_n=\lambda$, $\mu_n=0$).</p>
+<p class="small">(Full derivation of the differential equations: §10.)</p></details></div>
+
+<!-- ---------------- D ---------------- -->
+<h3 id="pyqD">D. Queueing theory: explain and derive</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q5a</span> (5 marks) In the M/M/1 queueing system, the arrival process is the Poisson process with rate λ (mean arrival rate) and the service time is exponentially distributed with parameter μ (mean service time). Derive the expression for (a) the average number of customers in the system and (b) the average number of customers waiting in the queue.</span>
+<details class="sol"><summary>Solution</summary>
+<p class="small">(The paper calls μ the "mean service time"; strictly, μ is the mean service <em>rate</em> and the mean service time is $1/\mu$. Say this in one line in your answer.)</p>
+<p><b>What to notice.</b> The derivation has three stages: (1) model the number in the system as a birth–death process; (2) solve its equilibrium equations to get the geometric distribution $p_n=(1-\rho)\rho^n$; (3) compute the means with the geometric-series derivative trick. Present all three: the examiner wants to see where $p_n$ comes from.</p>
+
+<p><b>Step 1: the model.</b> Let $N(t)$ be the number of customers in the system. Arrivals are Poisson(λ): in any short interval Δt an arrival occurs with probability $\lambda\Delta t+o(\Delta t)$, regardless of the state. When $N\ge1$ the server is busy; since service times are exponential (memoryless), the current service ends in Δt with probability $\mu\Delta t+o(\Delta t)$. So $N(t)$ is a birth–death process with</p>
+$$\lambda_n=\lambda\ \ (n\ge0),\qquad\mu_n=\mu\ \ (n\ge1).$$
+<figure class="diagram"><div data-dup="fig-mm1"></div><figcaption>(diagram as in §12: λ to the right, μ to the left)</figcaption></figure>
+
+<p><b>Step 2: steady-state probabilities.</b> The equilibrium equations are</p>
+$$\begin{aligned}
+\lambda\,p_0&=\mu\,p_1,\\
+(\lambda+\mu)\,p_n&=\lambda\,p_{n-1}+\mu\,p_{n+1},\quad n\ge1 .
+\end{aligned}$$
+<p>From the first, $p_1=\rho\,p_0$ with $\rho=\lambda/\mu$. Subtracting the cut equation $\lambda p_{n-1}=\mu p_n$ (true for $n=1$) from the $n$th equation gives $\lambda p_n=\mu p_{n+1}$, so by induction</p>
+$$p_{n+1}=\rho\,p_n\quad\Rightarrow\quad p_n=\rho^n\,p_0 .$$
+<p>Normalising (needs $\rho\lt1$ for convergence):</p>
+$$\begin{aligned}
+\sum_{n=0}^{\infty}\rho^np_0&=1\\
+\frac{p_0}{1-\rho}&=1\ \Rightarrow\ p_0=1-\rho,\\
+p_n&=(1-\rho)\rho^n,\qquad n=0,1,2,\dots
+\end{aligned}$$
+
+<p><b>(a) Average number in the system.</b></p>
+$$\begin{aligned}
+L&=\sum_{n=0}^{\infty}n\,p_n=(1-\rho)\sum_{n=0}^{\infty}n\rho^n .
+\end{aligned}$$
+<p>To evaluate $\sum n\rho^n$: differentiate $\sum_{n=0}^{\infty}\rho^n=\frac1{1-\rho}$ with respect to ρ to get $\sum_{n=1}^{\infty}n\rho^{n-1}=\frac{1}{(1-\rho)^2}$, then multiply by ρ:</p>
+$$\sum_{n=0}^{\infty}n\rho^n=\frac{\rho}{(1-\rho)^2}.$$
+<p>Therefore</p>
+$$\begin{aligned}
+L&=(1-\rho)\cdot\frac{\rho}{(1-\rho)^2}\\
+&=\boxed{\frac{\rho}{1-\rho}=\frac{\lambda}{\mu-\lambda}}
+\end{aligned}$$
+
+<p><b>(b) Average number waiting in the queue.</b> If $n\ge1$ customers are present, one is being served and $n-1$ are waiting:</p>
+$$\begin{aligned}
+L_q&=\sum_{n=1}^{\infty}(n-1)\,p_n\\
+&=\sum_{n=1}^{\infty}n\,p_n-\sum_{n=1}^{\infty}p_n\\
+&=L-(1-p_0)\\
+&=\frac{\rho}{1-\rho}-\rho\\
+&=\frac{\rho-\rho+\rho^2}{1-\rho}\\
+&=\boxed{\frac{\rho^2}{1-\rho}=\frac{\lambda^2}{\mu(\mu-\lambda)}}
+\end{aligned}$$
+
+<p><b>Add for completeness (by Little's law $L=\lambda W$, $L_q=\lambda W_q$):</b> $W=\frac{1}{\mu-\lambda}$, $W_q=\frac{\lambda}{\mu(\mu-\lambda)}$, and $W=W_q+\frac1\mu$.</p>
+<p><b>Interpretation.</b> $L-L_q=\rho$ is the average number in service (= probability the server is busy). Both $L$ and $L_q$ grow without bound as $\rho\to1$; the formulas hold only for $\rho\lt1$.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2022 Q5a</span> (5 marks) Explain the following queueing models: (a) M/M/1 queueing system (b) M/M/1/N queueing system.</span>
+<details class="sol"><summary>Solution (model answer)</summary>
+<p><b>Notation.</b> In Kendall's notation A/B/s/K, A is the arrival process, B the service-time distribution, s the number of servers and K the system capacity (omitted = unlimited). "M" stands for Markov (memoryless): Poisson arrivals / exponential service times.</p>
+
+<p><b>(a) M/M/1.</b></p>
+<ul>
+<li><b>Assumptions:</b> Poisson arrivals with rate λ (inter-arrival times iid Exp(λ)); service times iid Exp(μ), mean $1/\mu$; one server; unlimited waiting room; first-come first-served.</li>
+<li><b>Markov model:</b> the number in the system $N(t)$ is a birth–death process with $\lambda_n=\lambda$, $\mu_n=\mu$. [Draw the diagram: states 0, 1, 2, … with λ arrows right and μ arrows left.]</li>
+<li><b>Stability:</b> traffic intensity $\rho=\lambda/\mu$ must be &lt; 1 (the server must on average work faster than customers arrive), otherwise the queue grows without bound.</li>
+<li><b>Steady state:</b> from the balance equations $\lambda p_n=\mu p_{n+1}$: $p_n=(1-\rho)\rho^n$, $n\ge0$ (geometric). $p_0=1-\rho$ = idle probability; ρ = utilisation; $P[N\ge k]=\rho^k$.</li>
+<li><b>Measures:</b>
+$$L=\frac{\rho}{1-\rho},\quad L_q=\frac{\rho^2}{1-\rho},\quad W=\frac{1}{\mu-\lambda},\quad W_q=\frac{\rho}{\mu-\lambda},$$
+related by Little's law $L=\lambda W$, $L_q=\lambda W_q$ and $W=W_q+1/\mu$.</li>
+<li><b>Examples:</b> a single bank teller, a single-CPU job queue, a phone booth.</li>
+</ul>
+
+<p><b>(b) M/M/1/N.</b></p>
+<ul>
+<li><b>Assumptions:</b> as M/M/1, but at most $N$ customers can be in the system (1 in service + $N-1$ waiting). An arrival that finds $N$ customers present is <b>blocked</b> (lost).</li>
+<li><b>Markov model:</b> birth–death on $\{0,1,\dots,N\}$ with $\lambda_n=\lambda$ for $n\lt N$, $\lambda_N=0$, and $\mu_n=\mu$. [Diagram: as M/M/1 but ending at state N.]</li>
+<li><b>Steady state:</b> $p_n=\rho^np_0$, $n=0,\dots,N$, with
+$$p_0=\frac{1-\rho}{1-\rho^{N+1}}\ (\rho\ne1),\qquad p_0=\frac1{N+1}\ (\rho=1).$$
+<b>No requirement ρ &lt; 1</b>: the state space is finite, so a steady state always exists.</li>
+<li><b>Blocking probability</b> $P_B=p_N$; <b>effective arrival rate</b> $\lambda_a=\lambda(1-p_N)$.</li>
+<li><b>Measures:</b>
+$$L=\frac{\rho}{1-\rho}-\frac{(N+1)\rho^{N+1}}{1-\rho^{N+1}}\ \ (\rho\ne1),\ \ L=\frac N2\ (\rho=1);\quad L_q=L-(1-p_0);\quad W=\frac{L}{\lambda_a};\quad W_q=\frac{L_q}{\lambda_a}.$$</li>
+<li><b>Examples:</b> a telephone exchange with limited lines, a router with a finite buffer, a barber shop with a few chairs, a parking lot.</li>
+<li><b>Relation:</b> as $N\to\infty$ (with ρ &lt; 1), M/M/1/N → M/M/1.</li>
+</ul></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q5a</span> (5 marks) Describe the Markovian queueing models (M/M/1, M/M/1/M) in brief.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> This is the same question as ES 2022 Q5a; here the capacity is called $M$ instead of $N$ (don't confuse this $M$, a number, with the letter M for "Markov" in the first two positions). Write the ES 2022 Q5a answer with $N$ replaced by $M$. Compact version:</p>
+<p><b>M/M/1:</b> Poisson(λ) arrivals, Exp(μ) service, 1 server, infinite capacity. Birth–death with $\lambda_n=\lambda$, $\mu_n=\mu$. For $\rho=\lambda/\mu\lt1$: $p_n=(1-\rho)\rho^n$; $L=\frac{\rho}{1-\rho}$; $L_q=\frac{\rho^2}{1-\rho}$; $W=\frac1{\mu-\lambda}$; $W_q=\frac{\rho}{\mu-\lambda}$.</p>
+<p><b>M/M/1/M:</b> same, but at most $M$ customers in the system; arrivals finding $M$ present are lost. Birth–death on $\{0,\dots,M\}$ with $\lambda_n=\lambda$ ($n\lt M$), $\lambda_M=0$. Steady state for any ρ:</p>
+$$p_n=\frac{(1-\rho)\rho^n}{1-\rho^{M+1}}\ \ (\rho\ne1),\qquad p_n=\frac1{M+1}\ \ (\rho=1),\qquad n=0,\dots,M .$$
+<p>Blocking probability $p_M$; $\lambda_a=\lambda(1-p_M)$; $L=\frac{\rho}{1-\rho}-\frac{(M+1)\rho^{M+1}}{1-\rho^{M+1}}$; $W=L/\lambda_a$; $L_q=L-(1-p_0)$; $W_q=L_q/\lambda_a$.</p>
+<p>Draw both state-transition diagrams (§12, §13); they earn easy marks.</p></details></div>
+
+<!-- ---------------- E ---------------- -->
+<h3 id="pyqE">E. Queueing numericals</h3>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES 2021 Q5b</span> <span class="tag-pyq">ES Nov–Dec 2024 Q5c</span> (5 marks) Customers arrive at a watch repair shop according to a Poisson process at a rate of 1 per every 10 minutes, and the service time is an exponential random variable with mean 8 minutes. (i) Find the average number of customers L, the average time a customer spends in the shop W, and the average time a customer spends in waiting for service $W_q$. (ii) Suppose that the arrival rate of the customers increases 10 percent. Find the corresponding changes in L, W and $W_q$.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Poisson arrivals + exponential service + one repairman = <b>M/M/1</b>. Convert both statements into <b>rates per minute</b>: "1 every 10 minutes" ⇒ λ = 1/10; "mean service 8 minutes" ⇒ μ = 1/8 (a rate is 1/mean time). "Time in the shop" = time in the system (W); "time waiting for service" = time in the queue ($W_q$).</p>
+<p><b>(i) Step 1: rates and traffic intensity.</b></p>
+$$\begin{aligned}
+\lambda&=\tfrac1{10}=0.1\ \text{per min},\qquad \mu=\tfrac18=0.125\ \text{per min}\\
+\rho&=\frac{\lambda}{\mu}=\frac{1/10}{1/8}=\frac{8}{10}=0.8\lt1\ ✓
+\end{aligned}$$
+<p><b>Step 2: the measures.</b></p>
+$$\begin{aligned}
+L&=\frac{\rho}{1-\rho}=\frac{0.8}{0.2}=\mathbf{4\ customers}\\
+W&=\frac{1}{\mu-\lambda}=\frac{1}{0.125-0.1}=\frac{1}{0.025}=\mathbf{40\ min}\\
+W_q&=W-\frac1\mu=40-8=\mathbf{32\ min}
+\end{aligned}$$
+<p><b>Checks:</b> Little's law $L=\lambda W=0.1\times40=4$ ✓. Also $W_q=\frac{\rho}{\mu-\lambda}=\frac{0.8}{0.025}=32$ ✓, and $L_q=\lambda W_q=3.2$ (= $\frac{\rho^2}{1-\rho}=\frac{0.64}{0.2}$ ✓).</p>
+<p><b>Meaning:</b> a customer typically waits 32 minutes for an 8-minute repair; the repairman is busy 80% of the time.</p>
+
+<p><b>(ii) Step 1: new arrival rate.</b> A 10% increase: λ′ = 1.1 × 0.1 = 0.11 per min, μ = 0.125 unchanged:</p>
+$$\rho'=\frac{0.11}{0.125}=0.88 .$$
+<p><b>Step 2: new measures.</b></p>
+$$\begin{aligned}
+L'&=\frac{0.88}{0.12}=7.33\ \text{customers}\\
+W'&=\frac{1}{0.125-0.11}=\frac{1}{0.015}=66.67\ \text{min}\\
+W_q'&=66.67-8=58.67\ \text{min}
+\end{aligned}$$
+<p><b>Step 3: the changes.</b></p>
+<table>
+<tr><th></th><th>before</th><th>after (+10% λ)</th><th>change</th></tr>
+<tr><td>ρ</td><td>0.80</td><td>0.88</td><td>+10%</td></tr>
+<tr><td>L</td><td>4</td><td>7.33</td><td>+3.33 (+83%)</td></tr>
+<tr><td>W</td><td>40 min</td><td>66.67 min</td><td>+26.67 min (+67%)</td></tr>
+<tr><td>$W_q$</td><td>32 min</td><td>58.67 min</td><td>+26.67 min (+83%)</td></tr>
+</table>
+<p><b>Interpretation.</b> A mere 10% rise in traffic nearly doubles the queue. This is the "explosion near ρ = 1" effect (§12 graph): $W=\frac{1}{\mu-\lambda}$ depends on the <em>spare capacity</em> $\mu-\lambda$, which fell from 0.025 to 0.015 per minute (−40%).</p>
+<p class="small"><b>Note on Schaum's version (Prob. 9.7).</b> Schaum takes the new arrival rate as λ = 1/9 per minute (one every 9 minutes, really an 11% increase) and gets ρ = 8/9, $L=8$, $W=72$ min, $W_q=64$ min, remarking that L and $W_q$ double. Either reading is acceptable if you state it; λ′ = 0.11 is the literal "10 percent".</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q5b(i)</span> A drive-in banking service is modelled as an M/M/1 queueing system with customer arrival rate of 2 per minute. It is desired to have fewer than 5 customers line up 99% of the time. How fast should the service rate be?</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> "Fewer than 5 customers 99% of the time" ⇔ $P[N\ge5]\le0.01$. For M/M/1 the tail has the beautiful closed form $P[N\ge k]=\rho^k$, so the condition is one inequality in ρ, hence in μ.</p>
+<p><b>Step 1: the tail probability.</b></p>
+$$\begin{aligned}
+P[N\ge5]&=\sum_{n=5}^{\infty}(1-\rho)\rho^n\\
+&=(1-\rho)\,\rho^5\sum_{m=0}^{\infty}\rho^m &&\why{put $n=5+m$}\\
+&=(1-\rho)\,\rho^5\cdot\frac{1}{1-\rho}\\
+&=\rho^5 .
+\end{aligned}$$
+<p><b>Step 2: impose the requirement.</b></p>
+$$\begin{aligned}
+\rho^5&\le0.01\\
+\rho&\le(0.01)^{1/5}=10^{-0.4}=0.3981 .
+\end{aligned}$$
+<p><b>Step 3: translate into μ</b> (ρ = λ/μ with λ = 2 per min):</p>
+$$\begin{aligned}
+\frac{2}{\mu}&\le0.3981\\
+\mu&\ge\frac{2}{0.3981}=\mathbf{5.024\ customers\ per\ minute}.
+\end{aligned}$$
+<div data-plot="bank"></div>
+<p><b>Meaning.</b> The teller must serve at least about 5 customers a minute (mean service ≈ 12 s), i.e. be busy only ≈ 40% of the time. Keeping long queues <em>rare</em> needs a lot of spare capacity.</p>
+<p class="small"><b>If "line up" is read as "waiting in the queue"</b> (not counting the one being served), "fewer than 5 waiting" ⇔ $N\le5$, so the condition becomes $P[N\ge6]=\rho^6\le0.01$, giving ρ ≤ 0.464 and μ ≥ 4.31 per min. Schaum (Prob. 9.8) uses the first reading (customers in the system), with answer 5.024.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-pyq">ES Nov–Dec 2024 Q5b(ii)</span> A corporate computing centre has 2 computers of the same capacity. The jobs arriving at the centre are of two types, internal jobs and external jobs. These jobs have Poisson arrival times with rates 18 and 15 per hour respectively. The service time for a job is an exponential random variable with mean 3 minutes. Find the average waiting time per job when one computer is used exclusively for internal jobs and the other for external jobs.</span>
+<details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> Because each computer serves only its own job type, the centre splits into <b>two separate M/M/1 queues</b>. "Waiting time" in queueing language means time in the queue, $W_q$ (we also give $W$). Work in minutes: mean service 3 min ⇒ μ = 1/3 per min for both computers.</p>
+<p><b>Internal jobs (computer 1).</b></p>
+$$\begin{aligned}
+\lambda_1&=\tfrac{18}{60}=0.3\ \text{per min},\qquad \rho_1=\frac{0.3}{1/3}=0.9\\
+W_{q1}&=\frac{\rho_1}{\mu-\lambda_1}=\frac{0.9}{\frac13-0.3}=\frac{0.9}{1/30}=\mathbf{27\ min}\\
+W_1&=W_{q1}+3=30\ \text{min}\qquad(=\tfrac{1}{\mu-\lambda_1}=\tfrac{1}{1/30}\ ✓)
+\end{aligned}$$
+<p><b>External jobs (computer 2).</b></p>
+$$\begin{aligned}
+\lambda_2&=\tfrac{15}{60}=0.25\ \text{per min},\qquad \rho_2=\frac{0.25}{1/3}=0.75\\
+W_{q2}&=\frac{0.75}{\frac13-\frac14}=\frac{0.75}{1/12}=\mathbf{9\ min}\\
+W_2&=9+3=12\ \text{min}\qquad(=\tfrac{1}{1/12}\ ✓)
+\end{aligned}$$
+<p><b>Average over all jobs.</b> A randomly chosen job is internal with probability $\frac{18}{33}$ and external with probability $\frac{15}{33}$ (proportional to the arrival rates), so</p>
+$$\begin{aligned}
+\overline{W_q}&=\tfrac{18}{33}(27)+\tfrac{15}{33}(9)=\frac{486+135}{33}=\frac{621}{33}\approx\mathbf{18.8\ min},\\
+\overline{W}&=\tfrac{18}{33}(30)+\tfrac{15}{33}(12)=\frac{540+180}{33}\approx21.8\ \text{min}.
+\end{aligned}$$
+<p><b>Answer:</b> internal jobs wait 27 min, external jobs 9 min (Schaum 9.13(a) reports these two), about 18.8 min per job overall.</p>
+<p><b>Interpretation.</b> The internal computer is 90% busy, so its jobs wait three times as long although its traffic is only 20% higher. Schaum's part (b) shows that if <em>both</em> computers serve <em>both</em> job types (one M/M/2 queue with λ = 33/hr) the average wait drops to about 6.4 min: pooling servers greatly reduces waiting. That is why banks use a single line for several tellers.</p></details></div>
+
+<!-- ============================================================ -->
+<h2 id="sheet"><span class="num">18</span>Formula sheet: Unit 5</h2>
+<div class="sheet">
+  <div><h4>Markov property</h4>$P[X_{n+1}=j\mid X_n=i,\text{past}]=P[X_{n+1}=j\mid X_n=i]$<br>independent increments ⇒ Markov<br>iid ⇒ Markov (all rows of $P$ equal)<br>moving averages: not Markov</div>
+  <div><h4>Joint PMF</h4>$P[X_0=k_0,\dots,X_n=k_n]=p_{k_0}(0)\,p_{k_0k_1}\cdots p_{k_{n-1}k_n}$<br>order the path by time<br>homogeneous: $p_{ij}$ indep. of $n$</div>
+  <div><h4>Transition matrix</h4>$p_{ij}=P[X_{n+1}=j\mid X_n=i]$, row = now<br>$p_{ij}\ge0$, each row sums to 1<br>diagram: out-arrows sum to 1</div>
+  <div><h4>n steps</h4>Chapman–Kolmogorov: $p_{ij}(n+m)=\sum_kp_{ik}(n)p_{kj}(m)$<br>$P(n)=P^n$; $(P^2)_{ij}$ = row $i$ · col $j$<br>$\mathbf p(n)=\mathbf p(n-1)P=\mathbf p(0)P^n$</div>
+  <div><h4>Two-state chain</h4>$P=\begin{bmatrix}1-a&a\\b&1-b\end{bmatrix}$, $r=1-a-b$<br>$P[X_n=1]=\frac a{a+b}+r^n\big(P[X_0=1]-\frac a{a+b}\big)$<br>$p_{01}(n)=\frac a{a+b}(1-r^n)$, $p_{10}(n)=\frac b{a+b}(1-r^n)$<br>$\pi=\big[\frac b{a+b},\frac a{a+b}\big]$</div>
+  <div><h4>Classification</h4>$i\leftrightarrow j$: reach each other; classes<br>irreducible: one class; absorbing: $p_{ii}=1$<br>recurrent: return prob. 1; transient: &lt; 1<br>finite: closed class ⇔ recurrent; open ⇒ transient<br>period $=\gcd\{n:p_{jj}(n)\gt0\}$; self-loop ⇒ aperiodic<br>ergodic = positive recurrent + aperiodic</div>
+  <div><h4>Stationary / limit</h4>$\pi P=\pi$, $\sum\pi_j=1$; $\pi_j=\sum_i\pi_ip_{ij}$ (column $j$)<br>finite irreducible aperiodic: $P^n\to$ rows π<br>$\pi_j=1/E[\text{return time}]$<br>ergodic thm: time fraction in $j\to\pi_j$<br>flow out of $j$ = flow in</div>
+  <div><h4>CTMC</h4>holding time Exp($\nu_i$); rates $q_{ij}$<br>$Q$: $q_{ii}=-\nu_i$, rows sum to 0<br>$\mathbf p'(t)=\mathbf p(t)Q$; steady: $\pi Q=0$<br>2-state ($\alpha$, $\beta$): $p_0(t)=\frac\beta{\alpha+\beta}+(p_0(0)-\frac\beta{\alpha+\beta})e^{-(\alpha+\beta)t}$<br>Poisson = pure birth, $p_n'=-\lambda p_n+\lambda p_{n-1}$</div>
+  <div><h4>Birth–death</h4>$n\to n+1$ rate $\lambda_n$; $n\to n-1$ rate $\mu_n$<br>$p_n'=-(\lambda_n+\mu_n)p_n+\lambda_{n-1}p_{n-1}+\mu_{n+1}p_{n+1}$<br>equil.: $(\lambda_n+\mu_n)p_n=\lambda_{n-1}p_{n-1}+\mu_{n+1}p_{n+1}$, $\lambda_0p_0=\mu_1p_1$<br>cut: $\lambda_np_n=\mu_{n+1}p_{n+1}$<br>$p_n=p_0\prod_{k=0}^{n-1}\frac{\lambda_k}{\mu_{k+1}}$</div>
+  <div><h4>Queue basics</h4>A/B/s/K; M = Poisson / exponential<br>$\rho=\lambda/\mu$; mean service time $1/\mu$<br>Little: $L=\lambda_aW$, $L_q=\lambda_aW_q$<br>$W=W_q+1/\mu$</div>
+  <div><h4>M/M/1 (ρ &lt; 1)</h4>$p_n=(1-\rho)\rho^n$; $P[N\ge k]=\rho^k$<br>$L=\frac\rho{1-\rho}=\frac\lambda{\mu-\lambda}$, $L_q=\frac{\rho^2}{1-\rho}$<br>$W=\frac1{\mu-\lambda}$, $W_q=\frac\rho{\mu-\lambda}$<br>$P[T\gt t]=e^{-(\mu-\lambda)t}$</div>
+  <div><h4>M/M/1/N (any ρ)</h4>$p_n=\frac{(1-\rho)\rho^n}{1-\rho^{N+1}}$, $n\le N$ ($\frac1{N+1}$ if ρ = 1)<br>$P_B=p_N$, $\lambda_a=\lambda(1-p_N)=\mu(1-p_0)$<br>$L=\frac\rho{1-\rho}-\frac{(N+1)\rho^{N+1}}{1-\rho^{N+1}}$ ($\frac N2$ if ρ = 1)<br>$L_q=L-(1-p_0)$, $W=L/\lambda_a$, $W_q=L_q/\lambda_a$</div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="answers"><span class="num">19</span>Answer key</h2>
+<h4>Self-check</h4>
+<ol class="answer-key">
+  <li>Given the present state, the future is (conditionally) independent of the past.</li>
+  <li>No: the first row sums to 1.1.</li>
+  <li>$p_{01}(2)=0.5(0.5)+0.5(0.8)=0.65$.</li>
+  <li>$a=0.5$, $b=0.2$: $\pi=\big[\frac27,\frac57\big]$.</li>
+  <li>The next state doesn't depend on the present state: the process is iid (an extreme Markov chain); $P^n=P$ and π = any row.</li>
+  <li>Positive recurrent (closed finite class) and aperiodic (self-loop).</li>
+  <li>No, $\mathbf p(n)$ oscillates (unless it starts at π). Yes, a unique π exists, and time averages converge to it.</li>
+  <li>$\nu=3$: mean holding time $1/3$; next jump to the third state with probability $2/3$.</li>
+  <li>ρ = 0.8: $L=4$, $W=\frac1{5-4}=1$ hr, $P[N\ge2]=0.64$.</li>
+  <li>Its state space is finite ($0,\dots,N$), so $\sum_{n=0}^{N}\rho^n$ is always finite; excess arrivals are turned away instead of piling up.</li>
+  <li>The effective (entering) rate $\lambda_a=\lambda(1-p_N)$.</li>
+  <li>$\lambda_0p_0=\mu_1p_1$; $(\lambda_n+\mu_n)p_n=\lambda_{n-1}p_{n-1}+\mu_{n+1}p_{n+1}$.</li>
+</ol>
+<h4>Practice problems</h4>
+<ol class="answer-key">
+  <li>$X_{n+1}=\max(X_n,R_{n+1})$ with a fresh roll $R_{n+1}$ ⇒ Markov. From state $i$: stay with probability $i/6$; go to each $j\gt i$ with probability $1/6$; never down. Row 1: $[\frac16,\frac16,\frac16,\frac16,\frac16,\frac16]$; row 3: $[0,0,\frac36,\frac16,\frac16,\frac16]$; state 6 absorbing.</li>
+  <li>$P[Z_n=1\mid Z_{n-1}=0]=\frac{(1/2)(1/4)}{1/2}=\frac14$, but given also $Z_{n-2}=1$ (so $X_{n-2}=1$, hence $X_{n-1}=1$) we need $X_n-1=1$: probability 0. Not Markov.</li>
+  <li>$P^2=\begin{bmatrix}0.44&0.56\\0.28&0.72\end{bmatrix}$; $\mathbf p(2)=[0.44,0.56]$; $P(X_3=1\mid X_1=0)=0.56$; path $1\times0.4\times0.8=0.32$; $\pi=[\frac13,\frac23]$.</li>
+  <li>Row 0 of $P^2$: $[0.375,\ 0.5,\ 0.125]$. $\pi=[\frac14,\frac12,\frac14]$. Mean return times 4, 2, 4.</li>
+  <li>$\{0,1\}$: closed, positive recurrent, aperiodic. $\{2\}$: transient (leaks to 0, 1, 3). $\{3\}$: absorbing. Reducible.</li>
+  <li>Irreducible (0→1→2→3→0). Cycle lengths through 2: 2 (2→3→2) and 4 (2→3→0→1→2); gcd = 2. Period 2.</li>
+  <li>$r=0.4$: $p_{01}(5)=\frac13(1-0.4^5)=\frac13(0.98976)=0.3299$. Long run $\frac{0.2}{0.6}=\frac13$.</li>
+  <li>Availability $\frac{1}{1.2}=\frac56$. $P[\text{up at }t\mid\text{up}]=\frac56+\frac16e^{-1.2t}$.</li>
+  <li>$p_n=p_0\frac{(\lambda/\mu)^n}{n!}$ ⇒ $p_0=e^{-\lambda/\mu}$: Poisson($\lambda/\mu$), $L=\lambda/\mu$, for every λ, μ.</li>
+  <li>μ = 15/hr, ρ = 0.8: $L=4$, $L_q=3.2$, $W=\frac13$ hr = 20 min, $W_q=16$ min, $P[N\ge3]=0.512$, $P[T\gt\frac13\text{ hr}]=e^{-3/3}=e^{-1}=0.368$.</li>
+  <li>$\frac{\lambda}{0.5(0.5-\lambda)}\le5$ ⇒ $\lambda\le1.25-2.5\lambda$ ⇒ $\lambda\le0.357$ per min (≈ 21.4 per hour).</li>
+  <li>ρ = 1: $p_n=\frac15$; $L=2$; $P_B=0.2$; $\lambda_a=0.8$; $W=2.5$ min; $L_q=2-0.8=1.2$; $W_q=1.5$ min (check $W-W_q=1=1/\mu$ ✓).</li>
+  <li>ρ = 2/3: $p_0=\frac9{19}$, $p_1=\frac6{19}$, $p_2=\frac4{19}$; lost $\frac4{19}=21\%$; $\lambda_a=2\cdot\frac{15}{19}=\frac{30}{19}$/hr; $L=\frac{14}{19}=0.737$; $W=\frac{14}{30}$ hr = 28 min; $L_q=\frac4{19}$; $W_q=\frac4{30}$ hr = 8 min.</li>
+  <li>$W=L/\lambda=10/40$ hr = 15 min.</li>
+  <li>Column 0: $\pi_0=(1-a)\pi_0+b\pi_1$ ⇒ $a\pi_0=b\pi_1$; with $\pi_0+\pi_1=1$: $\pi_0=\frac b{a+b}$, $\pi_1=\frac a{a+b}$.</li>
+</ol>
+
+<p class="muted small" style="margin-top:40px">Sources: lecturer's handwritten notes (pp. 121–134: Markov property, binomial counting and moving-average examples, joint PMF, notation, transition matrix, speech-packet, random-walk and bulb examples, Chapman–Kolmogorov, state probabilities) and end-semester papers 2021–2026. Sections marked "Beyond class notes" (classification of states, stationary/limiting distributions and ergodicity, continuous-time chains, birth–death processes, queueing) cover syllabus topics the handwritten notes don't reach; they follow standard textbook treatments (Schaum's Outline, Hsu, Ch. 5 and 9; Leon-Garcia).</p>
+</main>
+</body>
+</html>
