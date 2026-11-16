@@ -280,6 +280,44 @@
     caption: 'Three Wiener sample paths (α = 1). Each W(t) ~ N(0, αt): the envelope grows like √t'
   }))();
 
+  /* ================= class notes 2026: ACF comparison, Poisson ensemble ================= */
+  PLOTS.acfCompare = {
+    w: 420, h: 240, x: [-6, 6], y: [0, 1.15], xlabel: 'τ', ylabel: 'R(τ)', xticks: [-3, 3], yticks: [{ v: 1, l: 'R(0)' }],
+    items: [{ fn: t => Math.exp(-0.25 * Math.abs(t)), color: 'c1' }, { fn: t => Math.exp(-0.8 * Math.abs(t)), color: 'c2' }, { fn: t => Math.exp(-6 * Math.abs(t)), n: 800, color: 'c3' },
+      { vline: 3, from: 0, to: 1.1 }, { dot: [3, Math.exp(-0.75)], color: 'c1' }, { dot: [3, Math.exp(-2.4)], color: 'c2' }, { dot: [3, Math.exp(-18)], color: 'c3' },
+      { text: 'R_{XX}', at: [4.6, 0.42], color: 'c1', size: 12 }, { text: 'R_{YY}', at: [2.0, 0.27], color: 'c2', size: 12 }, { text: 'R_{ZZ} ≈ uncorrelated', at: [0.35, 0.9], anchor: 'start', color: 'c3', size: 12 }],
+    caption: 'Same power, different memory: R_{XX}(3) > R_{YY}(3) > R_{ZZ}(3) ≈ 0'
+  };
+  PLOTS.poissonEns = (() => {
+    const offs = [0, 9, 18], sds = [26, 38, 51], items = [];
+    sds.forEach((sd, i) => {
+      const a = arrivals(0.8, 10, sd).filter(t => t < 10).slice(0, 7);
+      items.push({ hline: offs[i], color: 'mu', dash: false, width: 1 });
+      items.push({ stairs: a.map((t, k) => [t, offs[i] + k + 1]), start: offs[i], color: ['c1', 'c2', 'c3'][i], width: 1.8 });
+      items.push({ text: 'N(t, ξ' + '₁₂₃'[i] + ')', at: [0.15, offs[i] + 7.3], anchor: 'start', color: ['c1', 'c2', 'c3'][i], size: 12 });
+    });
+    items.push({ vline: 6, from: 0, to: 26, color: 'var(--fg)' }, { text: 't₀', at: [6.15, 25.5], anchor: 'start', size: 12 });
+    return { w: 460, h: 300, x: [0, 10], y: [-0.5, 26.5], xlabel: 't', ylabel: '', xticks: [], yticks: [], items,
+      caption: 'Three sample functions of the same Poisson process (stacked). The dashed slice at t₀ picks out the RV N(t₀) ~ Poisson(λt₀)' };
+  })();
+
+  /* ================= class notes 2026: random-phase cosine ================= */
+  PLOTS.arcsinePdf = {
+    w: 320, h: 230, x: [-1.3, 1.3], y: [0, 2.2], xlabel: 'α', ylabel: 'f_X(α; t)', xticks: [-1, 1], yticks: [{ v: 1 / PI, l: '1/π' }, 1, 2],
+    items: [{ fn: a => Math.abs(a) < 0.995 ? 1 / (PI * Math.sqrt(1 - a * a)) : NaN, from: -0.995, to: 0.995, n: 600, color: 'c1' },
+      { vline: -1, from: 0, to: 2.2 }, { vline: 1, from: 0, to: 2.2 }],
+    caption: 'Arcsine PDF 1/(π√(1−α²)) of cos(ω₀t+Φ): the same at every t (first-order stationary)'
+  };
+  PLOTS.phaseJoint = (() => {
+    const ph = PI / 3, pts = Array.from({ length: 241 }, (_, i) => { const th = 2 * PI * i / 240; return [Math.cos(th), Math.cos(th + ph)]; });
+    const circ = Array.from({ length: 241 }, (_, i) => { const th = 2 * PI * i / 240; return [Math.cos(th), Math.sin(th)]; });
+    const r = RNG(77), sc = Array.from({ length: 60 }, () => { const th = 2 * PI * r(); return [Math.cos(th), Math.cos(th + ph)]; });
+    return { w: 300, h: 280, x: [-1.4, 1.4], y: [-1.4, 1.4], xlabel: 'x_1', ylabel: 'x_2', xticks: [-1, 1], yticks: [-1, 1],
+      items: [{ pts: [[-1.3, -1.3], [1.3, 1.3]], color: 'mu', dash: true, width: 1 }, { pts: circ, color: 'c3', dash: true, width: 1.2 }, { pts, color: 'c1', width: 2 }, { scatter: sc, r: 2.6, color: 'c2', opacity: 0.85 },
+        { text: 'ω₀τ = π/3', at: [-1.3, 1.25], anchor: 'start', color: 'c1', size: 12 }, { text: 'ω₀τ = π/2 (circle)', at: [-1.3, -1.3], anchor: 'start', color: 'c3', size: 11.5 }, { text: 'τ = 0', at: [1.2, 1.0], anchor: 'end', color: 'mu', size: 11.5 }],
+      caption: '(X₁, X₂) always lies on an ellipse fixed by ω₀τ; dots are 60 simulated values of Φ' };
+  })();
+
   /* ================= PYQ figures ================= */
   PLOTS.pyqAeBt = {
     w: 360, h: 230, x: [-1.3, 1.3], y: [0, 1.1], xlabel: 'x', ylabel: 'f_X(x; t=1)', xticks: [{ v: -1, l: '−1' }, { v: -Math.exp(-1), l: '−e^{−t}' }, { v: Math.exp(-1), l: 'e^{−t}' }, { v: 1, l: '1' }], yticks: [{ v: (Math.E - 1) / 2, l: '(e^{t}−1)/2t' }],
