@@ -354,7 +354,12 @@ P[X_t^2+X_u^2\le a^2]&=\int_0^{2\pi}\!\!\int_0^a\frac{1}{2\pi}e^{-r^2/2}\,r\,dr\
 
 <div class="box why"><span class="bt">The idea in plain words</span>
 <p>Imagine recording noise from an amplifier that has been running for an hour. Whether you start the recording at 3:00 pm or 3:07 pm shouldn't matter: the noise "looks the same" statistically at all times. Its average level, its power and how fast it fluctuates do not drift. Such a process is called <b>stationary</b>. The line process $X(t)=At$, by contrast, spreads out as time passes, so it is not stationary.</p>
+<p><b>The one thing to get right first:</b> stationarity is <em>not</em> about a single waveform being flat or boring. Each sample function of a stationary process still wiggles up and down all the time. What stays the same is the <b>statistics across the ensemble</b>: if you freeze time at any instant and look at all the possible values (the vertical slice of §1), the histogram of those values is the same whichever instant you freeze at. And if you look at two instants together, how they relate depends only on how far apart they are.</p>
 <p>The lecturer's picture: draw several sample functions, pick a set of instants $t_0,t_1,\dots$, and then shift <em>all</em> of them by the same amount $T$. For a stationary process the statistics of the values at the shifted instants are identical to those at the original instants. Only the <em>gaps</em> between instants matter, not their absolute position.</p></div>
+
+<p>Compare the two pictures below. On the left is a stationary process: the bundle of paths looks equally spread at $t_1$ and at $t_1+T$, so the PDF of the slice is the same curve at both times. On the right is the line process: the bundle fans out, the slice at the later time is wider, and its PDF is flatter. That difference in PDFs over time is exactly what "not stationary" means.</p>
+<div class="plots-row"><div data-plot="statPaths"></div><div data-plot="statPdfs"></div></div>
+<div class="plots-row"><div data-plot="linePaths2"></div><div data-plot="linePdfs2"></div></div>
 
 <h3 id="sss">Strict-sense stationary (SSS)</h3>
 <div class="box def"><span class="bt">SSS (lecturer)</span>
@@ -362,25 +367,108 @@ P[X_t^2+X_u^2\le a^2]&=\int_0^{2\pi}\!\!\int_0^a\frac{1}{2\pi}e^{-r^2/2}\,r\,dr\
 $$f_X(\alpha_1,\dots,\alpha_N;\ t_1,\dots,t_N)=f_X(\alpha_1,\dots,\alpha_N;\ t_1+T,\dots,t_N+T)\qquad\forall\,N,\ t_i,\ T .$$
 <p>This is an <b>exact</b> property (it is about PDFs). If it holds only for $N\le k$, the process is called <b>stationary of order $k$</b>.</p></div>
 
-<p><b>What SSS implies (lecturer's two cases).</b></p>
-<p><b>Case N = 1.</b> $f_X(\alpha;t)=f_X(\alpha;t+T)$ for all $t,T$. Choose $T=-t$:</p>
+<h4>Reading the definition slowly</h4>
+<p>The formula looks heavy, so take it piece by piece.</p>
+<ul>
+<li>$f_X(\alpha_1,\dots,\alpha_N;\ t_1,\dots,t_N)$ is the joint PDF of the $N$ random variables $X(t_1),\dots,X(t_N)$: "what values does the process take at these $N$ instants, jointly?" The α's are the values (the variables of the PDF); the $t$'s just say <em>which</em> instants we are looking at.</li>
+<li>The right-hand side is the joint PDF of $X(t_1+T),\dots,X(t_N+T)$: the same pattern of instants, slid along the time axis by $T$. The gaps between the instants are unchanged by the slide.</li>
+<li>"=" says that sliding makes no difference at all to the joint behaviour.</li>
+<li>"$\forall N,\ t_i,\ T$" says this must hold for <em>every</em> number of instants, <em>every</em> choice of instants and <em>every</em> shift. That's why SSS is so strong (and so hard to check).</li>
+</ul>
+<p>In words, for the first two orders:</p>
+<table>
+<tr><th>Order</th><th>What the definition says</th><th>In plain words</th></tr>
+<tr><td>$N=1$</td><td>$f_X(\alpha;t)=f_X(\alpha;t+T)$</td><td>The PDF of a single sample is the same at every instant. $X(2)$, $X(7)$ and $X(100)$ all have the same distribution.</td></tr>
+<tr><td>$N=2$</td><td>$f_X(\alpha_1,\alpha_2;t_1,t_2)=f_X(\alpha_1,\alpha_2;t_1+T,t_2+T)$</td><td>The joint PDF of two samples depends only on how far apart they are. $(X(1),X(3))$ and $(X(6),X(8))$ have the same joint distribution.</td></tr>
+<tr><td>any $N$</td><td>the general formula</td><td>Any pattern of instants, slid anywhere, gives the same joint behaviour.</td></tr>
+</table>
+
+<h4>What SSS implies (the lecturer's two cases), step by step</h4>
+<p>The definition is an equation that is true for <b>every</b> shift $T$. The trick in both cases is: since it is true for every $T$, we are free to plug in whichever $T$ is most convenient. The convenient choice is the one that moves one of the instants to time 0, because then the time variable disappears.</p>
+
+<p><b>Case N = 1: the first-order PDF, mean and variance.</b></p>
+<p><b>Step 1: choose the shift.</b> The definition says, for every $t$ and every $T$:</p>
+$$f_X(\alpha;\,t)=f_X(\alpha;\,t+T).$$
+<p>Take any instant $t$ and choose $T=-t$. Then $t+T=t-t=0$, so</p>
 $$\begin{aligned}
-f_X(\alpha;t)&=f_X(\alpha;0) &&\why{the first-order PDF does not depend on $t$}\\[4pt]
-m_X(t)&=\int\alpha\,f_X(\alpha;t)\,d\alpha\\
-&=\int\alpha\,f_X(\alpha;0)\,d\alpha\\
-&=m_X\quad(\text{a constant}).
+f_X(\alpha;\,t)&=f_X(\alpha;\,t+T)\\
+&=f_X(\alpha;\,t-t) &&\why{put $T=-t$}\\
+&=f_X(\alpha;\,0).
 \end{aligned}$$
-<p>Likewise the variance is constant.</p>
-<p><b>Case N = 2.</b> $f_X(\alpha_1,\alpha_2;t_1,t_2)=f_X(\alpha_1,\alpha_2;t_1+T,t_2+T)$. Choose $T=-t_2$:</p>
+<p><b>What this says.</b> The right-hand side, $f_X(\alpha;0)$, is the PDF at time 0. It is one fixed curve. So <em>the PDF at any time $t$ equals the PDF at time 0</em>: there is really just one first-order PDF for the whole process. We can drop the $t$ and write $f_X(\alpha)$. For example, if $X(0)\sim N(0,4)$, then $X(5)\sim N(0,4)$ and $X(100)\sim N(0,4)$ too.</p>
+<p><b>Step 2: the mean.</b> The mean at time $t$ is computed from the PDF at time $t$:</p>
 $$\begin{aligned}
-f_X(\alpha_1,\alpha_2;t_1,t_2)&=f_X(\alpha_1,\alpha_2;\ t_1-t_2,\ 0) &&\why{depends only on the gap}\\[4pt]
-K_{XX}(t_1,t_2)&=\iint(\alpha_1-m_X)(\alpha_2-m_X)\,f_X(\alpha_1,\alpha_2;t_1,t_2)\,d\alpha_1d\alpha_2\\
-&=\iint(\alpha_1-m_X)(\alpha_2-m_X)\,f_X(\alpha_1,\alpha_2;t_1-t_2,0)\,d\alpha_1d\alpha_2\\
+m_X(t)&=\int_{-\infty}^{\infty}\alpha\,f_X(\alpha;t)\,d\alpha &&\why{definition of the mean of the RV $X(t)$}\\
+&=\int_{-\infty}^{\infty}\alpha\,f_X(\alpha;0)\,d\alpha &&\why{Step 1: replace $f_X(\alpha;t)$ by $f_X(\alpha;0)$}\\
+&=m_X(0).
+\end{aligned}$$
+<p>The integral in the second line has no $t$ anywhere in it, so its value is a single number, the mean at time 0. Call it $m_X$. The mean is the <b>same constant at every time</b>.</p>
+<p><b>Step 3: the variance</b>, in exactly the same way:</p>
+$$\begin{aligned}
+\sigma_X^2(t)&=\int_{-\infty}^{\infty}(\alpha-m_X)^2\,f_X(\alpha;t)\,d\alpha\\
+&=\int_{-\infty}^{\infty}(\alpha-m_X)^2\,f_X(\alpha;0)\,d\alpha &&\why{Step 1 again}\\
+&=\sigma_X^2\quad(\text{a constant}).
+\end{aligned}$$
+<p>The same argument works for <em>any</em> quantity computed from one sample: $E[X^2(t)]$, $P(X(t)\gt3)$, $E[g(X(t))]$. All are constant in time.</p>
+
+<p><b>Case N = 2: the joint PDF, autocorrelation and autocovariance.</b></p>
+<p><b>Step 1: choose the shift.</b> The definition says, for every $t_1,t_2$ and every $T$:</p>
+$$f_X(\alpha_1,\alpha_2;\,t_1,t_2)=f_X(\alpha_1,\alpha_2;\,t_1+T,\,t_2+T).$$
+<p>Now choose $T=-t_2$, which slides the second instant to time 0. Then $t_1+T=t_1-t_2$ and $t_2+T=0$:</p>
+$$\begin{aligned}
+f_X(\alpha_1,\alpha_2;\,t_1,t_2)&=f_X(\alpha_1,\alpha_2;\,t_1-t_2,\ t_2-t_2) &&\why{put $T=-t_2$}\\
+&=f_X(\alpha_1,\alpha_2;\,t_1-t_2,\ 0).
+\end{aligned}$$
+<p><b>What this says.</b> On the right, the second instant is always 0, and the only thing left that can vary is the first instant, $t_1-t_2=\tau$. So the joint PDF of $X(t_1)$ and $X(t_2)$ depends on the two times <b>only through their gap</b> τ. The picture below shows three pairs with the same gap: $(1,3)$, $(6,8)$ and $(-2,0)$. Under SSS all three have the same joint PDF, and the third one, the pair "slid back to 0", is the standard representative.</p>
+<div data-plot="statShift2"></div>
+<p>Here is what "same joint PDF" looks like. Each dot below is one sample function's pair of values $(x(t_1),x(t_2))$, for a stationary Gaussian process with $R(\tau)=e^{-|\tau|}$. The first two clouds use the same gap 0.2 at different places in time and have the same tilted shape (strongly correlated). The third uses gap 3: the values are almost unrelated, so the cloud is round.</p>
+<div class="plots-row"><div data-plot="cloudA"></div><div data-plot="cloudB"></div><div data-plot="cloudC"></div></div>
+<p><b>Step 2: the autocorrelation.</b> $R$ is computed from the joint PDF, so it inherits the "gap only" property:</p>
+$$\begin{aligned}
+R_{XX}(t_1,t_2)&=E[X(t_1)X(t_2)]\\
+&=\iint\alpha_1\alpha_2\,f_X(\alpha_1,\alpha_2;\,t_1,t_2)\,d\alpha_1\,d\alpha_2 &&\why{expectation of a function of two RVs (Unit 3)}\\
+&=\iint\alpha_1\alpha_2\,f_X(\alpha_1,\alpha_2;\,t_1-t_2,\,0)\,d\alpha_1\,d\alpha_2 &&\why{Step 1}\\
+&=R_{XX}(t_1-t_2,\,0).
+\end{aligned}$$
+<p>In the third line the only place a time appears is $t_1-t_2$. So the answer is some function of $t_1-t_2$ alone, which we write $R_{XX}(\tau)$, with $\tau=t_1-t_2$. For example, $R(1,3)$, $R(6,8)$ and $R(-2,0)$ are all the same number.</p>
+<p><b>Step 3: the autocovariance.</b> The same reasoning, now with $(\alpha_1-m_X)(\alpha_2-m_X)$ inside the integral. ($m_X$ is a constant by Case 1, so it doesn't bring in any time dependence.)</p>
+$$\begin{aligned}
+K_{XX}(t_1,t_2)&=\iint(\alpha_1-m_X)(\alpha_2-m_X)\,f_X(\alpha_1,\alpha_2;\,t_1,t_2)\,d\alpha_1\,d\alpha_2\\
+&=\iint(\alpha_1-m_X)(\alpha_2-m_X)\,f_X(\alpha_1,\alpha_2;\,t_1-t_2,\,0)\,d\alpha_1\,d\alpha_2 &&\why{Step 1}\\
 &=K_{XX}(t_1-t_2)=K_{XX}(\tau).
 \end{aligned}$$
-<p>And so $R_{XX}(t_1,t_2)=K_{XX}(\tau)+m_X^2=R_{XX}(\tau)$ as well.</p>
+<p>Or quicker, from Step 2: $K_{XX}(t_1,t_2)=R_{XX}(t_1,t_2)-m_X\,m_X=R_{XX}(\tau)-m_X^2$, which depends only on τ.</p>
+
+<div class="box key"><span class="bt">Summary: what SSS gives you</span>
+<ol>
+<li>One first-order PDF for all times: $f_X(\alpha;t)=f_X(\alpha)$.</li>
+<li>Constant mean $m_X$, constant variance $\sigma_X^2$, constant power $E[X^2]$.</li>
+<li>Joint PDF of two samples depends only on the gap: $f_X(\alpha_1,\alpha_2;t_1,t_2)=f_X(\alpha_1,\alpha_2;\tau)$.</li>
+<li>Autocorrelation and autocovariance depend only on the gap: $R_{XX}(\tau)$, $K_{XX}(\tau)$.</li>
+</ol>
+<p>Items 2 and 4 are exactly the definition of WSS below. That is the whole proof that SSS ⇒ WSS.</p></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.0a: an iid process is SSS</span>
+<p>Let $X(t)$ be an independent process whose samples all have the same PDF $g(\alpha)$ (for instance the Bernoulli process of §9). Show it is SSS.</p>
+<details class="sol"><summary>Solution</summary>
+<p>Independence lets us factor any joint PDF (§3), and every factor is the same function $g$:</p>
+$$\begin{aligned}
+f_X(\alpha_1,\dots,\alpha_N;\,t_1,\dots,t_N)&=f_X(\alpha_1;t_1)\cdots f_X(\alpha_N;t_N) &&\why{independent}\\
+&=g(\alpha_1)\cdots g(\alpha_N) &&\why{identically distributed}\\
+&=f_X(\alpha_1;t_1+T)\cdots f_X(\alpha_N;t_N+T)\\
+&=f_X(\alpha_1,\dots,\alpha_N;\,t_1+T,\dots,t_N+T).
+\end{aligned}$$
+<p>No $t$ appears in the middle line, so shifting all the times changes nothing, for every $N$. <b>SSS.</b> This is one of the few cases where SSS is easy to prove directly.</p></details></div>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.0b: how to show a process is NOT SSS</span>
+<p>Show that the line process $X(t)=At$, $A\sim U[0,1]$, is not SSS.</p>
+<details class="sol"><summary>Solution</summary>
+<p>To prove SSS you need every order $N$. To <em>disprove</em> it, one failure at one order is enough, and the easiest order to check is $N=1$. From Example 2.1, $X(t)\sim U[0,t]$, so for instance</p>
+$$f_X(\alpha;1)=1\ \text{on }[0,1],\qquad f_X(\alpha;2)=\tfrac12\ \text{on }[0,2].$$
+<p>These are different PDFs, so $f_X(\alpha;t)\ne f_X(\alpha;t+T)$ for $t=1$, $T=1$: <b>not SSS</b> (not even first-order stationary). Quicker still: the mean $t/2$ changes with time, which a stationary process cannot do (Case 1).</p></details></div>
 
 <h3 id="wss">Wide-sense stationary (WSS)</h3>
+<p><b>Why a second, weaker definition?</b> SSS needs the joint PDFs of every order, which we almost never know. In practice (and in every exam question) we only know or compute the mean and the autocorrelation, the average description of §2. So we ask for stationarity of just those two functions. That is WSS. "Wide" means the condition is weaker, so the class of WSS processes is wider than the class of SSS processes.</p>
 <div class="box def"><span class="bt">WSS (lecturer)</span>
 <p>$X(t)$ is <b>wide-sense stationary</b> (weakly stationary) if</p>
 <ol>
@@ -389,15 +477,51 @@ K_{XX}(t_1,t_2)&=\iint(\alpha_1-m_X)(\alpha_2-m_X)\,f_X(\alpha_1,\alpha_2;t_1,t_
 </ol>
 <p>(Many books add "3. $E[X^2(t)]\lt\infty$", which is automatic once $R_X(0)$ is finite.) This is an <b>average</b> property. For a WSS process we write $R_X(\tau)=E[X(t+\tau)X(t)]$, the same for every $t$.</p></div>
 <p>Equivalently: constant mean and $K_{XX}(t_1,t_2)=K_{XX}(\tau)$, because $K=R-m^2$ and $m$ is constant.</p>
+
+<p><b>What WSS guarantees, in words.</b></p>
+<ul>
+<li><b>Constant average level:</b> $E[X(t)]=m_X$ at every time (the DC value doesn't drift).</li>
+<li><b>Constant power:</b> putting $t_1=t_2=t$ gives $E[X^2(t)]=R_{XX}(t,t)=R_{XX}(0)$, the same for every $t$. Hence the variance $\sigma_X^2=R_{XX}(0)-m_X^2$ is constant too.</li>
+<li><b>Similarity depends only on separation:</b> how strongly $X$ now is related to $X$ a little later depends on how much later, not on what time "now" is. $R(\tau)$ for small τ says how smooth the process is; how fast $R(\tau)$ falls says how fast it forgets.</li>
+</ul>
+<p>What WSS does <em>not</em> guarantee: that the PDF of $X(t)$ is the same at all times (only its mean and variance are), or anything about third and higher moments.</p>
+
+<p><b>The notation $R_X(\tau)$.</b> For a WSS process it doesn't matter which pair of instants with gap τ you pick, so we pick a convenient one, $(t+\tau,\,t)$, and write $R_X(\tau)=E[X(t+\tau)X(t)]$. In calculations you usually compute $R_{XX}(t,t+\tau)$ (or $R_{XX}(t_1,t_2)$) and look at the answer: if all the $t$'s cancel and only τ remains, the second condition holds.</p>
+
 <p><b>Another way to say it</b> <span class="tag-new">Class notes 2026</span>: a process is WSS iff its <em>averages</em> are time-invariant, i.e. shifting both instants by the same amount $c$ changes nothing:</p>
 $$m_X(t)=m_X(t+c),\qquad R_{XX}(t_1,t_2)=R_{XX}(t_1+c,\ t_2+c)\quad\forall\,t,t_1,t_2,c .$$
-<p>Choosing $c=-t_2$ turns the second condition into $R_{XX}(t_1-t_2,0)$, a function of the gap only, so the two forms are the same. Compare: SSS asks the same shift-invariance of the <em>joint PDFs</em> (exact description); WSS asks it only of the mean and ACF (average description). The class summary: <b>Stationarity → SSS (joint PDF) / WSS (mean, ACF: averages)</b>.</p>
+<p>Choosing $c=-t_2$ turns the second condition into $R_{XX}(t_1-t_2,0)$, a function of the gap only, so the two forms are the same. (It is the same "pick a convenient shift" trick as in the SSS cases.) Compare: SSS asks the same shift-invariance of the <em>joint PDFs</em> (exact description); WSS asks it only of the mean and ACF (average description). The class summary: <b>Stationarity → SSS (joint PDF) / WSS (mean, ACF: averages)</b>.</p>
+
+<div class="box tip"><span class="bt">Quick quiz: is this a function of the gap only?</span>
+<p>This is the decision you make at the end of every WSS question. Cover the right column and try.</p>
+<table>
+<tr><th>$R_{XX}(t_1,t_2)$</th><th>Gap only?</th><th>Why</th></tr>
+<tr><td>$5e^{-2|t_1-t_2|}$</td><td>✓</td><td>only $t_1-t_2$ appears</td></tr>
+<tr><td>$\frac12\cos\omega_0(t_1-t_2)$</td><td>✓</td><td>only $t_1-t_2$</td></tr>
+<tr><td>$\cos\omega_0t_1\cos\omega_0t_2+\sin\omega_0t_1\sin\omega_0t_2$</td><td>✓</td><td>it <em>equals</em> $\cos\omega_0(t_1-t_2)$; simplify before deciding</td></tr>
+<tr><td>$\cos\omega_0t_1\cos\omega_0t_2$</td><td>✗</td><td>$=\frac12[\cos\omega_0(t_1-t_2)+\cos\omega_0(t_1+t_2)]$: a $t_1+t_2$ term remains</td></tr>
+<tr><td>$\frac13t_1t_2$</td><td>✗</td><td>$R(1,2)=\frac23$ but $R(2,3)=2$: same gap, different value</td></tr>
+<tr><td>$4\min(t_1,t_2)$</td><td>✗</td><td>$R(1,2)=4$ but $R(5,6)=20$</td></tr>
+<tr><td>$\frac{1-e^{-(t_1+t_2)}}{t_1+t_2}$</td><td>✗</td><td>depends on $t_1+t_2$</td></tr>
+<tr><td>$9+e^{-|t_1-t_2|}$</td><td>✓</td><td>a constant plus a function of the gap</td></tr>
+</table></div>
 
 <div class="box thm"><span class="bt">SSS ⇒ WSS, but WSS ⇏ SSS</span>
-<p><b>SSS ⇒ WSS.</b> Proved just above: SSS makes the mean constant (case N = 1) and the ACF a function of τ only (case N = 2). Those are exactly the two WSS conditions. (We need $E[X^2]\lt\infty$ so that the moments exist.)</p>
-<p><b>WSS does not imply SSS.</b> WSS fixes only the first two moments. The PDFs themselves can still change with time. <em>Counter-example:</em> let $X(t)$ be independent at different times, with $X(t)\sim N(0,1)$ for integer $t$ and $X(t)\sim U[-\sqrt3,\sqrt3]$ otherwise. Both distributions have mean 0 and variance 1, so $m_X=0$ and $R_X(t_1,t_2)=\delta$-like (1 if $t_1=t_2$, else 0), which depends only on $t_1-t_2$: WSS. But the first-order PDF changes shape with $t$: not SSS.</p>
-<p><b>Exception:</b> for a <b>Gaussian</b> process, WSS ⇒ SSS (§6).</p></div>
+<p><b>SSS ⇒ WSS.</b> Proved just above: SSS makes the mean constant (case N = 1) and the ACF a function of τ only (case N = 2). Those are exactly the two WSS conditions. (We need $E[X^2]\lt\infty$ so that the moments exist. A process can be SSS with infinite variance, e.g. iid Cauchy samples, and then the ACF doesn't exist, so it can't be WSS.)</p>
+<p><b>WSS does not imply SSS.</b> WSS fixes only the first two moments. The PDFs themselves can still change with time, as long as their mean and variance don't. <em>Counter-example:</em> let $X(t)$ be independent at different times, with $X(t)\sim N(0,1)$ for integer $t$ and $X(t)\sim U[-\sqrt3,\sqrt3]$ otherwise.</p>
+<ul>
+<li>Mean: both distributions have mean 0, so $m_X(t)=0$ for all $t$ ✓.</li>
+<li>Variance: $N(0,1)$ has variance 1; $U[-\sqrt3,\sqrt3]$ has variance $\frac{(2\sqrt3)^2}{12}=1$. So $E[X^2(t)]=1$ for all $t$.</li>
+<li>ACF: for $t_1\ne t_2$ the samples are independent with mean 0, so $R(t_1,t_2)=E[X(t_1)]E[X(t_2)]=0$; for $t_1=t_2$, $R=1$. This is 1 if the gap is 0 and 0 otherwise, a function of the gap only ✓. So the process is <b>WSS</b>.</li>
+<li>But $X(1)$ is Gaussian and $X(1.5)$ is uniform: the first-order PDF changes with time, so it is <b>not SSS</b> (not even first-order stationary).</li>
+</ul>
+<p><b>Exception:</b> for a <b>Gaussian</b> process, WSS ⇒ SSS (§6), because a Gaussian PDF is completely fixed by its mean and covariance, and WSS makes those shift-invariant.</p></div>
 <p class="small"><b>On the class illustration</b> <span class="tag-new">Class notes 2026</span>: the notes show $X(t_1)\sim U[-1,1]$, $X(t_2)\sim N(0,t_2^2)$, $X(t_3)\sim U[-t_3,t_3]$ ("same mean, different PDFs, so the converse is not true"). The idea is right, but for a WSS example the <em>variances</em> must also agree (they are $R(0)-m^2$, a constant). That's why the counter-example above matches both mean 0 and variance 1.</p>
+
+<div class="box key"><span class="bt">The hierarchy of stationarity</span>
+<p>From strongest to weakest:</p>
+$$\text{SSS}\ \Rightarrow\ \text{stationary of order }k\ (\text{every }k)\ \Rightarrow\ \text{stationary of order 2}\ \Rightarrow\ \text{WSS (if }E[X^2]\lt\infty)$$
+<p>and separately "order 2 ⇒ order 1 (first-order stationary)". <b>First-order stationary</b> means only that the PDF of a single sample doesn't depend on $t$ (Case N = 1); it says nothing about pairs of samples. Example 4.2b below shows a process that is first-order stationary. None of the arrows reverse in general; for Gaussian processes, WSS jumps all the way back up to SSS.</p></div>
 
 <table>
   <tr><th></th><th>SSS</th><th>WSS</th></tr>
@@ -406,6 +530,7 @@ $$m_X(t)=m_X(t+c),\qquad R_{XX}(t_1,t_2)=R_{XX}(t_1+c,\ t_2+c)\quad\forall\,t,t_
   <tr><td>Requires</td><td>$f(\cdot;t_1..t_N)=f(\cdot;t_1+T..t_N+T)$</td><td>$m_X$ constant, $R_X(t_1,t_2)=R_X(t_1-t_2)$</td></tr>
   <tr><td>Implies the other?</td><td>yes, SSS ⇒ WSS (if 2nd moments finite)</td><td>no (only for Gaussian processes)</td></tr>
   <tr><td>How to check</td><td>hard: need all PDFs</td><td>easy: compute two functions</td></tr>
+  <tr><td>How to disprove</td><td>show one PDF (usually first-order) changes with $t$, or show it isn't WSS</td><td>show $m_X(t)$ changes, or find two pairs with the same gap but different $R$</td></tr>
   <tr><td>Also called</td><td>strictly / strongly stationary</td><td>weakly / covariance stationary, stationary to order 2 in moments</td></tr>
 </table>
 
@@ -421,6 +546,7 @@ $$m_X(t)=m_X(t+c),\qquad R_{XX}(t_1,t_2)=R_{XX}(t_1+c,\ t_2+c)\quad\forall\,t,t_
 <div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.1 (lecturer): $X(t)=At+b$</span>
 <p>$A$ is a zero-mean RV with PDF $f_A$; $b$ is a constant. Is $X(t)$ SSS? WSS?</p>
 <details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> The only random thing is $A$, and it multiplies $t$. Every sample function is a straight line through the point $(0,b)$ with a random slope, so the lines fan out as $|t|$ grows. Expect "not stationary". The mean will turn out constant, which is a trap: you must go on to the ACF.</p>
 <p><b>First-order PDF.</b> $X(t)$ is a linear function of $A$, so</p>
 $$f_X(\alpha;t)=\frac{1}{|t|}\,f_A\Big(\frac{\alpha-b}{t}\Big).$$
 <p>This depends on $t$ (its width scales with $|t|$), so the process is <b>not SSS</b>.</p>
@@ -436,11 +562,13 @@ $$\begin{aligned}
 R_{XX}(0,5)&=b^2,\\
 R_{XX}(1,6)&=6(\sigma_A^2+m_A^2)+b^2 .
 \end{aligned}$$
-<p>They differ, so $R$ is not a function of the gap alone: <b>not WSS</b>.</p></details></div>
+<p>They differ, so $R$ is not a function of the gap alone: <b>not WSS</b>.</p>
+<p><b>Meaning.</b> The power $E[X^2(t)]=R(t,t)=(\sigma_A^2+m_A^2)t^2+b^2$ grows with $t$: the fan of lines gets wider. A constant mean alone was not enough to make the process stationary.</p></details></div>
 
 <div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span>Example 4.2 (lecturer): random-phase cosine</span>
 <p>$X(t)=\cos(\omega_0t+\phi)$, $\phi\sim U[0,2\pi]$. Is it WSS?</p>
 <details class="sol"><summary>Solution</summary>
+<p><b>What to notice.</b> φ is uniform over a full period, so averaging any sinusoid with φ in its argument gives 0 (warm-up W2). In the ACF, the product-to-sum identity splits $\cos\cdot\cos$ into a "difference" term with no φ (survives) and a "sum" term with 2φ (averages to 0).</p>
 $$\begin{aligned}
 m_X(t)&=\frac1{2\pi}\int_0^{2\pi}\cos(\omega_0t+\phi)\,d\phi\\
 &=\frac1{2\pi}\Big[\sin(\omega_0t+\phi)\Big]_0^{2\pi}=0 .\\[6pt]
@@ -519,7 +647,8 @@ R_X(t+\tau,t)&=E[A^2]\,E[\cos(\omega_0(t+\tau)+\Theta)\cos(\omega_0t+\Theta)] &&
 &=2\cdot\tfrac12\cos\omega_0\tau\\
 &=\cos\omega_0\tau .
 \end{aligned}$$
-<p>WSS, with average power $E[X^2(t)]=R_X(0)=1$. (General rule: $R_X(\tau)=\frac{E[A^2]}{2}\cos\omega_0\tau$.)</p></details></div>
+<p>WSS, with average power $E[X^2(t)]=R_X(0)=1$. (General rule: $R_X(\tau)=\frac{E[A^2]}{2}\cos\omega_0\tau$.)</p>
+<p><b>Compare with Example 2.3(a)</b>, where the amplitude was random but the phase was fixed: that process was <em>not</em> WSS. A random amplitude alone doesn't help; it's the uniform random phase that removes the time dependence. Here we didn't even need $E[A]=0$, because $E[\cos(\omega_0t+\Theta)]=0$ already makes the mean zero.</p></details></div>
 
 <div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 4.5: phase over too small an interval</span>
 <p>$X(t)=\cos(t+\Theta)$ with $\Theta\sim U[0,\pi/2]$. Is it WSS?</p>
@@ -529,12 +658,35 @@ m_X(t)&=\frac{2}{\pi}\int_0^{\pi/2}\cos(t+\theta)\,d\theta\\
 &=\frac2\pi\big[\sin(t+\tfrac\pi2)-\sin t\big]\\
 &=\frac2\pi(\cos t-\sin t).
 \end{aligned}$$
-<p>The mean depends on $t$ ⇒ <b>not WSS</b>. The phase must be spread over a whole period for the averaging trick (W2) to work.</p></details></div>
+<p>The mean depends on $t$ ⇒ <b>not WSS</b>. The phase must be spread over a whole period for the averaging trick (W2) to work.</p>
+<p><b>Why, intuitively.</b> With Θ only in $[0,\pi/2]$, all sample functions start within a quarter-cycle of each other, so they are bunched together and move up and down nearly in step. At $t=0$ they are all between $\cos0=1$ and $\cos\frac\pi2=0$ (mean $\frac2\pi$); half a period later they are all between −1 and 0 (mean $-\frac2\pi$). The ensemble "remembers" the time origin. A full-period phase spreads the paths evenly over every position in the cycle, so no instant looks different from another.</p></details></div>
 
 <h3 id="jwss">Jointly WSS processes</h3>
 <div class="box def"><span class="bt">Joint wide-sense stationarity</span>
 <p>$X(t)$ and $Y(t)$ are <b>jointly WSS</b> if each is WSS and their cross-correlation depends only on the gap: $R_{XY}(t,t+\tau)=E[X(t)Y(t+\tau)]=R_{XY}(\tau)$.</p></div>
 <p class="small">Convention warning: books differ on whether $R_{XY}(\tau)$ means $E[X(t)Y(t+\tau)]$ (Schaum, past papers) or $E[X(t+\tau)Y(t)]$. The two differ by $\tau\to-\tau$. Always state which you use; we use $R_{XY}(\tau)=E[X(t)Y(t+\tau)]$ and $R_X(\tau)=E[X(t)X(t+\tau)]$ (for the ACF it doesn't matter, since $R_X$ is even).</p>
+<p><b>Why we need it.</b> Each process being WSS on its own is not enough once you combine them. For $Z(t)=X(t)+Y(t)$:</p>
+$$R_Z(t,t+\tau)=R_X(t,t+\tau)+R_Y(t,t+\tau)+R_{XY}(t,t+\tau)+R_{YX}(t,t+\tau).$$
+<p>The first two terms depend only on τ if $X$ and $Y$ are WSS, but the cross terms must also depend only on τ for $Z$ to be WSS. That is exactly joint WSS.</p>
+
+<div class="ex"><span class="bt"><span class="tag-lvl lvl-m">Medium</span>Example 4.6: jointly WSS, and not jointly WSS</span>
+<p>Let $A,B$ be uncorrelated, zero-mean, each with variance σ². (a) $X(t)=\cos(\omega_0t+\Theta)$ and $Y(t)=\sin(\omega_0t+\Theta)$, Θ ~ U[0, 2π]: are they jointly WSS? (b) $X(t)=A\cos\omega_0t+B\sin\omega_0t$ and $Y(t)=A\cos\omega_0t-B\sin\omega_0t$: each is WSS (Example 4.3b). Are they jointly WSS? What about $X+Y$?</p>
+<details class="sol"><summary>Solution</summary>
+<p><b>(a)</b> Both are random-phase sinusoids, so each is WSS. Cross-correlation, using $\sin Q\cos P=\frac12[\sin(Q-P)+\sin(Q+P)]$:</p>
+$$\begin{aligned}
+R_{XY}(t,t+\tau)&=E\big[\cos(\omega_0t+\Theta)\sin(\omega_0t+\omega_0\tau+\Theta)\big]\\
+&=\tfrac12E\big[\sin\omega_0\tau\big]+\tfrac12E\big[\sin(2\omega_0t+\omega_0\tau+2\Theta)\big]\\
+&=\tfrac12\sin\omega_0\tau+0 .
+\end{aligned}$$
+<p>Only τ appears ⇒ <b>jointly WSS</b>.</p>
+<p><b>(b)</b> Use $E[A^2]=E[B^2]=\sigma^2$, $E[AB]=0$:</p>
+$$\begin{aligned}
+R_{XY}(t,t+\tau)&=E\big[(A\cos\omega_0t+B\sin\omega_0t)(A\cos\omega_0(t+\tau)-B\sin\omega_0(t+\tau))\big]\\
+&=\sigma^2\cos\omega_0t\cos\omega_0(t+\tau)-\sigma^2\sin\omega_0t\sin\omega_0(t+\tau)\\
+&=\sigma^2\cos\big(\omega_0t+\omega_0(t+\tau)\big) &&\why{$\cos P\cos Q-\sin P\sin Q=\cos(P+Q)$}\\
+&=\sigma^2\cos\omega_0(2t+\tau).
+\end{aligned}$$
+<p>This contains $t$ ⇒ <b>not jointly WSS</b>, even though each process is WSS by itself. The consequence shows up in the sum: $X(t)+Y(t)=2A\cos\omega_0t$, a random-amplitude cosine with $R=4\sigma^2\cos\omega_0t_1\cos\omega_0t_2$, which is not WSS (Example 2.3a).</p></details></div>
 
 <!-- ============================================================ -->
 <h2 id="acfprops"><span class="num">5</span>Properties of the autocorrelation &amp; cross-correlation functions <span class="tag-beyond">Beyond class notes</span></h2>

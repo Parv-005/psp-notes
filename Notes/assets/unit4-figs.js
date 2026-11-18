@@ -332,6 +332,52 @@
       items: [{ stems: st, color: 'c1' }], caption: 'Example: j = 6 arrivals by time t, (t−d)/t = 0.6 → Binomial(6, 0.6)' };
   })();
 
+  /* ================= §4 stationarity pictures ================= */
+  const gpdf = (m, s) => x => Math.exp(-((x - m) ** 2) / (2 * s * s)) / (Math.sqrt(2 * PI) * s);
+  PLOTS.statPaths = (() => ({
+    w: 420, h: 240, x: [0, 10], y: [-3.4, 3.4], xlabel: 't', ylabel: 'x(t)', xticks: [{ v: 2.5, l: 't₁' }, { v: 7.5, l: 't₁+T' }], yticks: [-2, 2],
+    items: [{ vline: 2.5, color: 'var(--fg)' }, { vline: 7.5, color: 'var(--fg)' },
+      ...[41, 42, 43, 44, 45].map((sd, i) => ({ pts: ouPath(1, 0.6, 10, 0.02, sd), color: ['c1', 'c2', 'c3', 'c4', 'c5'][i], width: 1.2 })),
+      { arrow: [[2.6, 3.0], [7.4, 3.0]], color: 'var(--fg)' }, { text: 'shift by T', at: [5, 3.1], dy: -6, size: 12 }],
+    caption: 'A stationary process: the bundle of paths looks the same around t₁ and around t₁ + T'
+  }))();
+  PLOTS.statPdfs = {
+    w: 300, h: 240, x: [-3.5, 3.5], y: [0, 0.5], xlabel: 'α', ylabel: 'PDF', xticks: [-2, 0, 2], yticks: [],
+    items: [{ fn: gpdf(0, 1), color: 'c1', width: 3 }, { fn: gpdf(0, 1), color: 'c2', dash: true, width: 2 },
+      { text: 'f_X(α; t₁)', at: [1.2, 0.36], anchor: 'start', color: 'c1', size: 12 }, { text: 'f_X(α; t₁+T)', at: [1.2, 0.31], anchor: 'start', color: 'c2', size: 12 }],
+    caption: '…so the PDF of the values at t₁ (solid) and at t₁ + T (dashed) are the same curve'
+  };
+  PLOTS.linePaths2 = {
+    w: 420, h: 240, x: [0, 1.1], y: [0, 1.1], xlabel: 't', ylabel: 'x(t) = a·t', xticks: [{ v: 0.3, l: 't₁' }, { v: 0.9, l: 't₁+T' }], yticks: [],
+    items: [{ vline: 0.3, color: 'var(--fg)' }, { vline: 0.9, color: 'var(--fg)' },
+      ...[0.1, 0.3, 0.5, 0.7, 0.9, 1].map((a, i) => ({ fn: t => a * t, from: 0, to: 1.05, color: ['c1', 'c2', 'c3', 'c4', 'c5', 'c1'][i], width: 1.4 })),
+      { pts: [[0.3, 0], [0.3, 0.3]], color: 'c2', width: 4 }, { pts: [[0.9, 0], [0.9, 0.9]], color: 'c2', width: 4 }],
+    caption: 'Line process X(t) = At: the bundle is narrow at t₁ and wide at t₁ + T'
+  };
+  PLOTS.linePdfs2 = {
+    w: 300, h: 240, x: [-0.1, 1.05], y: [0, 3.8], xlabel: 'α', ylabel: 'PDF', xticks: [{ v: 0.3, l: 't₁' }, { v: 0.9, l: 't₁+T' }], yticks: [{ v: 1 / 0.3, l: '1/t₁' }, { v: 1 / 0.9, l: '1/(t₁+T)' }],
+    items: [{ pts: [[0, 0], [0, 1 / 0.3], [0.3, 1 / 0.3], [0.3, 0]], color: 'c1', width: 2.5 }, { pts: [[0, 0], [0, 1 / 0.9], [0.9, 1 / 0.9], [0.9, 0]], color: 'c2', width: 2, dash: true }],
+    caption: '…so the PDFs differ: U[0, t₁] (solid) vs U[0, t₁+T] (dashed). Not stationary'
+  };
+  PLOTS.statShift2 = {
+    w: 520, h: 210, x: [-3, 11], y: [0, 4], xlabel: 'time', ylabel: '', xticks: [-2, 0, 1, 3, 6, 8], yticks: [],
+    items: [{ vline: 0, color: 'mu' },
+      { pts: [[1, 3], [3, 3]], color: 'c1', width: 3 }, { dot: [1, 3], color: 'c1' }, { dot: [3, 3], color: 'c1' }, { text: '(t₁, t₂) = (1, 3)', at: [3.3, 3], anchor: 'start', dy: 4, size: 12, color: 'c1' },
+      { pts: [[6, 2], [8, 2]], color: 'c3', width: 3 }, { dot: [6, 2], color: 'c3' }, { dot: [8, 2], color: 'c3' }, { text: 'shift T = 5 → (6, 8)', at: [8.3, 2], anchor: 'start', dy: 4, size: 12, color: 'c3' },
+      { pts: [[-2, 1], [0, 1]], color: 'c2', width: 3 }, { dot: [-2, 1], color: 'c2' }, { dot: [0, 1], color: 'c2' }, { text: 'shift T = −t₂ = −3 → (−2, 0)', at: [0.3, 1], anchor: 'start', dy: 4, size: 12, color: 'c2' }],
+    caption: 'Shifting a pair of instants moves both by the same amount, so the gap t₁ − t₂ = −2 never changes. Under SSS all three pairs have the same joint PDF'
+  };
+  function pairCloud(rho, seed, n = 260) {
+    const z = normals(2 * n, seed), out = [];
+    for (let i = 0; i < n; i++) out.push([z[2 * i], rho * z[2 * i] + Math.sqrt(1 - rho * rho) * z[2 * i + 1]]);
+    return out;
+  }
+  const cloud = (rho, seed, cap) => ({ w: 230, h: 230, x: [-3.3, 3.3], y: [-3.3, 3.3], xlabel: 'x(t₁)', ylabel: 'x(t₂)', xticks: [-2, 2], yticks: [-2, 2],
+    items: [{ scatter: pairCloud(rho, seed), r: 1.8, color: 'c1', opacity: 0.55 }], caption: cap });
+  PLOTS.cloudA = cloud(Math.exp(-0.2), 71, '(t₁, t₂) = (1, 1.2): gap 0.2');
+  PLOTS.cloudB = cloud(Math.exp(-0.2), 72, '(t₁, t₂) = (6, 6.2): gap 0.2, same shape');
+  PLOTS.cloudC = cloud(Math.exp(-3), 73, '(t₁, t₂) = (1, 4): gap 3, nearly round');
+
   document.addEventListener('DOMContentLoaded', () => {
     const put = (id, html) => { const e = document.getElementById(id); if (e) e.innerHTML = html; };
     put('fig-map4', conceptMap());
