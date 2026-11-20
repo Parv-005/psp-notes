@@ -600,7 +600,7 @@ $$E[X]=\int_0^\infty x\lambda e^{-\lambda x}dx=\lambda\cdot\frac{1!}{\lambda^2}=
 $$\sigma^2=\frac2{\lambda^2}-\frac1{\lambda^2}=\frac1{\lambda^2},\qquad\sigma=\frac1\lambda=\text{mean}.$$
 <p>In general $E[X^k]=\dfrac{k!}{\lambda^k}$ (also obtained from the MGF in §13).</p></div>
 
-<div class="box thm"><span class="bt">Memoryless property <span class="tag-beyond">Beyond class notes</span> (asked in MS 2024)</span>
+<div class="box thm" id="memoryless"><span class="bt">Memoryless property <span class="tag-beyond">Beyond class notes</span> (asked in MS 2024)</span>
 $$P(X\gt a+x\mid X\gt a)=\frac{P(X\gt a+x)}{P(X\gt a)}=\frac{e^{-\lambda(a+x)}}{e^{-\lambda a}}=e^{-\lambda x}=P(X\gt x).$$
 <p>In words: if the component has already survived $a$ hours, the chance it survives $x$ more is the same as for a brand-new component. It does not "remember" its age. The exponential is the <b>only</b> continuous distribution with this property (the geometric is the discrete one).</p></div>
 <div class="plots-row"><div data-plot="memoryless"></div><div data-plot="expMedian"></div></div>

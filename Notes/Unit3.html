@@ -1497,7 +1497,7 @@ f_Y(\beta)&=\frac{f_X(\alpha)}{|d\beta/d\alpha|}=\frac{f_X(\alpha)}{|g'(\alpha)|
 \end{aligned}$$
 <p>Where the curve is <b>steep</b>, a narrow α-strip is spread over a wide β-strip, so the output density is <b>low</b>. Where the curve is <b>flat</b>, a wide α-strip is squeezed into a narrow β-strip, so the output density is <b>high</b>. In the extreme case of a perfectly flat piece, everything is squeezed onto one point: an impulse.</p>
 
-<div class="box key"><span class="bt">Several roots (non-monotone $g$)</span>
+<div class="box key" id="roots"><span class="bt">Several roots (non-monotone $g$)</span>
 <p>If the equation $g(\alpha)=\beta$ has several roots $\alpha_1,\alpha_2,\dots$, probability arrives at β from each of them, and the contributions add:</p>
 $$f_Y(\beta)=\sum_k\frac{f_X(\alpha_k)}{|g'(\alpha_k)|}.$$
 <p>If there is no root (the curve never reaches height β), then $f_Y(\beta)=0$. This is the quickest method when the curve has no flat parts. When it does have flat parts, use the CDF method, because this formula misses the impulses.</p></div>
@@ -1708,7 +1708,7 @@ e^{-\lambda\alpha}&=1-\beta\\
 $$Y=\frac1\lambda\ln\Big(\frac{1}{1-Z}\Big)\ \sim\ \text{Exp}(\lambda).$$
 <p>(Since $1-Z$ is also $U(0,1)$, $Y=-\frac1\lambda\ln Z$ works equally well.)</p></details></div>
 
-<div class="ex"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 9.9 (lecturer): $Y=\sin X$, $X\sim U[-\pi,\pi]$</span>
+<div class="ex" id="ex9-9"><span class="bt"><span class="tag-lvl lvl-h">Exam</span>Example 9.9 (lecturer): $Y=\sin X$, $X\sim U[-\pi,\pi]$</span>
 <details class="sol"><summary>Solution</summary>
 <p><b>Range:</b> $Y\in[-1,1]$.</p>
 <p><b>Roots:</b> over one full period, the sine curve crosses any height β with $|\beta|\lt1$ exactly <b>twice</b>. For β &gt; 0 the roots are $\alpha_1=\sin^{-1}\beta$ and $\alpha_2=\pi-\sin^{-1}\beta$. (For β &lt; 0, the second one is $-\pi-\sin^{-1}\beta$.)</p>
@@ -3132,7 +3132,7 @@ F_R(r)&=1-P(XY\gt r)\\
 \end{aligned}$$
 <p>Exact facts you <em>can</em> state: $E[R]=E[X]E[Y]=1$ and $E[R^2]=E[X^2]E[Y^2]=2\times2=4$ (independence).</p></details></div>
 
-<h3>H. Central limit theorem</h3>
+<h3 id="pyqH">H. Central limit theorem</h3>
 
 <div class="ex"><span class="bt"><span class="tag-pyq">ES July 2024 Q3a</span> <span class="tag-pyq">ES June 2026 Q4b</span> (5 marks)</span>
 <p>State and prove the central limit theorem.</p>

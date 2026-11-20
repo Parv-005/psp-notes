@@ -319,7 +319,7 @@ $$P=\begin{bmatrix}p_{00}&p_{01}&\cdots&p_{0,m-1}\\p_{10}&p_{11}&\cdots&p_{1,m-1
 <p>A picture of the same information: one circle (node) per state, and an arrow $i\to j$ labelled $p_{ij}$ whenever $p_{ij}\gt0$. A self-loop at $i$ carries $p_{ii}$. Arrows with probability 0 are not drawn.</p>
 <p>Check: the labels on the arrows <b>leaving</b> each node (including its self-loop) add to 1. That is the "row sums to 1" rule in picture form.</p></div>
 
-<div class="ex"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Speech activity in packets (lecturer)</span>
+<div class="ex" id="speech"><span class="bt"><span class="tag-lvl lvl-e">Easy</span> Speech activity in packets (lecturer)</span>
 <p>Let $X_n$ indicate whether the $n$th voice packet contains speech: $X_n=0$ for silence, $X_n=1$ for speech activity. Observations: if packet $n$ is silent, packet $n+1$ is silent with probability $1-\alpha$ (so becomes speech with probability α); if packet $n$ is speech, packet $n+1$ is speech with probability $1-\beta$ (so becomes silence with probability β). Draw the diagram and write $P$.</p>
 <details class="sol"><summary>Solution</summary>
 <p>Two states. Fill the rows from the story: row 0 (now silent) is $[1-\alpha,\ \alpha]$; row 1 (now speech) is $[\beta,\ 1-\beta]$.</p>
